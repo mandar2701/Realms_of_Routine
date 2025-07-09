@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
-class LifeXPHomeScreen extends StatelessWidget {
+class LifeXPHomeScreen extends StatefulWidget {
   const LifeXPHomeScreen({super.key});
+
+  @override
+  State<LifeXPHomeScreen> createState() => _LifeXPHomeScreenState();
+}
+
+class _LifeXPHomeScreenState extends State<LifeXPHomeScreen> {
+  final Map<String, bool> _questStatus = {
+    'Do Laundry': false,
+    'Read Notes (10 mins)': false,
+    'Drink Water': false,
+    'Workout (30 mins)': false,
+    'Meditate (5 mins)': false,
+    'Write Journal': false,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +27,7 @@ class LifeXPHomeScreen extends StatelessWidget {
         title: Row(
           children: [
             GestureDetector(
-              onTap: () {
-                // Navigate to profile section
-              },
+              onTap: () {},
               child: const CircleAvatar(
                 radius: 24,
                 backgroundImage: AssetImage('assets/avatar.png'),
@@ -73,6 +85,66 @@ class LifeXPHomeScreen extends StatelessWidget {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
+      ),
+      body: Stack(
+        children: [
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 10,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: _questsSection(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _questsSection() {
+    return Column(
+      children: [
+        const Center(
+          child: Text(
+            'Quick Quests',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (var entry in _questStatus.entries)
+          _questItem(entry.key, '${(entry.key.length % 5 + 1) * 5} XP'),
+      ],
+    );
+  }
+
+  Widget _questItem(String title, String xp) {
+    return ListTile(
+      leading: Checkbox(
+        value: _questStatus[title],
+        onChanged: (val) {
+          setState(() {
+            _questStatus[title] = val!;
+          });
+        },
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 20),
+      ),
+      trailing: Text(
+        xp,
+        style: const TextStyle(color: Colors.amberAccent, fontSize: 20),
       ),
     );
   }
