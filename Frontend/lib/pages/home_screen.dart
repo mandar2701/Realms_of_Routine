@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
 
             Text(
-              'KONARK',
+              'Player',
               style: TextStyle(
                 fontSize: 35,
                 fontFamily: 'Cinzel',
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _customBar('', 0.77),
               const Spacer(),
-              const Text("3/10", style: TextStyle(color: Colors.white)),
+              const Text("7/10", style: TextStyle(color: Colors.white)),
             ],
           ),
         ],
@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
               print("Minus tapped for: $task");
               // You can call setState or remove task from list, etc.
             },
-            child: Image.asset('assets/icons/minus.png', width: 30),
+            child: Image.asset('assets/icons/minus.png', width: 60),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
               print("Plus tapped for: $task");
               // Example: mark task as done or open detail
             },
-            child: Image.asset('assets/icons/plus.png', width: 30),
+            child: Image.asset('assets/icons/plus.png', width: 60),
           ),
         ],
       ),
