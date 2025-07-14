@@ -3,3 +3,4 @@ flask-cors
 flask-mysql-connector
 flask-jwt-extended
 flask-sqlalchemy
+openai

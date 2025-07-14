@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'APC Calculator',
+      title: 'Realms of Routine',
       home: LifeXPHomeScreen(
         // ✅ Pass function to toggle theme
       ),
