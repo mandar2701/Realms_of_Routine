@@ -1,146 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class LifeXPHomeScreen extends StatefulWidget {
-  const LifeXPHomeScreen({super.key});
-
-  @override
-  State<LifeXPHomeScreen> createState() => _LifeXPHomeScreenState();
-}
-
-class _LifeXPHomeScreenState extends State<LifeXPHomeScreen> {
-  final Map<String, bool> _questStatus = {
-    'Do Laundry': false,
-    'Read Notes (10 mins)': false,
-    'Drink Water': false,
-    'Workout (30 mins)': false,
-    'Meditate (5 mins)': false,
-    'Write Journal': false,
-  };
-
-  final String flaskUrl = 'http://10.0.2.2:5000/generate-task?class=mage';
-
-  Future<void> _fetchNewQuest() async {
-    try {
-      final response = await http.get(Uri.parse(flaskUrl));
-      if (response.statusCode == 200) {
-        final String newTask = jsonDecode(response.body)['task'];
-        setState(() {
-          _questStatus[newTask] = false;
-        });
-      } else {
-        print('Failed to load quest: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching quest: $e');
-    }
-  }
+class FantasyHomeScreen extends StatelessWidget {
+  const FantasyHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       extendBody: true,
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Background Image
+          // Background
           Positioned.fill(
             child: Image.asset('assets/Background.png', fit: BoxFit.cover),
           ),
 
-          // Main UI
-          Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              toolbarHeight: 100,
-              title: Row(
+          // UI content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
                 children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: const CircleAvatar(radius: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Username',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      Text(
-                        'Mage',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        width: 100,
-                        child: LinearProgressIndicator(
-                          value: 0.6,
-                          backgroundColor: Colors.white24,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Lvl 6',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
+                  _topProfileBar(),
+                  const SizedBox(height: 20),
+                  _objectiveCard(),
+                  const SizedBox(height: 10),
+                  Expanded(child: _taskList()),
+                  const SizedBox(height: 10),
+                  _bottomNavBar(),
                 ],
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.blueAccent,
-              onPressed: _fetchNewQuest,
-              child: const Icon(Icons.add),
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              selectedItemColor: Colors.amber,
-              unselectedItemColor: Colors.white70,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.inventory),
-                  label: 'Inventory',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-            ),
-            body: Stack(
-              children: [
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  top: 110,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    child: _questsSection(),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -148,44 +38,166 @@ class _LifeXPHomeScreenState extends State<LifeXPHomeScreen> {
     );
   }
 
-  Widget _questsSection() {
-    return Column(
+  Widget _topProfileBar() {
+    return Row(
       children: [
-        const Center(
-          child: Text(
-            'Quick Quests',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
+
+            Text(
+              'KONARK',
+              style: TextStyle(
+                fontSize: 35,
+                fontFamily: 'Cinzel',
+                color: Colors.orangeAccent,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
+            const SizedBox(height: 4),
+            _customBar('Level 24', 0.7),
+            const SizedBox(height: 4),
+            _customBar('XP 4747', 0.47),
+          ],
         ),
-        const SizedBox(height: 8),
-        for (var entry in _questStatus.entries)
-          _questItem(entry.key, '${(entry.key.length % 5 + 1) * 5} XP'),
+        const Spacer(),
+        //Image.asset('assets/warrior.png', width: 100),
       ],
     );
   }
 
-  Widget _questItem(String title, String xp) {
-    return ListTile(
-      leading: Checkbox(
-        value: _questStatus[title],
-        onChanged: (val) {
-          setState(() {
-            _questStatus[title] = val!;
-          });
-        },
+  Widget _customBar(String label, double percent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white)),
+        Container(
+          height: 8,
+          width: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white24,
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: percent,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.orange,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _objectiveCard() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white24,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orangeAccent),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontSize: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Objective",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+
+          Row(
+            children: [
+              _customBar('', 0.77),
+              const Spacer(),
+              const Text("3/10", style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ],
       ),
-      trailing: Text(
-        xp,
-        style: const TextStyle(color: Colors.amberAccent, fontSize: 20),
+    );
+  }
+
+  Widget _taskList() {
+    final List<String> tasks = [
+      "Tap here to edit this into a bad habit",
+      "Slay 10 Push-ups",
+      "Read Scroll of Wisdom",
+      "Clean Potion Shelf",
+      "Water The Mystic Plant",
+    ];
+
+    return ListView.builder(
+      itemCount: tasks.length,
+      itemBuilder: (_, i) => _taskCard(tasks[i]),
+    );
+  }
+
+  Widget _taskCard(String task) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white24,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amberAccent),
       ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              // Action when minus icon is tapped
+              print("Minus tapped for: $task");
+              // You can call setState or remove task from list, etc.
+            },
+            child: Image.asset('assets/icons/minus.png', width: 30),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              task,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              // Action when plus icon is tapped
+              print("Plus tapped for: $task");
+              // Example: mark task as done or open detail
+            },
+            child: Image.asset('assets/icons/plus.png', width: 30),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottomNavBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white24,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      /* child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Image.asset('assets/icons/home.png', width: 30),
+          Image.asset('assets/icons/tasks.png', width: 30),
+          Column(
+            children: [
+              Image.asset('assets/avatar.png', width: 40),
+              const Text("Avatar", style: TextStyle(color: Colors.orange))
+            ],
+          ),
+          Image.asset('assets/icons/calendar.png', width: 30),
+          Image.asset('assets/icons/ai.png', width: 30),
+        ],
+      ),*/
     );
   }
 }

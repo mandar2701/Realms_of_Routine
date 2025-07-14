@@ -19,7 +19,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: LifeXPHomeScreen(
+      home: FantasyHomeScreen(
         // ✅ Pass function to toggle theme
       ),
     );
