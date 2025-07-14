@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'pages/home_screen.dart';
 
 void main() {
@@ -19,7 +20,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: FantasyHomeScreen(
+      home: HomeScreen(
         // ✅ Pass function to toggle theme
       ),
     );
