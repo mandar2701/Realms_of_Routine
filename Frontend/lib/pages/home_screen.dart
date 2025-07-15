@@ -27,13 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
-                  Flexible(flex: 2, child: _topProfileBar()),
-
-                  Flexible(flex: 1, child: _objectiveCard()),
-
-                  Flexible(flex: 7, child: _taskList()),
-
-                  Flexible(flex: 1, child: _bottomNavBar()),
+                  Flexible(flex: 5, child: _topProfileBar()),
+                  Flexible(flex: 2, child: _objectiveCard()),
+                  Flexible(flex: 14, child: _taskList()),
+                  Flexible(flex: 2, child: _bottomNavBar()),
                 ],
               ),
             ),
@@ -67,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const Spacer(),
-        //Image.asset('assets/icons/minus.png', width: 100),
+        Image.asset('assets/warrior.png', width: 150),
       ],
     );
   }
@@ -101,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _objectiveCard() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white24,
         borderRadius: BorderRadius.circular(16),
@@ -144,8 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _taskCard(String task) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white24,
         borderRadius: BorderRadius.circular(12),
@@ -183,26 +180,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _bottomNavBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
       decoration: BoxDecoration(
         color: Colors.white24,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
-      /* child: Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Image.asset('assets/icons/home.png', width: 30),
-          Image.asset('assets/icons/tasks.png', width: 30),
+          Image.asset('assets/icons/home.png', width: 50),
+          Image.asset('assets/icons/todo.png', width: 50),
           Column(
             children: [
-              Image.asset('assets/avatar.png', width: 40),
-              const Text("Avatar", style: TextStyle(color: Colors.orange))
+              Image.asset('assets/icons/profile.png', width: 33),
+              const Text("Avatar", style: TextStyle(color: Colors.orange)),
             ],
           ),
-          Image.asset('assets/icons/calendar.png', width: 30),
-          Image.asset('assets/icons/ai.png', width: 30),
+          Image.asset('assets/icons/calender.png', width: 50),
+          Image.asset('assets/icons/ai.png', width: 50),
         ],
-      ),*/
+      ),
     );
   }
 }

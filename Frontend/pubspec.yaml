@@ -64,7 +64,13 @@ flutter:
     - assets/Background.png
     - assets/icons/minus.png
     - assets/icons/plus.png
-    
+    - assets/icons/ai.png
+    - assets/icons/calender.png
+    - assets/icons/more.png
+    - assets/icons/profile.png
+    - assets/icons/todo.png
+    - assets/icons/home.png
+    - assets/warrior.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
