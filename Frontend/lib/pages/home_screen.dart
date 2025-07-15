@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _taskCard(String task) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white24,
         borderRadius: BorderRadius.circular(12),
@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Image.asset('assets/icons/todo.png', width: 50),
           Column(
             children: [
-              Image.asset('assets/icons/profile.png', width: 33),
+              Image.asset('assets/icons/profile.png', width: 30),
               const Text("Avatar", style: TextStyle(color: Colors.orange)),
             ],
           ),
