@@ -27,13 +27,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
-                  _topProfileBar(),
-                  const SizedBox(height: 20),
-                  _objectiveCard(),
-                  const SizedBox(height: 10),
-                  Expanded(child: _taskList()),
-                  const SizedBox(height: 10),
-                  _bottomNavBar(),
+                  Flexible(flex: 2, child: _topProfileBar()),
+
+                  Flexible(flex: 1, child: _objectiveCard()),
+
+                  Flexible(flex: 7, child: _taskList()),
+
+                  Flexible(flex: 1, child: _bottomNavBar()),
                 ],
               ),
             ),
@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const Spacer(),
-        //Image.asset('assets/warrior.png', width: 100),
+        //Image.asset('assets/icons/minus.png', width: 100),
       ],
     );
   }
