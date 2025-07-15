@@ -15,13 +15,20 @@ class _HomeScreenState extends State<HomeScreen> {
   int xpLimit = 5000;
   int totalTasks = 5;
   int completedTasks = 0;
-  List<String> tasks = [
-    "Tap here to edit this task",
-    "Slay 10 Push-ups",
-    "Read Scroll of Wisdom",
-    "Clean Potion Shelf",
-    "Water The Mystic Plant",
-  ];
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  late List<String> tasks;
+
+  @override
+  void initState() {
+    super.initState();
+    tasks = [
+      "Tap here to edit this task",
+      "Slay 10 Push-ups",
+      "Read Scroll of Wisdom",
+      "Clean Potion Shelf",
+      "Water The Mystic Plant",
+    ];
+  }
 
   void gainXP(int amount) {
     setState(() {
@@ -148,9 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _customBar(
                 '',
-                totalTasks == 0
+                (tasks.length + completedTasks) == 0
                     ? 0
-                    : completedTasks / (tasks.length + completedTasks),
+                    : completedTasks /
+                        (tasks.length + completedTasks).clamp(0.0, 1.0),
               ),
               const Spacer(),
               Text(
@@ -165,10 +173,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _taskList() {
-    return ListView.builder(
-      itemCount: tasks.length,
-      itemBuilder: (_, i) => _taskCard(tasks[i], i),
+    return AnimatedList(
+      key: _listKey,
+      initialItemCount: tasks.length,
+      itemBuilder: (context, index, animation) {
+        return _buildTaskItem(tasks[index], index, animation);
+      },
     );
+  }
+
+  //for animated list
+  Widget _buildTaskItem(String task, int index, Animation<double> animation) {
+    return SizeTransition(sizeFactor: animation, child: _taskCard(task, index));
   }
 
   Widget _taskCard(String task, int index) {
@@ -187,7 +203,15 @@ class _HomeScreenState extends State<HomeScreen> {
               // Action when minus icon is tapped
               HapticFeedback.selectionClick();
               setState(() {
-                tasks.removeAt(index); // remove deleted task from list
+                // remove deleted task from list
+                final removedTask = tasks[index];
+                tasks.removeAt(index);
+                _listKey.currentState!.removeItem(
+                  index,
+                  (context, animation) =>
+                      _buildTaskItem(removedTask, index, animation),
+                  duration: const Duration(milliseconds: 300),
+                );
               });
             },
             child: Image.asset('assets/icons/minus.png', width: 60),
@@ -205,7 +229,15 @@ class _HomeScreenState extends State<HomeScreen> {
               HapticFeedback.lightImpact();
               setState(() {
                 completedTasks++;
-                tasks.removeAt(index); // remove completed task from list
+                // remove completed task from list
+                final removedTask = tasks[index];
+                tasks.removeAt(index);
+                _listKey.currentState!.removeItem(
+                  index,
+                  (context, animation) =>
+                      _buildTaskItem(removedTask, index, animation),
+                  duration: const Duration(milliseconds: 300),
+                );
               });
               gainXP(2000); //  Use XP function
               ScaffoldMessenger.of(context).showSnackBar(
