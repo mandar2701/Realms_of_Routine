@@ -8,6 +8,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  //Variables:
+  int level = 24;
+  int xp = 2500;
+  int xpLimit = 5000;
+  int totalTasks = 5;
+  int completedTasks = 0;
+  List<String> tasks = [
+    "Tap here to edit this task",
+    "Slay 10 Push-ups",
+    "Read Scroll of Wisdom",
+    "Clean Potion Shelf",
+    "Water The Mystic Plant",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,9 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            _customBar('Level 24', 0.7),
+            _customBar('Level $level', level / 50),
             const SizedBox(height: 4),
-            _customBar('XP 4747', 0.47),
+            _customBar('XP: $xp', xp / xpLimit),
           ],
         ),
         const Spacer(),
@@ -114,9 +128,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Row(
             children: [
-              _customBar('', 0.77),
+              _customBar(
+                '',
+                totalTasks == 0
+                    ? 0
+                    : completedTasks / (tasks.length + completedTasks),
+              ),
               const Spacer(),
-              const Text("7/10", style: TextStyle(color: Colors.white)),
+              Text(
+                "$completedTasks/${tasks.length + completedTasks}",
+                style: TextStyle(color: Colors.white),
+              ),
             ],
           ),
         ],
@@ -125,21 +147,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _taskList() {
-    final List<String> tasks = [
-      "Tap here to edit this into a bad habit",
-      "Slay 10 Push-ups",
-      "Read Scroll of Wisdom",
-      "Clean Potion Shelf",
-      "Water The Mystic Plant",
-    ];
-
     return ListView.builder(
       itemCount: tasks.length,
-      itemBuilder: (_, i) => _taskCard(tasks[i]),
+      itemBuilder: (_, i) => _taskCard(tasks[i], i),
     );
   }
 
-  Widget _taskCard(String task) {
+  Widget _taskCard(String task, int index) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -153,8 +167,9 @@ class _HomeScreenState extends State<HomeScreen> {
           GestureDetector(
             onTap: () {
               // Action when minus icon is tapped
-              print("Minus tapped for: $task");
-              // You can call setState or remove task from list, etc.
+              setState(() {
+                tasks.removeAt(index); // remove deleted task from list
+              });
             },
             child: Image.asset('assets/icons/minus.png', width: 60),
           ),
@@ -168,8 +183,14 @@ class _HomeScreenState extends State<HomeScreen> {
           GestureDetector(
             onTap: () {
               // Action when plus icon is tapped
-              print("Plus tapped for: $task");
-              // Example: mark task as done or open detail
+              setState(() {
+                completedTasks++;
+                xp += 2000;
+                tasks.removeAt(index); // remove completed task from list
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("+200 XP for completing: $task")),
+              );
             },
             child: Image.asset('assets/icons/plus.png', width: 60),
           ),
