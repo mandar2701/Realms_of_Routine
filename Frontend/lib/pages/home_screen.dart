@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -184,6 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
           GestureDetector(
             onTap: () {
               // Action when minus icon is tapped
+              HapticFeedback.selectionClick();
               setState(() {
                 tasks.removeAt(index); // remove deleted task from list
               });
@@ -200,13 +202,14 @@ class _HomeScreenState extends State<HomeScreen> {
           GestureDetector(
             onTap: () {
               // Action when plus icon is tapped
+              HapticFeedback.lightImpact();
               setState(() {
                 completedTasks++;
                 tasks.removeAt(index); // remove completed task from list
               });
               gainXP(2000); //  Use XP function
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("+200 XP for completing: $task")),
+                SnackBar(content: Text("+2000 XP for completing: $task")),
               );
             },
             child: Image.asset('assets/icons/plus.png', width: 60),
