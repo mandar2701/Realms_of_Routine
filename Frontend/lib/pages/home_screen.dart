@@ -22,6 +22,23 @@ class _HomeScreenState extends State<HomeScreen> {
     "Water The Mystic Plant",
   ];
 
+  void gainXP(int amount) {
+    setState(() {
+      xp += amount;
+
+      while (xp >= xpLimit) {
+        xp -= xpLimit; // Carry forward leftover XP
+        level++; // Increase level
+        xpLimit += 1000; // Optional: make each level harder
+
+        // Optional feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("🎉 Level Up! You’re now Level $level")),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,9 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
               // Action when plus icon is tapped
               setState(() {
                 completedTasks++;
-                xp += 2000;
                 tasks.removeAt(index); // remove completed task from list
               });
+              gainXP(2000); //  Use XP function
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("+200 XP for completing: $task")),
               );
