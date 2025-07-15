@@ -136,6 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _objectiveCard() {
+    final total = tasks.length + completedTasks;
+    double progress = 0;
+    if (total > 0) {
+      progress = (completedTasks / total).clamp(0.0, 1.0);
+    }
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -150,16 +155,9 @@ class _HomeScreenState extends State<HomeScreen> {
             "Objective",
             style: TextStyle(color: Colors.white, fontSize: 16),
           ),
-
           Row(
             children: [
-              _customBar(
-                '',
-                (tasks.length + completedTasks) == 0
-                    ? 0
-                    : completedTasks /
-                        (tasks.length + completedTasks).clamp(0.0, 1.0),
-              ),
+              Expanded(child: _customBar('', progress)),
               const Spacer(),
               Text(
                 "$completedTasks/${tasks.length + completedTasks}",
@@ -177,14 +175,30 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _listKey,
       initialItemCount: tasks.length,
       itemBuilder: (context, index, animation) {
-        return _buildTaskItem(tasks[index], index, animation);
+        return _taskCard(tasks[index], index);
       },
     );
   }
 
   //for animated list
-  Widget _buildTaskItem(String task, int index, Animation<double> animation) {
-    return SizeTransition(sizeFactor: animation, child: _taskCard(task, index));
+  Widget _buildRemovedItem(
+    String task,
+    int index,
+    Animation<double> animation,
+  ) {
+    return Align(
+      alignment: Alignment.center, // fix weird starting point
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(-0.4, 0.0),
+          end: const Offset(0.0, 0.0), // slide slightly left
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+        child: FadeTransition(
+          opacity: animation,
+          child: _taskCard(task, index), // your full task card
+        ),
+      ),
+    );
   }
 
   Widget _taskCard(String task, int index) {
@@ -209,8 +223,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _listKey.currentState!.removeItem(
                   index,
                   (context, animation) =>
-                      _buildTaskItem(removedTask, index, animation),
-                  duration: const Duration(milliseconds: 300),
+                      _buildRemovedItem(removedTask, index, animation),
+                  duration: const Duration(milliseconds: 500),
                 );
               });
             },
@@ -235,8 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _listKey.currentState!.removeItem(
                   index,
                   (context, animation) =>
-                      _buildTaskItem(removedTask, index, animation),
-                  duration: const Duration(milliseconds: 300),
+                      _buildRemovedItem(removedTask, index, animation),
+                  duration: const Duration(milliseconds: 500),
                 );
               });
               gainXP(2000); //  Use XP function
