@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../pages/todo_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -203,12 +204,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _taskCard(String task, int index) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white24,
+        color: Colors.white10,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amberAccent),
       ),
       child: Row(
         children: [
@@ -276,13 +276,23 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Image.asset('assets/icons/home.png', width: 50),
-          Image.asset('assets/icons/todo.png', width: 50),
-          Column(
-            children: [
-              Image.asset('assets/icons/profile.png', width: 30),
-              const Text("Avatar", style: TextStyle(color: Colors.orange)),
-            ],
+          GestureDetector(
+            onTap: () {
+              // Action when minus icon is tapped
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TodoScreen()),
+              );
+            },
+            child: Image.asset('assets/icons/todo.png', width: 60),
           ),
+
+          //Column(
+          // children: [
+          Image.asset('assets/icons/profile.png', width: 70),
+          //const Text("Avatar", style: TextStyle(color: Colors.orange)),
+          //],
+          //),
           Image.asset('assets/icons/calender.png', width: 50),
           Image.asset('assets/icons/ai.png', width: 50),
         ],
