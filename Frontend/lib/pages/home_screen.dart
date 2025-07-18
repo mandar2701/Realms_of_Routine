@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../pages/todo_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,18 +19,39 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalTasks = 5;
   int completedTasks = 0;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  late List<String> tasks;
+  List<String> tasks = [];
 
   @override
   void initState() {
     super.initState();
-    tasks = [
-      "Tap here to edit this task",
-      "Slay 10 Push-ups",
-      "Read Scroll of Wisdom",
-      "Clean Potion Shelf",
-      "Water The Mystic Plant",
-    ];
+    fetchTasksFromAI();
+  }
+
+  void fetchTasksFromAI() async {
+    final uri = Uri.parse("http://localhost:5000/generate-task");
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        // Add tasks one by one to AnimatedList
+        for (int i = 0; i < data.length; i++) {
+          final task = data[i] as String;
+          tasks.insert(i, task);
+          _listKey.currentState?.insertItem(
+            i,
+            duration: Duration(milliseconds: 300),
+          );
+          await Future.delayed(
+            const Duration(milliseconds: 100),
+          ); // For slight animation stagger
+        }
+      } else {
+        print("Failed to load tasks: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   void gainXP(int amount) {
