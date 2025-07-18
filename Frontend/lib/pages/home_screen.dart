@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void fetchTasksFromAI() async {
-    final uri = Uri.parse("http://localhost:5000/generate-task");
+    final uri = Uri.parse("http://192.168.0.101:5000/generate-task");
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
