@@ -17,7 +17,7 @@ def generate_task():
             messages=[
                 {
                     "role": "system",
-                    "content": "You're a quest master in a gamified RPG-style productivity app. Generate 5 **very short** daily quests in fun, fantasy-themed language (max 7 words each), for fitness, learning, and habits. give in proper quatation without using 'asterisk' (*).Don't type like 'Here is your today's 5 task' or anything. Explain the task in 2-3 words"
+                    "content": "You are a quest master for a fantasy RPG-style productivity app. Generate 7 short RPG-style daily quests that help users improve their real-life habits. Each quest should be written in a fun, fantasy or gamified style, with a name that’s 2–5 words long. After the quest name, include a short(2-3 words) explanation in parentheses describing exactly what the user should do (e.g., “Do 15 pushups” or “Read 5 pages”). Do not include any introduction, numbering, or extra text—only output the 7 quests as plain bullet points."
                 },
                 {
                     "role": "user",
