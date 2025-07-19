@@ -28,23 +28,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void fetchTasksFromAI() async {
-    final uri = Uri.parse("http://192.168.0.101:5000/generate-task");
+    final uri = Uri.parse("http://192.168.0.100:5000/generate-task");
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        // Add tasks one by one to AnimatedList
         for (int i = 0; i < data.length; i++) {
           final task = data[i] as String;
-          tasks.insert(i, task);
-          _listKey.currentState?.insertItem(
-            i,
-            duration: Duration(milliseconds: 300),
-          );
-          await Future.delayed(
-            const Duration(milliseconds: 100),
-          ); // For slight animation stagger
+
+          // Insert each task and trigger UI update
+          setState(() {
+            tasks.insert(i, task);
+            _listKey.currentState?.insertItem(
+              i,
+              duration: Duration(milliseconds: 300),
+            );
+          });
+
+          // Delay to stagger the animations
+          await Future.delayed(const Duration(milliseconds: 100));
         }
       } else {
         print("Failed to load tasks: ${response.statusCode}");
