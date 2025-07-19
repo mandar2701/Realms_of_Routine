@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/login_page.dart';
 
 import 'pages/home_screen.dart';
 
@@ -20,7 +21,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: HomeScreen(
+      home: LoginPage(
         // ✅ Pass function to toggle theme
       ),
     );

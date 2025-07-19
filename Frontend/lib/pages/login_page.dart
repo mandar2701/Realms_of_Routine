@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -60,6 +61,10 @@ class LoginPage extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         // Handle login
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomeScreen()),
+                        );
                       },
                       child: Image.asset(
                         'assets/images/login_button.png',
@@ -67,15 +72,14 @@ class LoginPage extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             padding: EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 30),
+                              vertical: 12,
+                              horizontal: 30,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.brown,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black38,
-                                  blurRadius: 6,
-                                ),
+                                BoxShadow(color: Colors.black38, blurRadius: 6),
                               ],
                             ),
                             child: Text(
