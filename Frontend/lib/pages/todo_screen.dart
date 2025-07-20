@@ -42,8 +42,8 @@ class _TodoScreenState extends State<TodoScreen> {
                 Padding(
                   padding: EdgeInsets.only(
                     bottom: screenHeight * 0.015,
-                    left: screenWidth * 0.015,
-                    right: screenWidth * 0.015,
+                    left: screenWidth * 0.025,
+                    right: screenWidth * 0.025,
                   ),
                   child: _bottomNavBar(screenWidth, screenHeight),
                 ),
@@ -58,7 +58,7 @@ class _TodoScreenState extends State<TodoScreen> {
   Widget _bottomNavBar(double screenWidth, double screenHeight) {
     return Container(
       height:
-          screenHeight * 0.09, // Responsive height (e.g., 9% of screen height)
+          screenHeight * 0.08, // Responsive height (e.g., 9% of screen height)
       padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
 
       decoration: BoxDecoration(

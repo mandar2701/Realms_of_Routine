@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: TodoScreen(
+      home: LoginPage(
         // ✅ Pass function to toggle theme
       ),
     );
