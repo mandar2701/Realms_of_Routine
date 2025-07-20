@@ -13,7 +13,7 @@ class LoginPage extends StatelessWidget {
           Positioned.fill(
             child: Image.asset(
               'assets/images/background.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
           ),
           Center(

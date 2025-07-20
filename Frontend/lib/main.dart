@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
-
+import '../pages/todo_screen.dart';
 import 'pages/home_screen.dart';
 
 void main() {
@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: LoginPage(
+      home: TodoScreen(
         // ✅ Pass function to toggle theme
       ),
     );
