@@ -17,31 +17,37 @@ class _TodoScreenState extends State<TodoScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background
+          // Background image
           Positioned.fill(
             child: Image.asset('assets/todo_background.png', fit: BoxFit.fill),
           ),
 
-          // Foreground Container
-          Center(
-            child: Container(
-              width: screenWidth * 0.90,
-              height: screenHeight * 0.7,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                // color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.orange, width: 2),
-              ),
-            ),
-          ),
+          // Centered Container (accounting for full height)
+          SafeArea(
+            child: Column(
+              children: [
+                SizedBox(height: screenHeight * 0.13), // Empty space at top
+                // Center Container with flexible height
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      width: screenWidth * 0.90,
+                      height: screenHeight * 0.7,
+                      padding: const EdgeInsets.all(20),
+                    ),
+                  ),
+                ),
 
-          // Bottom Navigation Bar
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _bottomNavBar(),
+                // Bottom NavBar
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: screenHeight * 0.015,
+                    left: screenWidth * 0.015,
+                    right: screenWidth * 0.015,
+                  ),
+                  child: _bottomNavBar(screenWidth, screenHeight),
+                ),
+              ],
             ),
           ),
         ],
@@ -49,10 +55,12 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
-  Widget _bottomNavBar() {
+  Widget _bottomNavBar(double screenWidth, double screenHeight) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+      height:
+          screenHeight * 0.09, // Responsive height (e.g., 9% of screen height)
       padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
+
       decoration: BoxDecoration(
         color: Colors.white24,
         borderRadius: BorderRadius.circular(12),
@@ -71,11 +79,21 @@ class _TodoScreenState extends State<TodoScreen> {
           ),
           GestureDetector(
             onTap: () {
-              // Currently on TodoScreen, you might want to highlight or disable this
+              // Action when minus icon is tapped
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TodoScreen()),
+              );
             },
             child: Image.asset('assets/icons/todo.png', width: 60),
           ),
+
+          //Column(
+          // children: [
           Image.asset('assets/icons/profile.png', width: 70),
+          //const Text("Avatar", style: TextStyle(color: Colors.orange)),
+          //],
+          //),
           Image.asset('assets/icons/calender.png', width: 50),
           Image.asset('assets/icons/ai.png', width: 50),
         ],
