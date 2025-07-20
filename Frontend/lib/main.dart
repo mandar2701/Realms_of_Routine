@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
-import '../pages/todo_screen.dart';
-
-import 'pages/home_screen.dart';
+import 'pages/auth_page.dart';       // login/signup combined page
+import 'pages/todo_screen.dart';     
+import 'pages/home_screen.dart';     
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,9 +21,15 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home: LoginPage(
-        // ✅ Pass function to toggle theme
-      ),
+
+      // Start with AuthPage (login/signup toggle)
+      home: const AuthPage(),
+
+      // Optionally, define routes here if you want navigation
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/todo': (context) => const TodoScreen(),
+      },
     );
   }
 }
