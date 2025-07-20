@@ -13,6 +13,8 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Stack(
         children: [
@@ -22,138 +24,162 @@ class _AuthPageState extends State<AuthPage> {
               isLogin
                   ? 'assets/images/background.png'
                   : 'assets/images/background2.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
           ),
 
           // Form Content
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 80),
+          Column(
+            children: [
+              SizedBox(
+                height: isLogin ? screenHeight * 0.15 : screenHeight * 0.15,
+              ), // Empty space at top
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      width: screenWidth * 0.85,
+                      height:
+                          isLogin ? screenHeight * 0.63 : screenHeight * 0.70,
+                      padding: EdgeInsets.all(24),
+                      decoration: BoxDecoration(),
 
-                  buildInputField("Username"),
-                  const SizedBox(height: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: screenHeight * 0.10),
+                          buildInputField("Username", screenHeight),
+                          SizedBox(height: screenHeight * 0.03),
 
-                  buildInputField("Password", isPassword: true),
-                  const SizedBox(height: 20),
-
-                  if (!isLogin) ...[
-                    buildInputField("Confirm Password", isPassword: true),
-                    const SizedBox(height: 20),
-                  ],
-
-                  if (isLogin)
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        "Forgot password?",
-                        style: TextStyle(
-                          color: Color(0xFFEEEEEE),
-                          fontFamily: 'Cinzel',
-                          fontSize: 14,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-
-                  const SizedBox(height: 30),
-
-                  // Centered Auth Button
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
+                          buildInputField(
+                            "Password",
+                            screenHeight,
+                            isPassword: true,
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 150,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFB66A2F),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.black45),
-                        ),
-                        child: Center(
-                          child: Text(
-                            isLogin ? "LOGIN" : "SIGN UP",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontFamily: 'Cinzel',
-                              fontWeight: FontWeight.bold,
+                          SizedBox(height: screenHeight * 0.03),
+
+                          if (!isLogin) ...[
+                            buildInputField(
+                              "Confirm Password",
+                              screenHeight,
+                              isPassword: true,
+                            ),
+                            SizedBox(height: screenHeight * 0.03),
+                          ],
+
+                          if (isLogin)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                "Forgot password?",
+                                style: TextStyle(
+                                  color: Color(0xFFEEEEEE),
+                                  fontFamily: 'Cinzel',
+                                  fontSize: screenHeight * 0.015,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          // Centered Auth Button
+                          Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const HomeScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: screenWidth * 0.4,
+                                height: screenHeight * 0.07,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFB66A2F),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.black45),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    isLogin ? "LOGIN" : "SIGN UP",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenHeight * 0.022,
+                                      fontFamily: 'Cinzel',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+
+                          SizedBox(height: screenHeight * 0.03),
+
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  isLogin ? "New user ?" : "Already a user ?",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: screenHeight * 0.015,
+                                    fontFamily: 'Cinzel',
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isLogin = !isLogin;
+                                    });
+                                  },
+                                  child: Text(
+                                    isLogin ? "SIGN UP" : "LOG IN",
+                                    style: TextStyle(
+                                      color: Color(0xFFFFE57F),
+                                      fontSize: screenHeight * 0.022,
+                                      fontFamily: 'Cinzel',
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          isLogin ? "New user ?" : "Already a user ?",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontFamily: 'Cinzel',
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isLogin = !isLogin;
-                            });
-                          },
-                          child: Text(
-                            isLogin ? "SIGN UP" : "LOG IN",
-                            style: const TextStyle(
-                              color: Color(0xFFFFE57F),
-                              fontSize: 20,
-                              fontFamily: 'Cinzel',
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 60),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget buildInputField(String label, {bool isPassword = false}) {
+  Widget buildInputField(
+    String label,
+    double screenHeight, {
+    bool isPassword = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFFEFDCC3),
-            fontSize: 18,
+            fontSize: screenHeight * 0.025,
             fontFamily: 'Cinzel',
           ),
         ),
-        const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
             border: Border(
