@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Use environment variable for security
-client = Groq(api_key="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")
+client = Groq(api_key="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")
 @app.route('/generate-task')
 def generate_task():
     try:

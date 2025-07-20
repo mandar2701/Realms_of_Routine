@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -63,22 +64,32 @@ class _AuthPageState extends State<AuthPage> {
 
                   // Centered Auth Button
                   Center(
-                    child: Container(
-                      width: 150,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFB66A2F),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.black45),
-                      ),
-                      child: Center(
-                        child: Text(
-                          isLogin ? "LOGIN" : "SIGN UP",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Cinzel',
-                            fontWeight: FontWeight.bold,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 150,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFB66A2F),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.black45),
+                        ),
+                        child: Center(
+                          child: Text(
+                            isLogin ? "LOGIN" : "SIGN UP",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontFamily: 'Cinzel',
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

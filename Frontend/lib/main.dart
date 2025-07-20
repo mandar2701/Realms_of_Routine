@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'pages/auth_page.dart';       // login/signup combined page
-import 'pages/todo_screen.dart';     
-import 'pages/home_screen.dart';     
+import 'pages/auth_page.dart'; // login/signup combined page
+import 'pages/todo_screen.dart';
+import 'pages/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +26,10 @@ class _MyAppState extends State<MyApp> {
       home: const AuthPage(),
 
       // Optionally, define routes here if you want navigation
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/todo': (context) => const TodoScreen(),
-      },
+      //  routes: {
+      //  '/home': (context) => const HomeScreen(),
+      //'/todo': (context) => const TodoScreen(),
+      //},
     );
   }
 }
