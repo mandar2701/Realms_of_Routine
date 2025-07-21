@@ -1,6 +1,6 @@
 {
-    "name": "life_xp_project",
-    "short_name": "life_xp_project",
+    "name": "ror",
+    "short_name": "ror",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

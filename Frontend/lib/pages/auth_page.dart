@@ -42,7 +42,6 @@ class _AuthPageState extends State<AuthPage> {
                       height:
                           isLogin ? screenHeight * 0.63 : screenHeight * 0.70,
                       padding: EdgeInsets.all(24),
-                      decoration: BoxDecoration(),
 
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

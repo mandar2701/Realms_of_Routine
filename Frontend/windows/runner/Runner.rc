@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "life_xp_project" "\0"
+            VALUE "FileDescription", "ror" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "life_xp_project" "\0"
+            VALUE "InternalName", "ror" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "life_xp_project.exe" "\0"
-            VALUE "ProductName", "life_xp_project" "\0"
+            VALUE "OriginalFilename", "ror.exe" "\0"
+            VALUE "ProductName", "ror" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
