@@ -19,7 +19,10 @@ class _TodoScreenState extends State<TodoScreen> {
         children: [
           // Background image
           Positioned.fill(
-            child: Image.asset('assets/todo_background.png', fit: BoxFit.fill),
+            child: Image.asset(
+              'assets/Background/todo_bg.jpg',
+              fit: BoxFit.fill,
+            ),
           ),
 
           // Centered Container (accounting for full height)

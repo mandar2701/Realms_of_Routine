@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../pages/todo_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../pages/profile.dart';
+import '../pages/game.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Background
           Positioned.fill(
-            child: Image.asset('assets/Background.png', fit: BoxFit.fill),
+            child: Image.asset(
+              'assets/Background/home_bg.jpg',
+              fit: BoxFit.fill,
+            ),
           ),
 
           // UI content
@@ -312,15 +317,33 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Image.asset('assets/icons/todo.png', width: 60),
           ),
-
+          GestureDetector(
+            onTap: () {
+              // Action when minus icon is tapped
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
+              );
+            },
+            child: Image.asset('assets/icons/profile.png', width: 70),
+          ),
           //Column(
           // children: [
-          Image.asset('assets/icons/profile.png', width: 70),
+          //Image.asset('assets/icons/profile.png', width: 70),
           //const Text("Avatar", style: TextStyle(color: Colors.orange)),
           //],
           //),
           Image.asset('assets/icons/calender.png', width: 50),
-          Image.asset('assets/icons/ai.png', width: 50),
+          GestureDetector(
+            onTap: () {
+              // Action when minus icon is tapped
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GameScreen()),
+              );
+            },
+            child: Image.asset('assets/icons/ai.png', width: 50),
+          ),
         ],
       ),
     );
