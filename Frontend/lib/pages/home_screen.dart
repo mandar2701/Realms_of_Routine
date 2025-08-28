@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../pages/profile.dart';
 import '../pages/game.dart';
 import '../models/task_manager.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,19 +16,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  //Variables:
+  // Variables:
   int level = 24;
   int xp = 2500;
   int xpLimit = 5000;
-  int totalTasks = 5;
   int completedTasks = 0;
+
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
 
   @override
   void initState() {
     super.initState();
-    fetchTasksFromAI();
+    // fetch tasks after first frame so Provider is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchTasksFromAI();
+    });
   }
 
   void fetchTasksFromAI() async {
@@ -37,14 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
+        final taskManager = Provider.of<TaskManager>(context, listen: false);
+
         for (int i = 0; i < data.length; i++) {
           final task = data[i] as String;
 
           setState(() {
-            TaskManager.instance.tasks.insert(i, task);
+            tasks.insert(i, task);
+            taskManager.addTask(task); // ✅ store in TaskManager
             _listKey.currentState?.insertItem(
               i,
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
             );
           });
 
@@ -67,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
         level++; // Increase level
         xpLimit += 1000; // Optional: make each level harder
 
-        // Optional feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("🎉 Level Up! You’re now Level $level")),
         );
@@ -211,22 +217,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //for animated list
   Widget _buildRemovedItem(
     String task,
     int index,
     Animation<double> animation,
   ) {
     return Align(
-      alignment: Alignment.center, // fix weird starting point
+      alignment: Alignment.center,
       child: SlideTransition(
         position: Tween<Offset>(
           begin: const Offset(-0.4, 0.0),
-          end: const Offset(0.0, 0.0), // slide slightly left
+          end: const Offset(0.0, 0.0),
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
         child: FadeTransition(
           opacity: animation,
-          child: _taskCard(task, index), // your full task card
+          child: _taskCard(task, index),
         ),
       ),
     );
@@ -244,10 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              // Action when minus icon is tapped
               HapticFeedback.selectionClick();
               setState(() {
-                // remove deleted task from list
                 final removedTask = tasks[index];
                 tasks.removeAt(index);
                 _listKey.currentState!.removeItem(
@@ -269,11 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           GestureDetector(
             onTap: () {
-              // Action when plus icon is tapped
               HapticFeedback.lightImpact();
               setState(() {
                 completedTasks++;
-                // remove completed task from list
                 final removedTask = tasks[index];
                 tasks.removeAt(index);
                 _listKey.currentState!.removeItem(
@@ -283,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   duration: const Duration(milliseconds: 500),
                 );
               });
-              gainXP(2000); //  Use XP function
+              gainXP(2000);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("+2000 XP for completing: $task")),
               );
@@ -308,37 +309,28 @@ class _HomeScreenState extends State<HomeScreen> {
           Image.asset('assets/icons/home.png', width: 50),
           GestureDetector(
             onTap: () {
-              // Action when minus icon is tapped
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TodoScreen()),
+                MaterialPageRoute(builder: (context) => const TodoScreen()),
               );
             },
             child: Image.asset('assets/icons/todo.png', width: 60),
           ),
           GestureDetector(
             onTap: () {
-              // Action when minus icon is tapped
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
               );
             },
             child: Image.asset('assets/icons/profile.png', width: 70),
           ),
-          //Column(
-          // children: [
-          //Image.asset('assets/icons/profile.png', width: 70),
-          //const Text("Avatar", style: TextStyle(color: Colors.orange)),
-          //],
-          //),
           Image.asset('assets/icons/calender.png', width: 50),
           GestureDetector(
             onTap: () {
-              // Action when minus icon is tapped
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => GameScreen()),
+                MaterialPageRoute(builder: (context) => const GameScreen()),
               );
             },
             child: Image.asset('assets/icons/ai.png', width: 50),

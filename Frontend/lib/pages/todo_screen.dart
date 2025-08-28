@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'package:provider/provider.dart';
 import '../models/task_manager.dart';
+import 'home_screen.dart';
 
-class TodoScreen extends StatefulWidget {
+class TodoScreen extends StatelessWidget {
   const TodoScreen({super.key});
 
   @override
-  State<TodoScreen> createState() => _TodoScreenState();
-}
-
-class _TodoScreenState extends State<TodoScreen> {
-  List<String> tasks = [
-    "Go to gym",
-    "Complete assignment",
-    "Complete assignment",
-    "Complete assignment",
-    "Complete assignment",
-    "Complete assignment",
-    "Complete assignment",
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final taskManager = Provider.of<TaskManager>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -36,7 +22,6 @@ class _TodoScreenState extends State<TodoScreen> {
             ),
           ),
 
-          // Foreground content
           SafeArea(
             child: Column(
               children: [
@@ -61,15 +46,15 @@ class _TodoScreenState extends State<TodoScreen> {
                           // Task list
                           Expanded(
                             child: ListView.builder(
-                              itemCount: tasks.length,
+                              itemCount: taskManager.tasks.length,
                               itemBuilder: (context, index) {
                                 return Container(
                                   margin: const EdgeInsets.symmetric(
-                                    vertical: 0.2,
+                                    vertical: 2,
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
-                                    vertical: 0.2,
+                                    vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
                                     border: Border(
@@ -83,16 +68,13 @@ class _TodoScreenState extends State<TodoScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Delete icon (left)
+                                      // Delete icon
                                       GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            tasks.removeAt(index);
-                                          });
-                                        },
+                                        onTap:
+                                            () => taskManager.removeTask(index),
                                         child: Image.asset(
                                           'assets/icons/delete.png',
-                                          width: 60,
+                                          width: 40,
                                         ),
                                       ),
 
@@ -100,7 +82,7 @@ class _TodoScreenState extends State<TodoScreen> {
                                       Expanded(
                                         child: Center(
                                           child: Text(
-                                            tasks[index],
+                                            taskManager.tasks[index],
                                             style: const TextStyle(
                                               fontSize: 18,
                                               color: Colors.white,
@@ -109,22 +91,21 @@ class _TodoScreenState extends State<TodoScreen> {
                                         ),
                                       ),
 
-                                      // Complete icon (right)
+                                      // Complete icon
                                       GestureDetector(
                                         onTap: () {
+                                          taskManager.completeTask(index);
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
                                             SnackBar(
-                                              content: Text(
-                                                "${tasks[index]} completed ✅",
-                                              ),
+                                              content: Text("Task completed ✅"),
                                             ),
                                           );
                                         },
                                         child: Image.asset(
                                           'assets/icons/add.png',
-                                          width: 60,
+                                          width: 40,
                                         ),
                                       ),
                                     ],
@@ -134,12 +115,9 @@ class _TodoScreenState extends State<TodoScreen> {
                             ),
                           ),
 
-                          // Add more task
                           GestureDetector(
                             onTap: () {
-                              setState(() {
-                                tasks.add("New Task");
-                              });
+                              taskManager.addTask("New Task");
                             },
                             child: const Padding(
                               padding: EdgeInsets.all(8.0),
@@ -161,53 +139,40 @@ class _TodoScreenState extends State<TodoScreen> {
 
                 // Bottom NavBar
                 Padding(
-                  padding: EdgeInsets.only(
-                    bottom: screenHeight * 0.015,
-                    left: screenWidth * 0.025,
-                    right: screenWidth * 0.025,
+                  padding: const EdgeInsets.all(12.0),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        GestureDetector(
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeScreen(),
+                                ),
+                              ),
+                          child: Image.asset(
+                            'assets/icons/home.png',
+                            width: 40,
+                          ),
+                        ),
+                        Image.asset('assets/icons/todo.png', width: 40),
+                        Image.asset('assets/icons/profile.png', width: 50),
+                        Image.asset('assets/icons/calender.png', width: 40),
+                        Image.asset('assets/icons/ai.png', width: 40),
+                      ],
+                    ),
                   ),
-                  child: _bottomNavBar(screenWidth, screenHeight),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _bottomNavBar(double screenWidth, double screenHeight) {
-    return Container(
-      height: screenHeight * 0.08,
-      padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
-      decoration: BoxDecoration(
-        color: Colors.white24,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            },
-            child: Image.asset('assets/icons/home.png', width: 50),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TodoScreen()),
-              );
-            },
-            child: Image.asset('assets/icons/todo.png', width: 60),
-          ),
-          Image.asset('assets/icons/profile.png', width: 70),
-          Image.asset('assets/icons/calender.png', width: 50),
-          Image.asset('assets/icons/ai.png', width: 50),
         ],
       ),
     );

@@ -1,21 +1,27 @@
-class TaskManager {
-  static final TaskManager instance = TaskManager._internal();
+import 'package:flutter/foundation.dart';
 
-  TaskManager._internal();
+class TaskManager extends ChangeNotifier {
+  final List<String> _tasks = [];
 
-  List<String> tasks = [];
-  int completedTasks = 0;
+  List<String> get tasks => List.unmodifiable(_tasks);
 
   void addTask(String task) {
-    tasks.add(task);
+    _tasks.add(task);
+    notifyListeners();
   }
 
   void removeTask(int index) {
-    tasks.removeAt(index);
+    if (index >= 0 && index < _tasks.length) {
+      _tasks.removeAt(index);
+      notifyListeners();
+    }
   }
 
   void completeTask(int index) {
-    completedTasks++;
-    tasks.removeAt(index);
+    if (index >= 0 && index < _tasks.length) {
+      // Here you can mark completed or move to another list
+      _tasks.removeAt(index);
+      notifyListeners();
+    }
   }
 }

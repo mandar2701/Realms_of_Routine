@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'pages/auth_page.dart'; // login/signup combined page
 import 'pages/todo_screen.dart';
 import 'pages/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'models/task_manager.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => TaskManager(), child: const MyApp()),
+  );
 }
 
 class MyApp extends StatefulWidget {
