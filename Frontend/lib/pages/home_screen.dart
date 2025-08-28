@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../pages/profile.dart';
 import '../pages/game.dart';
+import '../models/task_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,16 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
         for (int i = 0; i < data.length; i++) {
           final task = data[i] as String;
 
-          // Insert each task and trigger UI update
           setState(() {
-            tasks.insert(i, task);
+            TaskManager.instance.tasks.insert(i, task);
             _listKey.currentState?.insertItem(
               i,
               duration: Duration(milliseconds: 300),
             );
           });
 
-          // Delay to stagger the animations
           await Future.delayed(const Duration(milliseconds: 100));
         }
       } else {

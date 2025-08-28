@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -15,7 +16,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           SizedBox.expand(
             child: Image.asset(
-              'assets/Background/game_bg.png',
+              "assets/Background/game_bg.png",
               fit: BoxFit.cover,
             ),
           ),
