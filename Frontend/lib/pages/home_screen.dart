@@ -7,6 +7,7 @@ import '../pages/profile.dart';
 import '../pages/game.dart';
 import '../models/task_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,13 +26,36 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
 
+  final supabase = Supabase.instance.client; // ✅ Supabase client
+  String? username; // ✅ store username
+  bool isLoadingUser = true;
+
   @override
   void initState() {
     super.initState();
-    // fetch tasks after first frame so Provider is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchTasksFromAI();
     });
+    _loadUsername(); // ✅ load username from profiles table
+  }
+
+  /// ✅ Fetch username from Supabase `profiles` table
+  Future<void> _loadUsername() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    final response = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (mounted) {
+      setState(() {
+        username = response?['username'] as String?;
+        isLoadingUser = false;
+      });
+    }
   }
 
   void fetchTasksFromAI() async {
@@ -48,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           setState(() {
             tasks.insert(i, task);
-            taskManager.addTask(task); // ✅ store in TaskManager
+            taskManager.addTask(task);
             _listKey.currentState?.insertItem(
               i,
               duration: const Duration(milliseconds: 300),
@@ -70,9 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
       xp += amount;
 
       while (xp >= xpLimit) {
-        xp -= xpLimit; // Carry forward leftover XP
-        level++; // Increase level
-        xpLimit += 1000; // Optional: make each level harder
+        xp -= xpLimit;
+        level++;
+        xpLimit += 1000;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("🎉 Level Up! You’re now Level $level")),
@@ -116,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// ✅ Updated Profile Bar to show username from DB
   Widget _topProfileBar() {
     return Row(
       children: [
@@ -125,14 +150,17 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
 
             Text(
-              'Player',
-              style: TextStyle(
+              isLoadingUser
+                  ? "Loading..."
+                  : (username ?? "Player"), // ✅ username from DB
+              style: const TextStyle(
                 fontSize: 35,
                 fontFamily: 'Cinzel',
                 color: Colors.orangeAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 4),
             _customBar('Level $level', level / 50),
             const SizedBox(height: 4),
@@ -198,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               Text(
                 "$completedTasks/${tasks.length + completedTasks}",
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             ],
           ),
