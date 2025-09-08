@@ -12,7 +12,7 @@ client = Groq(api_key="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"
 def generate_task():
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[
                 {
                     "role": "system",
