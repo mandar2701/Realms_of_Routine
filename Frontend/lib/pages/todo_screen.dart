@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/create_task.dart';
 import 'package:provider/provider.dart';
 import '../models/task_manager.dart';
 import 'home_screen.dart';
@@ -116,9 +117,14 @@ class TodoScreen extends StatelessWidget {
                           ),
 
                           GestureDetector(
-                            onTap: () {
-                              taskManager.addTask("New Task");
-                            },
+                            onTap:
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => const CreateTaskScreen(),
+                                  ),
+                                ),
                             child: const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text(
