@@ -7,9 +7,9 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/../../src/Flutter sdk/flutter/packages/flutter_tools/gradle" name="gradle">
+              <build path="$PROJECT_DIR$/../../../../Flutter/flutter/packages/flutter_tools/gradle" name="gradle">
                 <projects>
-                  <project path="$PROJECT_DIR$/../../src/Flutter sdk/flutter/packages/flutter_tools/gradle" />
+                  <project path="$PROJECT_DIR$/../../../../Flutter/flutter/packages/flutter_tools/gradle" />
                 </projects>
               </build>
             </builds>
@@ -20,12 +20,11 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../../../../Flutter/flutter/packages/flutter_tools/gradle" />
             <option value="$PROJECT_DIR$/Frontend/android" />
             <option value="$PROJECT_DIR$/Frontend/android/app" />
-            <option value="$PROJECT_DIR$/../../src/Flutter sdk/flutter/packages/flutter_tools/gradle" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>
