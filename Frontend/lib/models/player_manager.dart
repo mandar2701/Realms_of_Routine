@@ -15,7 +15,6 @@ class PlayerManager extends ChangeNotifier {
     xp += amount;
 
     while (xp >= xpLimit) {
-      xp -= xpLimit;
       level++;
       xpLimit += 500;
     }
