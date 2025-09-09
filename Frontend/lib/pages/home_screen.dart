@@ -314,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 duration: const Duration(milliseconds: 500),
               );
 
-              gainXP(2000);
+              gainXP(500);
             },
             child: Image.asset('assets/icons/plus.png', width: 60),
           ),
