@@ -5,6 +5,7 @@ import 'pages/todo_screen.dart';
 import 'pages/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'models/task_manager.dart';
+import 'models/player_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +18,13 @@ void main() async {
   );
 
   runApp(
-    ChangeNotifierProvider(create: (_) => TaskManager(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskManager()),
+        ChangeNotifierProvider(create: (_) => PlayerManager()), // ✅ shared
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
