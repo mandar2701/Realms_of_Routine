@@ -25,8 +25,4 @@ class TaskManager extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  void gainXP(int amount) {
-    // optional: if you want XP in TaskManager
-  }
 }
