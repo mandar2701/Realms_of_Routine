@@ -37,6 +37,7 @@ dependencies:
   http: ^1.2.0
   provider: ^6.1.5+1
   google_fonts: ^6.2.1
+  font_awesome_flutter: ^10.7.0
 
 
 dev_dependencies:
@@ -71,7 +72,6 @@ flutter:
     - assets/icons/minus.png
     - assets/icons/plus.png
     - assets/icons/ai.png
-    - assets/icons/
     - assets/icons/calender.png
     - assets/icons/more.png
     - assets/icons/profile.png
@@ -84,6 +84,12 @@ flutter:
     - assets/images/background.png
     - assets/images/background2.png
     - assets/icons/back.png
+    - assets/Characters/player.png
+    - assets/Characters/enemy.png
+    - assets/Characters/attack.png
+    - assets/Characters/kick.png
+    - assets/Characters/profile.png
+    - border.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
