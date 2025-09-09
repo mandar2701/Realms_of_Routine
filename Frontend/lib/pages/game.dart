@@ -13,7 +13,8 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+// 1. Add TickerProviderStateMixin for animations
+class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game variables
   double playerHealth = 100;
   double bossHealth = 100;
@@ -21,22 +22,90 @@ class _GameScreenState extends State<GameScreen> {
   bool isPlayerTurn = true;
   bool isGameRunning = true;
 
-  // Damage effect variables
-  bool playerIsHit = false;
-  bool bossIsHit = false;
+  // REMOVED: Damage effect variables (no longer needed)
+  // bool playerIsHit = false;
+  // bool bossIsHit = false;
 
-  // Attack logic for Sword
+  // 2. ADD: Animation Controllers for the shake effect
+  late AnimationController _playerShakeController;
+  late AnimationController _bossShakeController;
+  late Animation<Offset> _playerShakeAnimation;
+  late Animation<Offset> _bossShakeAnimation;
+
+  // 3. ADD: initState to set up the animations
+  @override
+  void initState() {
+    super.initState();
+
+    _playerShakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _playerShakeAnimation = TweenSequence<Offset>([
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0, 0), end: const Offset(-0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(-0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0, 0)),
+        weight: 1,
+      ),
+    ]).animate(
+      CurvedAnimation(parent: _playerShakeController, curve: Curves.easeInOut),
+    );
+
+    _bossShakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _bossShakeAnimation = TweenSequence<Offset>([
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0, 0), end: const Offset(0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(-0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0.02, 0)),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(0, 0)),
+        weight: 1,
+      ),
+    ]).animate(
+      CurvedAnimation(parent: _bossShakeController, curve: Curves.easeInOut),
+    );
+  }
+
+  // 4. ADD: dispose to clean up the controllers
+  @override
+  void dispose() {
+    _playerShakeController.dispose();
+    _bossShakeController.dispose();
+    super.dispose();
+  }
+
   void swordAttack() {
     if (isPlayerTurn && isGameRunning) {
-      int damage = Random().nextInt(15) + 10; // Sword: Higher damage
+      int damage = Random().nextInt(15) + 10;
       performPlayerAttack(damage, 'You slashed the boss for $damage damage!');
     }
   }
 
-  // Attack logic for Kick
   void kickAttack() {
     if (isPlayerTurn && isGameRunning) {
-      int damage = Random().nextInt(8) + 5; // Kick: Lower damage
+      int damage = Random().nextInt(8) + 5;
       performPlayerAttack(damage, 'You kicked the boss for $damage damage!');
     }
   }
@@ -46,15 +115,13 @@ class _GameScreenState extends State<GameScreen> {
       bossHealth -= damage;
       gameMessage = message;
       isPlayerTurn = false;
-      bossIsHit = true; // Trigger boss hit effect
+      // REMOVED: bossIsHit = true;
     });
 
-    // Remove the hit effect after a short duration
-    Timer(const Duration(milliseconds: 300), () {
-      setState(() {
-        bossIsHit = false;
-      });
-    });
+    // REMOVED: Timer for the hit effect
+
+    // 5. CHANGE: Trigger the boss shake animation instead of the red flash
+    _bossShakeController.forward(from: 0.0);
 
     if (bossHealth <= 0) {
       bossHealth = 0;
@@ -73,15 +140,13 @@ class _GameScreenState extends State<GameScreen> {
         playerHealth -= damage;
         gameMessage = 'The boss attacked you for $damage damage!';
         isPlayerTurn = true;
-        playerIsHit = true; // Trigger player hit effect
+        // REMOVED: playerIsHit = true;
       });
 
-      // Remove the hit effect after a short duration
-      Timer(const Duration(milliseconds: 300), () {
-        setState(() {
-          playerIsHit = false;
-        });
-      });
+      // REMOVED: Timer for the hit effect
+
+      // 6. CHANGE: Trigger the player shake animation instead of the red flash
+      _playerShakeController.forward(from: 0.0);
 
       if (playerHealth <= 0) {
         playerHealth = 0;
@@ -123,25 +188,23 @@ class _GameScreenState extends State<GameScreen> {
       gameMessage = 'Your turn!';
       isPlayerTurn = true;
       isGameRunning = true;
-      playerIsHit = false;
-      bossIsHit = false;
+      // REMOVED: playerIsHit = false;
+      // REMOVED: bossIsHit = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // YOUR LAYOUT IS UNCHANGED
     return Scaffold(
       body: Stack(
         children: [
-          // 1. BACKGROUND IMAGE (Bottom layer)
           SizedBox.expand(
             child: Image.asset(
               "assets/Background/game_bg.png",
               fit: BoxFit.cover,
             ),
           ),
-
-          // 2. TOP HEALTH BARS
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
@@ -149,7 +212,6 @@ class _GameScreenState extends State<GameScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Player Health Bar
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -170,7 +232,6 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ],
                   ),
-                  // Boss Health Bar
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -192,13 +253,8 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-
-          // 3. GAME MESSAGE
           Align(
-            alignment: const Alignment(
-              0.0,
-              -0.6,
-            ), // Positioned below health bars
+            alignment: const Alignment(0.0, -0.6),
             child: Text(
               gameMessage,
               style: const TextStyle(
@@ -209,32 +265,36 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-
-          // 4. CHARACTERS
-          // We use a SizedBox to constrain the height so characters don't take the full screen
           SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Align(
-              alignment: const Alignment(
-                0.0,
-                0.4,
-              ), // Moves characters lower down
+              alignment: const Alignment(0.0, 0.4),
               child: SizedBox(
-                height:
-                    MediaQuery.of(context).size.height *
-                    0.4, // 40% of screen height
+                height: MediaQuery.of(context).size.height * 0.4,
                 child: Row(
                   children: [
-                    Expanded(flex: 5, child: Player(isHit: playerIsHit)),
+                    // 7. CHANGE: Apply the shake animation to the Player
+                    Expanded(
+                      flex: 5,
+                      child: SlideTransition(
+                        position: _playerShakeAnimation,
+                        child: const Player(), // Pass no parameters
+                      ),
+                    ),
                     const Spacer(flex: 1),
-                    Expanded(flex: 5, child: Boss(isHit: bossIsHit)),
+                    // 8. CHANGE: Apply the shake animation to the Boss
+                    Expanded(
+                      flex: 5,
+                      child: SlideTransition(
+                        position: _bossShakeAnimation,
+                        child: const Boss(), // Pass no parameters
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-
-          // 5. BOTTOM ATTACK BUTTONS
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
