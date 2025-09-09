@@ -15,8 +15,7 @@ class Player extends StatelessWidget {
       ),
       child: Image.asset(
         'player.png', // Your player character PNG
-        width: 100,
-        height: 100,
+        height: 300,
       ),
     );
   }

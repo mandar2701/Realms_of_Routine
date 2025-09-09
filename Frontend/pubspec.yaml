@@ -86,6 +86,8 @@ flutter:
     - assets/icons/back.png
     - assets/player.png
     - assets/boss.png
+    - assets/icons/attack.png
+    - assets/icons/kick.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

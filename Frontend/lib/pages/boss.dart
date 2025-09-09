@@ -15,8 +15,6 @@ class Boss extends StatelessWidget {
       ),
       child: Image.asset(
         'boss.png', // Your boss character PNG
-        width: 150,
-        height: 150,
       ),
     );
   }
