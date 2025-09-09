@@ -84,12 +84,19 @@ flutter:
     - assets/images/background.png
     - assets/images/background2.png
     - assets/icons/back.png
+<<<<<<< HEAD
     - assets/Characters/player.png
     - assets/Characters/enemy.png
     - assets/Characters/attack.png
     - assets/Characters/kick.png
     - assets/Characters/profile.png
     - border.png
+=======
+    - assets/player.png
+    - assets/boss.png
+    - assets/icons/attack.png
+    - assets/icons/kick.png
+>>>>>>> 285c212c81644ca220c15e10d8260dfe13285521
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
