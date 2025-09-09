@@ -99,7 +99,7 @@ class _GameScreenState extends State<GameScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            playerWon ? "C O N G R A T U L A T I O N S" : "G A M E  O V E R",
+            playerWon ? "C O N G R A T U L A T I..." : "G A M E  O V E R",
           ),
           content: Text(
             playerWon ? "You have won!" : "Would you like to play again?",
@@ -141,73 +141,101 @@ class _GameScreenState extends State<GameScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Boss
-                Boss(isHit: bossIsHit),
-                const SizedBox(height: 10),
-                // Boss Health Bar
-                SizedBox(
-                  width: 200,
-                  child: LinearProgressIndicator(
-                    value: bossHealth / 100,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                    minHeight: 10,
-                  ),
-                ),
-                const SizedBox(height: 100),
-
-                // Player
-                Player(isHit: playerIsHit),
-                const SizedBox(height: 10),
-
-                // Player Health Bar
-                SizedBox(
-                  width: 200,
-                  child: LinearProgressIndicator(
-                    value: playerHealth / 100,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Colors.green,
-                    ),
-                    minHeight: 10,
-                  ),
-                ),
-                const SizedBox(height: 50),
-
-                // Game Message
-                Text(
-                  gameMessage,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Attack Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          // Characters and Health Bars
+          Stack(
+            children: [
+              // Player
+              Align(
+                alignment: const Alignment(-0.75, 0.4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ElevatedButton(
-                      onPressed: swordAttack,
-                      child: const Text(
-                        'Sword',
-                        style: TextStyle(fontSize: 20),
+                    Player(isHit: playerIsHit),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 150, // Match player width
+                      child: LinearProgressIndicator(
+                        value: playerHealth / 100,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.green,
+                        ),
+                        minHeight: 10,
                       ),
-                    ),
-                    const SizedBox(width: 20),
-                    ElevatedButton(
-                      onPressed: kickAttack,
-                      child: const Text('Kick', style: TextStyle(fontSize: 20)),
                     ),
                   ],
                 ),
-              ],
+              ),
+
+              // Boss
+              Align(
+                alignment: const Alignment(0.75, -0.6),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Boss(isHit: bossIsHit),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 200, // Match boss width
+                      child: LinearProgressIndicator(
+                        value: bossHealth / 100,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.red,
+                        ),
+                        minHeight: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Game UI (Message and Buttons)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 40.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    gameMessage,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(blurRadius: 5.0, color: Colors.black)],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Sword Attack Button
+                      GestureDetector(
+                        onTap: swordAttack,
+                        child: Image.asset(
+                          'icons/sword_icon.png', // Add this asset
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
+                      const SizedBox(width: 40),
+                      // Kick Attack Button
+                      GestureDetector(
+                        onTap: kickAttack,
+                        child: Image.asset(
+                          'icons/kick_icon.png', // Add this asset
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
