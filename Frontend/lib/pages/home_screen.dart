@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int xp = 2500;
   int xpLimit = 5000;
   int completedTasks = 0;
-
+  int totalTasks = 0;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
 
@@ -60,20 +60,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void fetchTasksFromAI() async {
+    final taskManager = Provider.of<TaskManager>(context, listen: false);
+
+    if (taskManager.tasks.isNotEmpty) return;
     final uri = Uri.parse("http://localhost:5000/generate-task");
+
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        final taskManager = Provider.of<TaskManager>(context, listen: false);
-
-        for (int i = 0; i < data.length; i++) {
+        for (int i = 0; i < 7; i++) {
           final task = data[i] as String;
 
           setState(() {
             tasks.insert(i, task);
             taskManager.addTask(task);
+            //totalTasks++; // ✅ increase permanently
+
             _listKey.currentState?.insertItem(
               i,
               duration: const Duration(milliseconds: 300),
@@ -202,11 +206,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _objectiveCard() {
-    final total = tasks.length + completedTasks;
+    final taskManager = Provider.of<TaskManager>(context);
     double progress = 0;
-    if (total > 0) {
-      progress = (completedTasks / total).clamp(0.0, 1.0);
+    if (taskManager.totalTasks > 0) {
+      progress = (taskManager.completedTasks / taskManager.totalTasks).clamp(
+        0.0,
+        1.0,
+      );
     }
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -226,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(child: _customBar('', progress)),
               const Spacer(),
               Text(
-                "$completedTasks/${tasks.length + completedTasks}",
+                "${taskManager.completedTasks}/${taskManager.totalTasks}",
                 style: const TextStyle(color: Colors.white),
               ),
             ],
@@ -237,11 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _taskList() {
+    final taskManager = Provider.of<TaskManager>(context);
+
     return AnimatedList(
       key: _listKey,
-      initialItemCount: tasks.length,
+      initialItemCount: taskManager.tasks.length,
       itemBuilder: (context, index, animation) {
-        return _taskCard(tasks[index], index);
+        return _taskCard(taskManager.tasks[index], index);
       },
     );
   }
@@ -267,6 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _taskCard(String task, int index) {
+    final taskManager = Provider.of<TaskManager>(context, listen: false);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -276,43 +288,52 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
+          // ❌ Remove task
           GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
-              setState(() {
-                final removedTask = tasks[index];
-                tasks.removeAt(index);
-                _listKey.currentState!.removeItem(
-                  index,
-                  (context, animation) =>
-                      _buildRemovedItem(removedTask, index, animation),
-                  duration: const Duration(milliseconds: 500),
-                );
-              });
+              final removedTask = taskManager.tasks[index];
+              taskManager.removeTask(index);
+
+              _listKey.currentState!.removeItem(
+                index,
+                (context, animation) =>
+                    _buildRemovedItem(removedTask, index, animation),
+                duration: const Duration(milliseconds: 500),
+              );
             },
             child: Image.asset('assets/icons/minus.png', width: 60),
           ),
+
           const SizedBox(width: 12),
+
+          // Task text
           Expanded(
             child: Text(
               task,
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
+
+          // ✅ Complete task
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              setState(() {
-                completedTasks++;
-                final removedTask = tasks[index];
-                tasks.removeAt(index);
-                _listKey.currentState!.removeItem(
-                  index,
-                  (context, animation) =>
-                      _buildRemovedItem(removedTask, index, animation),
-                  duration: const Duration(milliseconds: 500),
-                );
-              });
+              final taskManager = Provider.of<TaskManager>(
+                context,
+                listen: false,
+              );
+
+              // Update TaskManager
+              taskManager.completeTask(index);
+
+              _listKey.currentState!.removeItem(
+                index,
+                (context, animation) =>
+                    _buildRemovedItem(task, index, animation),
+                duration: const Duration(milliseconds: 500),
+              );
+
               gainXP(2000);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("+2000 XP for completing: $task")),

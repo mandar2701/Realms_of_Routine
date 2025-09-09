@@ -1,27 +1,32 @@
 import 'package:flutter/foundation.dart';
 
 class TaskManager extends ChangeNotifier {
-  final List<String> _tasks = [];
-
-  List<String> get tasks => List.unmodifiable(_tasks);
+  List<String> tasks = [];
+  int totalTasks = 0;
+  int completedTasks = 0;
 
   void addTask(String task) {
-    _tasks.add(task);
+    tasks.add(task);
+    totalTasks++;
     notifyListeners();
   }
 
   void removeTask(int index) {
-    if (index >= 0 && index < _tasks.length) {
-      _tasks.removeAt(index);
+    if (index < tasks.length) {
+      tasks.removeAt(index);
       notifyListeners();
     }
   }
 
   void completeTask(int index) {
-    if (index >= 0 && index < _tasks.length) {
-      // Here you can mark completed or move to another list
-      _tasks.removeAt(index);
+    if (index < tasks.length) {
+      tasks.removeAt(index);
+      completedTasks++;
       notifyListeners();
     }
+  }
+
+  void gainXP(int amount) {
+    // optional: if you want XP in TaskManager
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import '../models/task_manager.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({super.key});
@@ -179,15 +182,50 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
-                      vertical: 8,
+                      vertical: 12,
                     ),
                   ),
-                  onPressed: _createTask,
+                  onPressed: () {
+                    final taskManager = Provider.of<TaskManager>(
+                      context,
+                      listen: false,
+                    );
+
+                    final title = _titleController.text.trim();
+                    final notes = _notesController.text.trim();
+
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Please enter a title")),
+                      );
+                      return;
+                    }
+
+                    // Concatenate title and notes
+                    final taskText = notes.isEmpty ? title : "$title ($notes)";
+
+                    // Add to TaskManager
+                    taskManager.addTask(taskText);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Task created successfully!"),
+                      ),
+                    );
+
+                    // Clear fields
+                    _titleController.clear();
+                    _notesController.clear();
+                    setState(() {
+                      _selectedDifficulty = 1;
+                    });
+
+                    Navigator.pop(context); // Go back to HomeScreen
+                  },
                   child: Text(
                     "CREATE TASK",
                     style: GoogleFonts.imFellEnglish(
                       fontSize: 22,
-
                       color: Colors.white,
                     ),
                   ),
