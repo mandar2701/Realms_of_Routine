@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../models/player_manager.dart';
 import '../pages/todo_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,17 +18,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Variables:
-  int level = 24;
-  int xp = 2500;
-  int xpLimit = 5000;
-  int completedTasks = 0;
-  int totalTasks = 0;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
 
-  final supabase = Supabase.instance.client; // ✅ Supabase client
-  String? username; // ✅ store username
+  final supabase = Supabase.instance.client;
+  String? username;
   bool isLoadingUser = true;
 
   @override
@@ -36,10 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchTasksFromAI();
     });
-    _loadUsername(); // ✅ load username from profiles table
+    _loadUsername();
   }
 
-  /// ✅ Fetch username from Supabase `profiles` table
   Future<void> _loadUsername() async {
     final user = supabase.auth.currentUser;
     if (user == null) return;
@@ -51,11 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
             .eq('id', user.id)
             .maybeSingle();
 
-    if (mounted) {
-      setState(() {
-        username = response?['username'] as String?;
-        isLoadingUser = false;
-      });
+    if (mounted && response != null) {
+      final player = Provider.of<PlayerManager>(context, listen: false);
+      player.setName(response['username'] as String);
     }
   }
 
@@ -76,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             tasks.insert(i, task);
             taskManager.addTask(task);
-            //totalTasks++; // ✅ increase permanently
 
             _listKey.currentState?.insertItem(
               i,
@@ -95,44 +86,54 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void gainXP(int amount) {
-    setState(() {
-      xp += amount;
+    final player = Provider.of<PlayerManager>(context, listen: false);
+    player.gainXP(amount);
 
-      while (xp >= xpLimit) {
-        xp -= xpLimit;
-        level++;
-        xpLimit += 1000;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "+$amount XP! Level: ${player.level}",
+          style: _fantasyTextStyle(),
+        ),
+      ),
+    );
+  }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("🎉 Level Up! You’re now Level $level")),
-        );
-      }
-    });
+  TextStyle _fantasyTextStyle({
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+  }) {
+    return TextStyle(
+      fontFamily: 'Cinzel',
+      color: color ?? Colors.white,
+      fontWeight: fontWeight ?? FontWeight.normal,
+      fontSize: fontSize,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final player = Provider.of<PlayerManager>(context); // ✅ shared player state
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Background
           Positioned.fill(
             child: Image.asset(
               'assets/Background/home_bg.jpg',
               fit: BoxFit.fill,
             ),
           ),
-
-          // UI content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
-                  Flexible(flex: 5, child: _topProfileBar()),
+                  Flexible(flex: 5, child: _topProfileBar(player)),
                   Flexible(flex: 2, child: _objectiveCard()),
                   Flexible(flex: 14, child: _taskList()),
                   Flexible(flex: 2, child: _bottomNavBar()),
@@ -145,31 +146,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// ✅ Updated Profile Bar to show username from DB
-  Widget _topProfileBar() {
+  Widget _topProfileBar(PlayerManager player) {
     return Row(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-
             Text(
-              isLoadingUser
-                  ? "Loading..."
-                  : (username ?? "Player"), // ✅ username from DB
-              style: const TextStyle(
+              player.name,
+              style: _fantasyTextStyle(
                 fontSize: 35,
-                fontFamily: 'Cinzel',
                 color: Colors.orangeAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 4),
-            _customBar('Level $level', level / 50),
+            _customBar('Level ${player.level}', player.level / 50),
             const SizedBox(height: 4),
-            _customBar('XP: $xp', xp / xpLimit),
+            _customBar('XP: ${player.xp}', player.xp / player.xpLimit),
           ],
         ),
         const Spacer(),
@@ -182,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white)),
+        Text(label, style: _fantasyTextStyle(color: Colors.white)),
         Container(
           height: 8,
           width: 150,
@@ -225,17 +220,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Objective",
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
+          Text("Objective", style: _fantasyTextStyle(fontSize: 16)),
           Row(
             children: [
               Expanded(child: _customBar('', progress)),
               const Spacer(),
               Text(
                 "${taskManager.completedTasks}/${taskManager.totalTasks}",
-                style: const TextStyle(color: Colors.white),
+                style: _fantasyTextStyle(),
               ),
             ],
           ),
@@ -288,7 +280,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          // ❌ Remove task
           GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
@@ -304,18 +295,8 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Image.asset('assets/icons/minus.png', width: 60),
           ),
-
           const SizedBox(width: 12),
-
-          // Task text
-          Expanded(
-            child: Text(
-              task,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-
-          // ✅ Complete task
+          Expanded(child: Text(task, style: _fantasyTextStyle(fontSize: 16))),
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
@@ -324,7 +305,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 listen: false,
               );
 
-              // Update TaskManager
               taskManager.completeTask(index);
 
               _listKey.currentState!.removeItem(
@@ -335,9 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
 
               gainXP(2000);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("+2000 XP for completing: $task")),
-              );
             },
             child: Image.asset('assets/icons/plus.png', width: 60),
           ),
