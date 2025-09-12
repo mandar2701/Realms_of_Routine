@@ -43,6 +43,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.13.1"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -90,7 +91,7 @@ flutter:
     - assets/Characters/attack.png
     - assets/Characters/kick.png
     - assets/Characters/profile.png
-
+    - assets/icons/ror_logo.jpg
     - assets/player.png
     - assets/boss.png
     - assets/icons/attack.png
@@ -122,3 +123,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_icons:
+  image_path: "assets/icons/ror_logo.jpg"
+  android: "launcher_icon"
+  ios: true
+  adaptive_icon_background: "#FFFFFF" # Or "assets/icon/background.png"
+  adaptive_icon_foreground: "assets/icons/ror_logo.jpg"
