@@ -1,4 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "interactive",
-    "dotnet.defaultSolution": "WebApplication1.sln"
+    "dotnet.defaultSolution": "WebApplication1.sln",
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": []
 }
