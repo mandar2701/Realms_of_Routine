@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:life_xp_project/services/auth_services.dart';
 import 'home_screen.dart';
 import 'signup_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService authService = AuthService();
+
+  void signInUser() {
+    authService.signInUser(
+      context: context,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +55,23 @@ class LoginPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: screenHeight * 0.10),
-                          buildInputField("Username", screenHeight, true),
+
+                          // Email field
+                          buildInputField(
+                            "Email",
+                            screenHeight,
+                            controller: _emailController,
+                            isEmail: true,
+                          ),
                           SizedBox(height: screenHeight * 0.03),
-                          buildInputField("Password", screenHeight, true, isPassword: true),
+
+                          // Password field
+                          buildInputField(
+                            "Password",
+                            screenHeight,
+                            controller: _passwordController,
+                            isPassword: true,
+                          ),
                           SizedBox(height: screenHeight * 0.03),
 
                           Align(
@@ -47,7 +79,7 @@ class LoginPage extends StatelessWidget {
                             child: Text(
                               "Forgot password?",
                               style: TextStyle(
-                                color: Color(0xFFEEEEEE),
+                                color: const Color(0xFFEEEEEE),
                                 fontFamily: 'Cinzel',
                                 fontSize: screenHeight * 0.015,
                                 decoration: TextDecoration.underline,
@@ -60,14 +92,7 @@ class LoginPage extends StatelessWidget {
                           // Login button
                           Center(
                             child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeScreen(),
-                                  ),
-                                );
-                              },
+                              onTap: signInUser,
                               child: Container(
                                 width: screenWidth * 0.4,
                                 height: screenHeight * 0.07,
@@ -111,7 +136,8 @@ class LoginPage extends StatelessWidget {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const SignupPage(),
+                                        builder: (context) =>
+                                            const SignupPage(),
                                       ),
                                     );
                                   },
@@ -143,32 +169,39 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-// Reusable input field
+// Reusable input field (like SignupPage)
 Widget buildInputField(
-    String label, double screenHeight, bool isLogin,
-    {bool isPassword = false}) {
+  String label,
+  double screenHeight, {
+  bool isPassword = false,
+  bool isEmail = false,
+  TextEditingController? controller,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         label,
         style: TextStyle(
-          color: Color(0xFFEFDCC3),
+          color: const Color(0xFFEFDCC3),
           fontSize: screenHeight * 0.025,
           fontFamily: 'Cinzel',
         ),
       ),
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isLogin ? const Color(0xFFFFA726) : const Color(0xFFE5B769),
+              color: Color(0xFFFFA726),
               width: 2,
             ),
           ),
         ),
         child: TextField(
+          controller: controller,
           obscureText: isPassword,
+          keyboardType:
+              isEmail ? TextInputType.emailAddress : TextInputType.text,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             border: InputBorder.none,

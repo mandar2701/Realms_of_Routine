@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:life_xp_project/pages/signup_page.dart';
+import 'package:life_xp_project/providers/user_provider.dart';
+import 'package:life_xp_project/services/auth_services.dart';
 import 'pages/todo_screen.dart';
 import 'pages/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +14,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => TaskManager()),
         ChangeNotifierProvider(create: (_) => PlayerManager()), // ✅ shared
       ],
@@ -28,14 +31,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final AuthService authService = AuthService();
   @override
+  void intitState() {
+    super.initState();
+    authService.getUserData(context);
+  }
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
 
       // Start with AuthPage (login/signup toggle)
-      home: const SignupPage(),
+       home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
 
       // Optionally, define routes here if you want navigation
       //  routes: {

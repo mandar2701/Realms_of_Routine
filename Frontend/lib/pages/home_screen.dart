@@ -8,8 +8,6 @@ import '../pages/profile.dart';
 import '../pages/game.dart';
 import '../models/task_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,36 +19,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
 
-  final supabase = Supabase.instance.client;
-  String? username;
-  bool isLoadingUser = true;
-
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchTasksFromAI();
-    });
-    _loadUsername();
-  }
+  
 
-  Future<void> _loadUsername() async {
-    final user = supabase.auth.currentUser;
-    if (user == null) return;
-
-    final response =
-        await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', user.id)
-            .maybeSingle();
-
-    if (mounted && response != null) {
-      final player = Provider.of<PlayerManager>(context, listen: false);
-      player.setName(response['username'] as String);
-    }
-  }
-
+  
   void fetchTasksFromAI() async {
     final taskManager = Provider.of<TaskManager>(context, listen: false);
 

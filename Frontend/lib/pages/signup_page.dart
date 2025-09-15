@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:life_xp_project/services/auth_services.dart';
 import 'home_screen.dart';
 import 'login_page.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService authService = AuthService();
+
+  void signupUser() {
+    authService.signUpUser(
+      context: context,
+      email: _emailController.text,
+      password: _passwordController.text,
+      name: _usernameController.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,23 +57,38 @@ class SignupPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: screenHeight * 0.10),
-                          buildInputField("Username", screenHeight, false),
+
+                          // Username
+                          buildInputField(
+                            "Username",
+                            screenHeight,
+                            controller: _usernameController,
+                          ),
                           SizedBox(height: screenHeight * 0.03),
-                          buildInputField("Password", screenHeight, false, isPassword: true),
+
+                          // Email
+                          buildInputField(
+                            "Email",
+                            screenHeight,
+                            controller: _emailController,
+                          ),
                           SizedBox(height: screenHeight * 0.03),
-                          buildInputField("Confirm Password", screenHeight, false, isPassword: true),
+
+                          // Password
+                          buildInputField(
+                            "Password",
+                            screenHeight,
+                            controller: _passwordController,
+                            isPassword: true,
+                          ),
                           SizedBox(height: screenHeight * 0.03),
 
                           // Signup button
                           Center(
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeScreen(),
-                                  ),
-                                );
+                                // Later: call AuthService().signup(...)
+                               onPressed: signupUser();
                               },
                               child: Container(
                                 width: screenWidth * 0.4,
@@ -132,30 +167,37 @@ class SignupPage extends StatelessWidget {
 
 // Reuse same helper
 Widget buildInputField(
-    String label, double screenHeight, bool isLogin,
-    {bool isPassword = false}) {
+  String label,
+  double screenHeight, {
+  bool isPassword = false,
+  TextEditingController? controller,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         label,
         style: TextStyle(
-          color: Color(0xFFEFDCC3),
+          color: const Color(0xFFEFDCC3),
           fontSize: screenHeight * 0.025,
           fontFamily: 'Cinzel',
         ),
       ),
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isLogin ? const Color(0xFFFFA726) : const Color(0xFFE5B769),
+              color: Color(0xFFE5B769),
               width: 2,
             ),
           ),
         ),
         child: TextField(
+          controller: controller,
           obscureText: isPassword,
+          keyboardType: label == "Email"
+              ? TextInputType.emailAddress
+              : TextInputType.text,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             border: InputBorder.none,
