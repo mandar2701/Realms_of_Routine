@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../pages/boss.dart';
 import '../pages/player.dart';
+import 'bottom_navbar.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -13,7 +14,6 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-// 1. Add TickerProviderStateMixin for animations
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Game variables
   double playerHealth = 100;
@@ -22,17 +22,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool isPlayerTurn = true;
   bool isGameRunning = true;
 
-  // REMOVED: Damage effect variables (no longer needed)
-  // bool playerIsHit = false;
-  // bool bossIsHit = false;
-
-  // 2. ADD: Animation Controllers for the shake effect
   late AnimationController _playerShakeController;
   late AnimationController _bossShakeController;
   late Animation<Offset> _playerShakeAnimation;
   late Animation<Offset> _bossShakeAnimation;
 
-  // 3. ADD: initState to set up the animations
   @override
   void initState() {
     super.initState();
@@ -88,7 +82,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 4. ADD: dispose to clean up the controllers
   @override
   void dispose() {
     _playerShakeController.dispose();
@@ -115,12 +108,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       bossHealth -= damage;
       gameMessage = message;
       isPlayerTurn = false;
-      // REMOVED: bossIsHit = true;
     });
 
-    // REMOVED: Timer for the hit effect
-
-    // 5. CHANGE: Trigger the boss shake animation instead of the red flash
     _bossShakeController.forward(from: 0.0);
 
     if (bossHealth <= 0) {
@@ -140,12 +129,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         playerHealth -= damage;
         gameMessage = 'The boss attacked you for $damage damage!';
         isPlayerTurn = true;
-        // REMOVED: playerIsHit = true;
       });
 
-      // REMOVED: Timer for the hit effect
-
-      // 6. CHANGE: Trigger the player shake animation instead of the red flash
       _playerShakeController.forward(from: 0.0);
 
       if (playerHealth <= 0) {
@@ -188,137 +173,167 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       gameMessage = 'Your turn!';
       isPlayerTurn = true;
       isGameRunning = true;
-      // REMOVED: playerIsHit = false;
-      // REMOVED: bossIsHit = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // YOUR LAYOUT IS UNCHANGED
     return Scaffold(
       body: Stack(
         children: [
-          SizedBox.expand(
+          // Background
+          Positioned.fill(
             child: Image.asset(
-              "assets/Background/game_bg.png",
-              fit: BoxFit.cover,
+              'assets/Background/game_bg.png',
+              fit: BoxFit.fill,
             ),
           ),
-          Align(
-            alignment: Alignment.topCenter,
+          SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
                 children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Player",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: LinearProgressIndicator(
-                          value: playerHealth / 100,
-                          backgroundColor: Colors.grey[700],
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.green,
+                  Expanded(
+                    child:
+                    // Player + Boss Health Bars
+                    Column(
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Player",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.4,
+                                      child: LinearProgressIndicator(
+                                        value: playerHealth / 100,
+                                        backgroundColor: Colors.grey[700],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                              Colors.green,
+                                            ),
+                                        minHeight: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Boss",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.4,
+                                      child: LinearProgressIndicator(
+                                        value: bossHealth / 100,
+                                        backgroundColor: Colors.grey[700],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                              Colors.red,
+                                            ),
+                                        minHeight: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                          minHeight: 10,
                         ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text("Boss", style: TextStyle(color: Colors.white)),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: LinearProgressIndicator(
-                          value: bossHealth / 100,
-                          backgroundColor: Colors.grey[700],
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.red,
+
+                        // Game Message
+                        Flexible(
+                          flex: 2,
+                          child: Center(
+                            child: Text(
+                              gameMessage,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(blurRadius: 5.0, color: Colors.black),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          minHeight: 10,
                         ),
-                      ),
-                    ],
+
+                        // Characters (Player + Boss)
+                        Flexible(
+                          flex: 15,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: SlideTransition(
+                                  position: _playerShakeAnimation,
+                                  child: const Player(),
+                                ),
+                              ),
+                              const Spacer(flex: 1),
+                              Expanded(
+                                flex: 5,
+                                child: SlideTransition(
+                                  position: _bossShakeAnimation,
+                                  child: const Boss(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Attack Buttons
+                        Flexible(
+                          flex: 5,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: swordAttack,
+                                child: Image.asset(
+                                  'icons/attack.png',
+                                  width: 120,
+                                  height: 120,
+                                ),
+                              ),
+                              const SizedBox(width: 40),
+                              GestureDetector(
+                                onTap: kickAttack,
+                                child: Image.asset(
+                                  'icons/kick.png',
+                                  width: 120,
+                                  height: 120,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Bottom Navbar
                   ),
-                ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: const Alignment(0.0, -0.6),
-            child: Text(
-              gameMessage,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: [Shadow(blurRadius: 5.0, color: Colors.black)],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: Align(
-              alignment: const Alignment(0.0, 0.4),
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.4,
-                child: Row(
-                  children: [
-                    // 7. CHANGE: Apply the shake animation to the Player
-                    Expanded(
-                      flex: 5,
-                      child: SlideTransition(
-                        position: _playerShakeAnimation,
-                        child: const Player(), // Pass no parameters
-                      ),
-                    ),
-                    const Spacer(flex: 1),
-                    // 8. CHANGE: Apply the shake animation to the Boss
-                    Expanded(
-                      flex: 5,
-                      child: SlideTransition(
-                        position: _bossShakeAnimation,
-                        child: const Boss(), // Pass no parameters
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 40.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: swordAttack,
-                    child: Image.asset(
-                      'icons/attack.png',
-                      width: 120,
-                      height: 120,
-                    ),
-                  ),
-                  const SizedBox(width: 40),
-                  GestureDetector(
-                    onTap: kickAttack,
-                    child: Image.asset(
-                      'icons/kick.png',
-                      width: 120,
-                      height: 120,
-                    ),
-                  ),
+                  BottomNavbar(),
                 ],
               ),
             ),

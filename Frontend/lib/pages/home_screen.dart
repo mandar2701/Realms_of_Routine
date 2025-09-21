@@ -1,16 +1,14 @@
+import 'dart:async'; // Import the Timer class
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../models/player_manager.dart';
-import '../pages/todo_screen.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:async'; // Import the Timer class
-import '../pages/profile.dart';
-import '../pages/game.dart';
-import '../models/task_manager.dart';
 import 'package:provider/provider.dart';
 
-import 'quest_calendar.dart';
+import '../models/player_manager.dart';
+import '../models/task_manager.dart';
+import '../pages/bottom_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -154,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(flex: 5, child: _topProfileBar(player)),
                   Flexible(flex: 2, child: _objectiveCard()),
                   Flexible(flex: 14, child: _taskList()),
-                  Flexible(flex: 2, child: _bottomNavBar()),
+                  Flexible(flex: 2, child: BottomNavbar()),
                 ],
               ),
             ),
@@ -334,60 +332,6 @@ class _HomeScreenState extends State<HomeScreen> {
               gainXP(500);
             },
             child: Image.asset('assets/icons/plus.png', width: 60),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _bottomNavBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
-      decoration: BoxDecoration(
-        color: Colors.white24,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Image.asset('assets/icons/home.png', width: 50),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TodoScreen()),
-              );
-            },
-            child: Image.asset('assets/icons/todo.png', width: 60),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-            child: Image.asset('assets/icons/profile.png', width: 70),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const QuestCalendarScreen(),
-                ),
-              );
-            },
-            child: Image.asset('assets/icons/calender.png', width: 50),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const GameScreen()),
-              );
-            },
-            child: Image.asset('assets/icons/ai.png', width: 50),
           ),
         ],
       ),

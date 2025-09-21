@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 
-import 'game.dart';
-import 'profile.dart';
-import 'todo_screen.dart';
+import 'bottom_navbar.dart';
 
 class QuestCalendarScreen extends StatefulWidget {
   const QuestCalendarScreen({super.key});
@@ -39,6 +36,9 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade900,
       body: Stack(
@@ -53,145 +53,116 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
             ),
           ),
 
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 60),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 207, 203, 203).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(15),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                Flexible(
+                  flex: 21,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(
+                        255,
+                        207,
+                        203,
+                        203,
+                      ).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 40),
 
-                // Real Calendar
-                _buildCalendar(),
+                        // Real Calendar
+                        _buildCalendar(),
 
-                const SizedBox(height: 10),
-                Text(
-                  "DAILY QUESTS",
-                  style: GoogleFonts.cinzelDecorative(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amberAccent,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const Divider(color: Colors.amber),
-
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: dailyQuests.length,
-                    itemBuilder: (context, index) {
-                      final quest = dailyQuests[index];
-                      return ListTile(
-                        leading: Icon(
-                          quest["status"] == "completed"
-                              ? Icons.shield
-                              : quest["status"] == "failed"
-                              ? Icons.close_rounded
-                              : Icons.favorite,
-                          color:
-                              quest["status"] == "completed"
-                                  ? Colors.amber
-                                  : quest["status"] == "failed"
-                                  ? Colors.red
-                                  : Colors.greenAccent,
-                        ),
-                        title: Text(
-                          quest["title"],
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                        trailing: Text(
-                          "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                          style: TextStyle(
-                            fontSize: 16,
+                        const SizedBox(height: 10),
+                        Text(
+                          "DAILY QUESTS",
+                          style: GoogleFonts.cinzelDecorative(
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: quest["xp"] > 0 ? Colors.green : Colors.red,
+                            color: Colors.amberAccent,
+                            letterSpacing: 2,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        const Divider(color: Colors.amber),
 
-                // Set Quest Button
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber.shade700,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      addQuest("New Custom Quest", 25, "completed");
-                    },
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text(
-                      "Set Quest",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: dailyQuests.length,
+                            itemBuilder: (context, index) {
+                              final quest = dailyQuests[index];
+                              return ListTile(
+                                leading: Icon(
+                                  quest["status"] == "completed"
+                                      ? Icons.shield
+                                      : quest["status"] == "failed"
+                                      ? Icons.close_rounded
+                                      : Icons.favorite,
+                                  color:
+                                      quest["status"] == "completed"
+                                          ? Colors.amber
+                                          : quest["status"] == "failed"
+                                          ? Colors.red
+                                          : Colors.greenAccent,
+                                ),
+                                title: Text(
+                                  quest["title"],
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        quest["xp"] > 0
+                                            ? Colors.green
+                                            : Colors.red,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        // Set Quest Button
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber.shade700,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              addQuest("New Custom Quest", 25, "completed");
+                            },
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            label: const Text(
+                              "Set Quest",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                SizedBox(height: screenHeight * 0.02),
+                // Bottom navigation
+                Flexible(flex: 2, child: BottomNavbar()),
               ],
-            ),
-          ),
-          // Bottom navigation
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 75,
-              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Image.asset('assets/icons/home.png', width: 50),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TodoScreen(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/todo.png', width: 60),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileScreen(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/profile.png', width: 70),
-                  ),
-                  Image.asset('assets/icons/calender.png', width: 50),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/ai.png', width: 50),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
