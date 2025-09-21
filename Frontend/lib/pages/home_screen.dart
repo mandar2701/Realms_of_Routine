@@ -4,10 +4,14 @@ import '../models/player_manager.dart';
 import '../pages/todo_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async'; // Import the Timer class
 import '../pages/profile.dart';
 import '../pages/game.dart';
 import '../models/task_manager.dart';
 import 'package:provider/provider.dart';
+
+import 'quest_calendar.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,15 +22,57 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   List<String> tasks = [];
+  Timer? _dailyTimer; // Timer for daily task reset
 
   @override
-  
+  void initState() {
+    super.initState();
+    // Schedule the first task fetch at the next midnight
+    _scheduleDailyTaskFetch();
+    // Initially fetch tasks when the screen is first loaded
+    // Only if there are no tasks yet
+    final taskManager = Provider.of<TaskManager>(context, listen: false);
+    if (taskManager.tasks.isEmpty) {
+      fetchTasksFromAI();
+    } else {
+      tasks = List.from(taskManager.tasks);
+    }
+  }
 
-  
+  @override
+  void dispose() {
+    // Cancel the timer to prevent memory leaks
+    _dailyTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleDailyTaskFetch() {
+    // Calculate the time until the next midnight
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1, 0, 0);
+    final durationUntilMidnight = nextMidnight.difference(now);
+
+    // Schedule the timer to run at the next midnight
+    _dailyTimer = Timer(durationUntilMidnight, () {
+      // Get the TaskManager instance
+      final taskManager = Provider.of<TaskManager>(context, listen: false);
+
+      // Clear all existing tasks
+      taskManager.clearTasks();
+
+      // Fetch new tasks from the AI
+      fetchTasksFromAI();
+
+      // Schedule a recurring timer to run every 24 hours
+      _dailyTimer = Timer.periodic(const Duration(hours: 24), (timer) {
+        taskManager.clearTasks();
+        fetchTasksFromAI();
+      });
+    });
+  }
+
   void fetchTasksFromAI() async {
     final taskManager = Provider.of<TaskManager>(context, listen: false);
-
-    if (taskManager.tasks.isNotEmpty) return;
     final uri = Uri.parse("http://localhost:5000/generate-task");
 
     try {
@@ -34,19 +80,22 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        for (int i = 0; i < 7; i++) {
-          final task = data[i] as String;
+        // Clear local tasks list and add new tasks from the API
+        setState(() {
+          tasks.clear();
+        });
 
+        // Loop through the received tasks and add them with an animation
+        for (int i = 0; i < data.length && i < 7; i++) {
+          final task = data[i] as String;
+          taskManager.addTask(task);
           setState(() {
             tasks.insert(i, task);
-            taskManager.addTask(task);
-
-            _listKey.currentState?.insertItem(
-              i,
-              duration: const Duration(milliseconds: 300),
-            );
           });
-
+          _listKey.currentState?.insertItem(
+            i,
+            duration: const Duration(milliseconds: 300),
+          );
           await Future.delayed(const Duration(milliseconds: 100));
         }
       } else {
@@ -95,10 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/Background/home_bg.jpg',
-              fit: BoxFit.fill,
-            ),
+            child: Image.asset('Background/home_bg.png', fit: BoxFit.fill),
           ),
           SafeArea(
             child: Padding(
@@ -276,9 +322,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 listen: false,
               );
-
+              final task = taskManager.tasks[index];
               taskManager.completeTask(index);
-
               _listKey.currentState!.removeItem(
                 index,
                 (context, animation) =>
@@ -324,7 +369,17 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Image.asset('assets/icons/profile.png', width: 70),
           ),
-          Image.asset('assets/icons/calender.png', width: 50),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QuestCalendarScreen(),
+                ),
+              );
+            },
+            child: Image.asset('assets/icons/calender.png', width: 50),
+          ),
           GestureDetector(
             onTap: () {
               Navigator.push(

@@ -88,7 +88,7 @@ class _SignupPageState extends State<SignupPage> {
                             child: GestureDetector(
                               onTap: () {
                                 // Later: call AuthService().signup(...)
-                               onPressed: signupUser();
+                                signupUser();
                               },
                               child: Container(
                                 width: screenWidth * 0.4,
@@ -186,18 +186,16 @@ Widget buildInputField(
       Container(
         decoration: const BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: Color(0xFFE5B769),
-              width: 2,
-            ),
+            bottom: BorderSide(color: Color(0xFFE5B769), width: 2),
           ),
         ),
         child: TextField(
           controller: controller,
           obscureText: isPassword,
-          keyboardType: label == "Email"
-              ? TextInputType.emailAddress
-              : TextInputType.text,
+          keyboardType:
+              label == "Email"
+                  ? TextInputType.emailAddress
+                  : TextInputType.text,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             border: InputBorder.none,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../pages/create_task.dart';
 import 'package:provider/provider.dart';
 import '../models/task_manager.dart';
+import 'game.dart';
 import 'home_screen.dart';
 
 class TodoScreen extends StatelessWidget {
@@ -171,7 +172,17 @@ class TodoScreen extends StatelessWidget {
                         Image.asset('assets/icons/todo.png', width: 40),
                         Image.asset('assets/icons/profile.png', width: 50),
                         Image.asset('assets/icons/calender.png', width: 40),
-                        Image.asset('assets/icons/ai.png', width: 40),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const GameScreen(),
+                              ),
+                            );
+                          },
+                          child: Image.asset('assets/icons/ai.png', width: 50),
+                        ),
                       ],
                     ),
                   ),

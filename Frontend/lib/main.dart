@@ -37,13 +37,17 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     authService.getUserData(context);
   }
+
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
 
       // Start with AuthPage (login/signup toggle)
-       home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
+      home:
+          Provider.of<UserProvider>(context).user.token.isEmpty
+              ? const SignupPage()
+              : const HomeScreen(),
 
       // Optionally, define routes here if you want navigation
       //  routes: {
