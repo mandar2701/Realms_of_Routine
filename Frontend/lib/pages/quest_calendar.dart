@@ -123,19 +123,34 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                   padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber.shade700,
+                      backgroundColor: const Color.fromARGB(
+                        255,
+                        207,
+                        203,
+                        203,
+                      ).withOpacity(0.2),
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
+                        side: const BorderSide(
+                          // 👈 Border added
+                          color: const Color.fromARGB(255, 238, 228, 190),
+                          width: 0.25,
+                        ),
                       ),
                     ),
                     onPressed: () {
                       addQuest("New Custom Quest", 25, "completed");
                     },
                     icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text(
+                    label: Text(
                       "Set Quest",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                      style: GoogleFonts.cinzelDecorative(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 238, 228, 190),
+                        letterSpacing: 2,
+                      ),
                     ),
                   ),
                 ),

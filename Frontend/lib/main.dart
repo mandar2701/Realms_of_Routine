@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:life_xp_project/pages/signup_page.dart';
 import 'package:life_xp_project/providers/user_provider.dart';
 import 'package:life_xp_project/services/auth_services.dart';
+import 'pages/quest_calendar.dart';
 import 'pages/todo_screen.dart';
 import 'pages/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -46,8 +47,8 @@ class _MyAppState extends State<MyApp> {
       // Start with AuthPage (login/signup toggle)
       home:
           Provider.of<UserProvider>(context).user.token.isEmpty
-              ? const SignupPage()
-              : const HomeScreen(),
+              ? const QuestCalendarScreen()
+              : const QuestCalendarScreen(),
 
       // Optionally, define routes here if you want navigation
       //  routes: {
