@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
+import 'bottom_navbar.dart';
 import 'game.dart';
 import 'profile.dart';
 import 'todo_screen.dart';
@@ -48,167 +49,183 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage("Background/cal_bg.png"),
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
           ),
 
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 60),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 207, 203, 203).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-
-                // Real Calendar
-                _buildCalendar(),
-
-                const SizedBox(height: 10),
-                Text(
-                  "DAILY QUESTS",
-                  style: GoogleFonts.cinzelDecorative(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amberAccent,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const Divider(color: Colors.amber),
-
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: dailyQuests.length,
-                    itemBuilder: (context, index) {
-                      final quest = dailyQuests[index];
-                      return ListTile(
-                        leading: Icon(
-                          quest["status"] == "completed"
-                              ? Icons.shield
-                              : quest["status"] == "failed"
-                              ? Icons.close_rounded
-                              : Icons.favorite,
-                          color:
-                              quest["status"] == "completed"
-                                  ? Colors.amber
-                                  : quest["status"] == "failed"
-                                  ? Colors.red
-                                  : Colors.greenAccent,
-                        ),
-                        title: Text(
-                          quest["title"],
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                        trailing: Text(
-                          "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: quest["xp"] > 0 ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Set Quest Button
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(
-                        255,
-                        207,
-                        203,
-                        203,
-                      ).withOpacity(0.2),
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: const BorderSide(
-                          // 👈 Border added
-                          color: const Color.fromARGB(255, 238, 228, 190),
-                          width: 0.25,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      addQuest("New Custom Quest", 25, "completed");
-                    },
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: Text(
-                      "Set Quest",
-                      style: GoogleFonts.cinzelDecorative(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 238, 228, 190),
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Bottom navigation
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 75,
-              padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
                 children: [
-                  Image.asset('assets/icons/home.png', width: 50),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TodoScreen(),
+                  Flexible(
+                    flex: 11,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Expanded(
+                        child: Container(
+                          /*  margin: const EdgeInsets.symmetric(
+                            horizontal: 25,
+                            vertical: 60,
+                          ),*/
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(
+                              255,
+                              207,
+                              203,
+                              203,
+                            ).withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            children: [
+                              //const SizedBox(height: 40),
+
+                              // Real Calendar
+                              _buildCalendar(),
+
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  const Expanded(
+                                    child: Divider(
+                                      color: Color.fromARGB(255, 233, 214, 142),
+                                      thickness: 1,
+                                      endIndent:
+                                          10, // space between line and text
+                                    ),
+                                  ),
+                                  Text(
+                                    "DAILY QUESTS",
+                                    style: GoogleFonts.cinzelDecorative(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(255, 233, 214, 142),
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                  const Expanded(
+                                    child: Divider(
+                                      color: Color.fromARGB(255, 233, 214, 142),
+                                      thickness: 1,
+                                      indent: 10, // space between text and line
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: dailyQuests.length,
+                                  itemBuilder: (context, index) {
+                                    final quest = dailyQuests[index];
+                                    return ListTile(
+                                      leading: Icon(
+                                        quest["status"] == "completed"
+                                            ? Icons.shield
+                                            : quest["status"] == "failed"
+                                            ? Icons.close_rounded
+                                            : Icons.favorite,
+                                        color:
+                                            quest["status"] == "completed"
+                                                ? Colors.amber
+                                                : quest["status"] == "failed"
+                                                ? Colors.red
+                                                : Colors.greenAccent,
+                                      ),
+                                      title: Text(
+                                        quest["title"],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      trailing: Text(
+                                        "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              quest["xp"] > 0
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+
+                              // Set Quest Button
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      207,
+                                      203,
+                                      203,
+                                    ).withOpacity(0.2),
+                                    minimumSize: const Size(
+                                      double.infinity,
+                                      50,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      side: const BorderSide(
+                                        // 👈 Border added
+                                        color: const Color.fromARGB(
+                                          255,
+                                          238,
+                                          228,
+                                          190,
+                                        ),
+                                        width: 0.25,
+                                      ),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    addQuest(
+                                      "New Custom Quest",
+                                      25,
+                                      "completed",
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  ),
+                                  label: Text(
+                                    "Set Quest",
+                                    style: GoogleFonts.cinzelDecorative(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color.fromARGB(
+                                        255,
+                                        238,
+                                        228,
+                                        190,
+                                      ),
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/todo.png', width: 60),
+                      ),
+                    ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileScreen(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/profile.png', width: 70),
-                  ),
-                  Image.asset('assets/icons/calender.png', width: 50),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/icons/ai.png', width: 50),
-                  ),
+                  const SizedBox(height: 10),
+                  Flexible(flex: 1, child: BottomNavbar()),
                 ],
               ),
             ),
           ),
+          // Bottom navigation
         ],
       ),
     );
@@ -236,8 +253,30 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
             color: Colors.blueAccent,
             shape: BoxShape.circle,
           ),
-          defaultTextStyle: const TextStyle(color: Colors.white),
-          weekendTextStyle: const TextStyle(color: Colors.redAccent),
+          defaultTextStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          weekendTextStyle: const TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        daysOfWeekStyle: DaysOfWeekStyle(
+          weekdayStyle: GoogleFonts.cinzel(
+            // applies to Mon–Fri
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            letterSpacing: 1, // spacing between letters
+          ),
+          weekendStyle: GoogleFonts.cinzel(
+            // applies to Sat & Sun
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            letterSpacing: 1,
+          ),
         ),
         headerStyle: HeaderStyle(
           titleTextStyle: GoogleFonts.cinzel(
@@ -257,14 +296,14 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
           markerBuilder: (context, day, events) {
             final status = _events[DateTime.utc(day.year, day.month, day.day)];
             if (status == "completed") {
-              return const Icon(Icons.shield, color: Colors.amber, size: 16);
+              return const Icon(Icons.shield, color: Colors.amber, size: 18);
             } else if (status == "failed") {
-              return const Icon(Icons.close, color: Colors.red, size: 16);
+              return const Icon(Icons.close, color: Colors.red, size: 18);
             } else if (status == "bonus") {
               return const Icon(
                 Icons.favorite,
                 color: Colors.greenAccent,
-                size: 16,
+                size: 18,
               );
             }
             return null;
