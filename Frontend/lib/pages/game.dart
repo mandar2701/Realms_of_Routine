@@ -192,15 +192,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
                     flex: 9,
-                    child:
-                    // Player + Boss Health Bars
-                    Column(
+                    child: Column(
+                      // Main game content column
                       children: [
+                        // Player + Boss Health Bars
                         Flexible(
-                          flex: 2,
+                          flex: 4,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -278,6 +279,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             ),
                           ),
                         ),
+
+                        // Spacer to push characters to the bottom
+                        const Spacer(flex: 12),
 
                         // Characters (Player + Boss)
                         Flexible(
