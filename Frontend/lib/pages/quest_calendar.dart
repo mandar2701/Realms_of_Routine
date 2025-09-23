@@ -99,7 +99,7 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                   ),
                                   Text(
                                     "DAILY QUESTS",
-                                    style: GoogleFonts.cinzelDecorative(
+                                    style: GoogleFonts.playfairDisplay(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 233, 214, 142),
@@ -136,14 +136,29 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                       ),
                                       title: Text(
                                         quest["title"],
-                                        style: GoogleFonts.poppins(
-                                          color: Colors.white,
+                                        style: GoogleFonts.playfairDisplay(
                                           fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            238,
+                                            228,
+                                            190,
+                                          ),
+                                          textBaseline:
+                                              TextBaseline
+                                                  .alphabetic, // optional for alignment
+                                        ).copyWith(
+                                          letterSpacing: 1.2,
+                                          // This disables the forced caps
+                                          fontFeatures: [
+                                            const FontFeature.disable('smcp'),
+                                          ],
                                         ),
                                       ),
                                       trailing: Text(
                                         "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                                        style: TextStyle(
+                                        style: GoogleFonts.playfairDisplay(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color:
@@ -194,12 +209,18 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                     );
                                   },
                                   icon: const Icon(
-                                    Icons.add,
-                                    color: Colors.white,
+                                    Icons.add_box_outlined,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      238,
+                                      228,
+                                      190,
+                                    ),
+                                    size: 24,
                                   ),
                                   label: Text(
                                     "Set Quest",
-                                    style: GoogleFonts.cinzelDecorative(
+                                    style: GoogleFonts.playfairDisplay(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: const Color.fromARGB(
@@ -253,13 +274,15 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
             color: Colors.blueAccent,
             shape: BoxShape.circle,
           ),
-          defaultTextStyle: const TextStyle(
+          defaultTextStyle: GoogleFonts.cinzelDecorative(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontWeight: FontWeight.bold,
           ),
-          weekendTextStyle: const TextStyle(
-            color: Colors.redAccent,
+          weekendTextStyle: GoogleFonts.cinzelDecorative(
+            fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Colors.redAccent,
           ),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
