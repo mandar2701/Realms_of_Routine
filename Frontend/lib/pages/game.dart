@@ -193,7 +193,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
-                  Expanded(
+                  Flexible(
+                    flex: 9,
                     child:
                     // Player + Boss Health Bars
                     Column(
@@ -330,10 +331,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                       ],
                     ),
-
-                    // Bottom Navbar
                   ),
-                  BottomNavbar(),
+
+                  // Bottom Navbar
+                  Flexible(flex: 1, child: BottomNavbar()),
                 ],
               ),
             ),

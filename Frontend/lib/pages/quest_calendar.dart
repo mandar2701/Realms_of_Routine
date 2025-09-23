@@ -1,12 +1,10 @@
+import 'dart:ui'; // Import the dart:ui library for ImageFilter
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 
 import 'bottom_navbar.dart';
-import 'game.dart';
-import 'profile.dart';
-import 'todo_screen.dart';
 
 class QuestCalendarScreen extends StatefulWidget {
   const QuestCalendarScreen({super.key});
@@ -63,178 +61,202 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                     flex: 11,
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Expanded(
-                        child: Container(
-                          /*  margin: const EdgeInsets.symmetric(
+                      // Wrap the Container with ClipRRect and BackdropFilter
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(
+                            sigmaX: 4,
+                            sigmaY: 4,
+                          ), // Adjust blur strength here
+                          child: Container(
+                            /* margin: const EdgeInsets.symmetric(
                             horizontal: 25,
                             vertical: 60,
                           ),*/
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(
-                              255,
-                              207,
-                              203,
-                              203,
-                            ).withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            children: [
-                              //const SizedBox(height: 40),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(
+                                255,
+                                255,
+                                255,
+                                255,
+                              ).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              children: [
+                                //const SizedBox(height: 40),
 
-                              // Real Calendar
-                              _buildCalendar(),
+                                // Real Calendar
+                                _buildCalendar(),
 
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Expanded(
-                                    child: Divider(
-                                      color: Color.fromARGB(255, 233, 214, 142),
-                                      thickness: 1,
-                                      endIndent:
-                                          10, // space between line and text
-                                    ),
-                                  ),
-                                  Text(
-                                    "DAILY QUESTS",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 233, 214, 142),
-                                      letterSpacing: 2,
-                                    ),
-                                  ),
-                                  const Expanded(
-                                    child: Divider(
-                                      color: Color.fromARGB(255, 233, 214, 142),
-                                      thickness: 1,
-                                      indent: 10, // space between text and line
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: dailyQuests.length,
-                                  itemBuilder: (context, index) {
-                                    final quest = dailyQuests[index];
-                                    return ListTile(
-                                      leading: Icon(
-                                        quest["status"] == "completed"
-                                            ? Icons.shield
-                                            : quest["status"] == "failed"
-                                            ? Icons.close_rounded
-                                            : Icons.favorite,
-                                        color:
-                                            quest["status"] == "completed"
-                                                ? Colors.amber
-                                                : quest["status"] == "failed"
-                                                ? Colors.red
-                                                : Colors.greenAccent,
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    const Expanded(
+                                      child: Divider(
+                                        color: Color.fromARGB(
+                                          255,
+                                          233,
+                                          214,
+                                          142,
+                                        ),
+                                        thickness: 1,
+                                        endIndent:
+                                            10, // space between line and text
                                       ),
-                                      title: Text(
-                                        quest["title"],
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                    ),
+                                    Text(
+                                      "DAILY QUESTS",
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color.fromARGB(
+                                          255,
+                                          233,
+                                          214,
+                                          142,
+                                        ),
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Divider(
+                                        color: Color.fromARGB(
+                                          255,
+                                          233,
+                                          214,
+                                          142,
+                                        ),
+                                        thickness: 1,
+                                        indent:
+                                            10, // space between text and line
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: dailyQuests.length,
+                                    itemBuilder: (context, index) {
+                                      final quest = dailyQuests[index];
+                                      return ListTile(
+                                        leading: Icon(
+                                          quest["status"] == "completed"
+                                              ? Icons.shield
+                                              : quest["status"] == "failed"
+                                              ? Icons.close_rounded
+                                              : Icons.favorite,
+                                          color:
+                                              quest["status"] == "completed"
+                                                  ? Colors.amber
+                                                  : quest["status"] == "failed"
+                                                  ? Colors.red
+                                                  : Colors.greenAccent,
+                                        ),
+                                        title: Text(
+                                          quest["title"],
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              238,
+                                              228,
+                                              190,
+                                            ),
+                                            textBaseline:
+                                                TextBaseline
+                                                    .alphabetic, // optional for alignment
+                                          ).copyWith(
+                                            letterSpacing: 1.2,
+                                            // This disables the forced caps
+                                            fontFeatures: [
+                                              const FontFeature.disable('smcp'),
+                                            ],
+                                          ),
+                                        ),
+                                        trailing: Text(
+                                          "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                quest["xp"] > 0
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                                // Set Quest Button
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                        255,
+                                        207,
+                                        203,
+                                        203,
+                                      ).withOpacity(0.2),
+                                      minimumSize: const Size(
+                                        double.infinity,
+                                        50,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        side: const BorderSide(
+                                          // 👈 Border added
                                           color: const Color.fromARGB(
                                             255,
                                             238,
                                             228,
                                             190,
                                           ),
-                                          textBaseline:
-                                              TextBaseline
-                                                  .alphabetic, // optional for alignment
-                                        ).copyWith(
-                                          letterSpacing: 1.2,
-                                          // This disables the forced caps
-                                          fontFeatures: [
-                                            const FontFeature.disable('smcp'),
-                                          ],
+                                          width: 0.25,
                                         ),
                                       ),
-                                      trailing: Text(
-                                        "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              quest["xp"] > 0
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              // Set Quest Button
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                      255,
-                                      207,
-                                      203,
-                                      203,
-                                    ).withOpacity(0.2),
-                                    minimumSize: const Size(
-                                      double.infinity,
-                                      50,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                      side: const BorderSide(
-                                        // 👈 Border added
-                                        color: const Color.fromARGB(
-                                          255,
-                                          238,
-                                          228,
-                                          190,
-                                        ),
-                                        width: 0.25,
-                                      ),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    addQuest(
-                                      "New Custom Quest",
-                                      25,
-                                      "completed",
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.add_box_outlined,
-                                    color: const Color.fromARGB(
-                                      255,
-                                      238,
-                                      228,
-                                      190,
-                                    ),
-                                    size: 24,
-                                  ),
-                                  label: Text(
-                                    "Set Quest",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                    onPressed: () {
+                                      addQuest(
+                                        "New Custom Quest",
+                                        25,
+                                        "completed",
+                                      );
+                                    },
+                                    icon: const Icon(
+                                      Icons.add_box_outlined,
                                       color: const Color.fromARGB(
                                         255,
                                         238,
                                         228,
                                         190,
                                       ),
-                                      letterSpacing: 2,
+                                      size: 24,
+                                    ),
+                                    label: Text(
+                                      "Set Quest",
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color.fromARGB(
+                                          255,
+                                          238,
+                                          228,
+                                          190,
+                                        ),
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

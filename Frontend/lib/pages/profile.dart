@@ -1,7 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 import '../models/player_manager.dart';
 import 'bottom_navbar.dart';
@@ -199,11 +199,10 @@ class StatsView extends StatefulWidget {
 class _StatsViewState extends State<StatsView> {
   Map<String, double> statsData = {
     'Strength': 8,
-    'Intellect': 5,
-    'Agility': 9,
+    'Agility': 5,
+    'Vigor': 9,
     'Stamina': 6,
-    'Wisdom': 4,
-    'Charisma': 7,
+    'Defense': 4,
   };
 
   @override
