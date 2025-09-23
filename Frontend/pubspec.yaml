@@ -40,7 +40,7 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   table_calendar: ^3.1.2
   fl_chart: ^0.63.0
-
+  gif: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +99,7 @@ flutter:
     - assets/boss.png
     - assets/icons/attack.png
     - assets/icons/kick.png
+    - assets/effects/slash_effect.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

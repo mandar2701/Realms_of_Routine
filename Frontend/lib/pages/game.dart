@@ -21,6 +21,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   String gameMessage = 'Your turn!';
   bool isPlayerTurn = true;
   bool isGameRunning = true;
+  bool _isSlashActive = false; // control slash animation
 
   late AnimationController _playerShakeController;
   late AnimationController _bossShakeController;
@@ -108,9 +109,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       bossHealth -= damage;
       gameMessage = message;
       isPlayerTurn = false;
+      _isSlashActive = true; // start slash animation
     });
 
     _bossShakeController.forward(from: 0.0);
+
+    Future.delayed(const Duration(milliseconds: 450), () {
+      setState(() {
+        _isSlashActive = false; // stop slash animation
+      });
+    });
 
     if (bossHealth <= 0) {
       bossHealth = 0;
@@ -173,6 +181,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       gameMessage = 'Your turn!';
       isPlayerTurn = true;
       isGameRunning = true;
+      _isSlashActive = false;
     });
   }
 
@@ -197,7 +206,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   Flexible(
                     flex: 9,
                     child: Column(
-                      // Main game content column
                       children: [
                         // Player + Boss Health Bars
                         Flexible(
@@ -280,7 +288,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        // Spacer to push characters to the bottom
                         const Spacer(flex: 12),
 
                         // Characters (Player + Boss)
@@ -298,9 +305,24 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               const Spacer(flex: 1),
                               Expanded(
                                 flex: 5,
-                                child: SlideTransition(
-                                  position: _bossShakeAnimation,
-                                  child: const Boss(),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SlideTransition(
+                                      position: _bossShakeAnimation,
+                                      child: const Boss(),
+                                    ),
+                                    if (_isSlashActive)
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.4,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                            0.4,
+                                        child: SlashAnimation(),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -345,6 +367,50 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Slash frame-by-frame animation widget
+class SlashAnimation extends StatefulWidget {
+  const SlashAnimation({super.key});
+
+  @override
+  State<SlashAnimation> createState() => _SlashAnimationState();
+}
+
+class _SlashAnimationState extends State<SlashAnimation>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  int currentFrame = 0;
+  final int totalFrames = 9;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    )..addListener(() {
+      setState(() {
+        currentFrame = (_controller.value * totalFrames).floor();
+        if (currentFrame >= totalFrames) currentFrame = totalFrames - 1;
+      });
+    });
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'effects/slash/slash_${currentFrame + 1}.png',
+      fit: BoxFit.contain,
     );
   }
 }
