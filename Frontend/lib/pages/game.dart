@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 import '../pages/boss.dart';
 import '../pages/player.dart';
@@ -187,6 +189,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
     return Scaffold(
       body: Stack(
         children: [
@@ -221,10 +224,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text(
-                                      "Player",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
+                                    Text(
+                                       user.name.isNotEmpty ? user.name : "Player",
+                                       style: const TextStyle(color: Colors.white),
+                                     ),
                                     SizedBox(
                                       width:
                                           MediaQuery.of(context).size.width *

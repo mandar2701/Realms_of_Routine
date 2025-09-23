@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../models/player_manager.dart';
+import '../providers/user_provider.dart';
 import 'bottom_navbar.dart';
 
 // Enum to manage the selected tab
@@ -25,9 +26,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     final player = Provider.of<PlayerManager>(context);
+    final user = Provider.of<UserProvider>(context).user;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -53,13 +55,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Column(
                             children: [
                               Text(
-                                player.name ?? "Player",
-                                style: GoogleFonts.imFellEnglish(
-                                  fontSize: screenWidth * 0.08,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
-                                  letterSpacing: 2,
-                                ),
+                                user.name.isNotEmpty ? user.name : (player.name ?? "Player"),
+                                 style: GoogleFonts.imFellEnglish(
+                                   fontSize: screenWidth * 0.08,
+                                   fontWeight: FontWeight.bold,
+                                   color: Colors.orange,
+                                   letterSpacing: 2,
+                                 ),
                               ),
                               Text(
                                 "Level ${player.level}",
@@ -163,6 +165,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildTabContent() {
+    final user = Provider.of<UserProvider>(context).user;
+    final player = Provider.of<PlayerManager>(context);
+
     switch (_selectedTab) {
       case ProfileTab.stats:
         return const StatsView();
@@ -178,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case ProfileTab.about:
         return Center(
           child: Text(
-            "About Player",
+            "About ${user.name.isNotEmpty ? user.name : (player.name ?? "Player")}",
             style: GoogleFonts.imFellEnglish(color: Colors.white, fontSize: 18),
           ),
         );
