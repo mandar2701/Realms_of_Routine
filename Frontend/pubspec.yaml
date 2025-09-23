@@ -41,6 +41,8 @@ dependencies:
   table_calendar: ^3.1.2
   fl_chart: ^0.63.0
   gif: ^2.3.0
+  flutter_gif: ^0.0.4
+  gif_view: ^0.4.2
 
 dev_dependencies:
   flutter_test:
@@ -100,6 +102,7 @@ flutter:
     - assets/icons/attack.png
     - assets/icons/kick.png
     - assets/effects/slash_effect.gif
+    - assets/Characters/player_attack.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

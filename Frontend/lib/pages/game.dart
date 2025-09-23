@@ -1,11 +1,15 @@
+// lib/screens/game_screen.dart
+
 import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+// Make sure these paths are correct for your project structure
 import '../pages/boss.dart';
 import '../pages/player.dart';
-import 'bottom_navbar.dart';
+import '../pages/player_state.dart';
+import 'bottom_navbar.dart'; // Assuming you have this widget
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -21,7 +25,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   String gameMessage = 'Your turn!';
   bool isPlayerTurn = true;
   bool isGameRunning = true;
-  bool _isSlashActive = false; // control slash animation
+  bool _isSlashActive = false;
+  PlayerState _playerState = PlayerState.idle;
 
   late AnimationController _playerShakeController;
   late AnimationController _bossShakeController;
@@ -92,6 +97,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   void swordAttack() {
     if (isPlayerTurn && isGameRunning) {
+      setState(() {
+        _playerState = PlayerState.swordAttack;
+      });
       int damage = Random().nextInt(15) + 10;
       performPlayerAttack(damage, 'You slashed the boss for $damage damage!');
     }
@@ -99,6 +107,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   void kickAttack() {
     if (isPlayerTurn && isGameRunning) {
+      setState(() {
+        _playerState = PlayerState.kickAttack;
+      });
       int damage = Random().nextInt(8) + 5;
       performPlayerAttack(damage, 'You kicked the boss for $damage damage!');
     }
@@ -109,14 +120,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       bossHealth -= damage;
       gameMessage = message;
       isPlayerTurn = false;
-      _isSlashActive = true; // start slash animation
+      _isSlashActive = true;
     });
 
     _bossShakeController.forward(from: 0.0);
 
-    Future.delayed(const Duration(milliseconds: 450), () {
+    // This duration should match the length of your attack GIF
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
       setState(() {
-        _isSlashActive = false; // stop slash animation
+        _isSlashActive = false;
+        _playerState = PlayerState.idle;
       });
     });
 
@@ -126,14 +140,14 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       gameMessage = 'You defeated the boss!';
       _showGameOverDialog(true);
     } else {
-      Timer(const Duration(seconds: 1), bossAttack);
+      Timer(const Duration(seconds: 2), bossAttack);
     }
   }
 
   void bossAttack() {
     if (!isPlayerTurn && isGameRunning) {
+      int damage = Random().nextInt(8) + 3;
       setState(() {
-        int damage = Random().nextInt(8) + 3;
         playerHealth -= damage;
         gameMessage = 'The boss attacked you for $damage damage!';
         isPlayerTurn = true;
@@ -182,6 +196,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       isPlayerTurn = true;
       isGameRunning = true;
       _isSlashActive = false;
+      _playerState = PlayerState.idle;
     });
   }
 
@@ -190,7 +205,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // Background
           Positioned.fill(
             child: Image.asset(
               'assets/Background/game_bg.png',
@@ -201,166 +215,80 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
-                    flex: 9,
-                    child: Column(
+                  // Health Bars
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildHealthBar("Player", playerHealth, Colors.green),
+                      _buildHealthBar("Boss", bossHealth, Colors.red),
+                    ],
+                  ),
+                  const Spacer(flex: 1),
+                  // Game Message
+                  Text(
+                    gameMessage,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(blurRadius: 5.0, color: Colors.black)],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Spacer(flex: 4),
+                  // Characters (Player + Boss)
+                  Expanded(
+                    flex: 15,
+                    child: Row(
                       children: [
-                        // Player + Boss Health Bars
-                        Flexible(
-                          flex: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      "Player",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: LinearProgressIndicator(
-                                        value: playerHealth / 100,
-                                        backgroundColor: Colors.grey[700],
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                              Colors.green,
-                                            ),
-                                        minHeight: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      "Boss",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: LinearProgressIndicator(
-                                        value: bossHealth / 100,
-                                        backgroundColor: Colors.grey[700],
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                              Colors.red,
-                                            ),
-                                        minHeight: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                        Expanded(
+                          flex: 5, // Give player more space
+                          child: SlideTransition(
+                            position: _playerShakeAnimation,
+                            child: Player(state: _playerState),
                           ),
                         ),
-
-                        // Game Message
-                        Flexible(
-                          flex: 2,
-                          child: Center(
-                            child: Text(
-                              gameMessage,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(blurRadius: 5.0, color: Colors.black),
-                                ],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-
-                        const Spacer(flex: 12),
-
-                        // Characters (Player + Boss)
-                        Flexible(
-                          flex: 15,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 5,
-                                child: SlideTransition(
-                                  position: _playerShakeAnimation,
-                                  child: const Player(),
-                                ),
-                              ),
-                              const Spacer(flex: 1),
-                              Expanded(
-                                flex: 5,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    SlideTransition(
-                                      position: _bossShakeAnimation,
-                                      child: const Boss(),
-                                    ),
-                                    if (_isSlashActive)
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                            0.4,
-                                        height:
-                                            MediaQuery.of(context).size.width *
-                                            0.4,
-                                        child: SlashAnimation(),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Attack Buttons
-                        Flexible(
+                        const Spacer(flex: 1),
+                        Expanded(
                           flex: 5,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Stack(
+                            alignment: Alignment.center,
                             children: [
-                              GestureDetector(
-                                onTap: swordAttack,
-                                child: Image.asset(
-                                  'icons/attack.png',
-                                  width: 120,
-                                  height: 120,
-                                ),
+                              SlideTransition(
+                                position: _bossShakeAnimation,
+                                child:
+                                    const Boss(), // Assuming you have a Boss widget
                               ),
-                              const SizedBox(width: 40),
-                              GestureDetector(
-                                onTap: kickAttack,
-                                child: Image.asset(
-                                  'icons/kick.png',
-                                  width: 120,
-                                  height: 120,
+                              if (_isSlashActive)
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  child: const SlashAnimation(),
                                 ),
-                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // Bottom Navbar
-                  Flexible(flex: 1, child: BottomNavbar()),
+                  const Spacer(flex: 2),
+                  // Attack Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildAttackButton(
+                        'assets/icons/attack.png',
+                        swordAttack,
+                      ),
+                      const SizedBox(width: 40),
+                      _buildAttackButton('assets/icons/kick.png', kickAttack),
+                    ],
+                  ),
+                  const Spacer(flex: 1),
+                  const BottomNavbar(), // Assuming you have a BottomNavbar widget
                 ],
               ),
             ),
@@ -369,9 +297,35 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _buildHealthBar(String label, double value, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white)),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.4,
+          child: LinearProgressIndicator(
+            value: value / 100,
+            backgroundColor: Colors.grey[700],
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttackButton(String iconPath, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Image.asset(iconPath, width: 100, height: 100),
+    );
+  }
 }
 
-/// Slash frame-by-frame animation widget
+// You still need the SlashAnimation widget from your original code
 class SlashAnimation extends StatefulWidget {
   const SlashAnimation({super.key});
 
@@ -392,6 +346,7 @@ class _SlashAnimationState extends State<SlashAnimation>
       vsync: this,
       duration: const Duration(milliseconds: 450),
     )..addListener(() {
+      if (!mounted) return;
       setState(() {
         currentFrame = (_controller.value * totalFrames).floor();
         if (currentFrame >= totalFrames) currentFrame = totalFrames - 1;
