@@ -1,6 +1,11 @@
 import 'dart:async'; // Import the Timer class
 import 'dart:convert';
 
+import '../models/player_manager.dart';
+import '../models/task_manager.dart';
+import '../pages/bottom_navbar.dart';
+import '../providers/user_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -134,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final player = Provider.of<PlayerManager>(context); // ✅ shared player state
+    final user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
       extendBody: true,
@@ -162,7 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _topProfileBar(PlayerManager player) {
+   Widget _topProfileBar(PlayerManager player) {
+    final user = Provider.of<UserProvider>(context).user;
     return Row(
       children: [
         Column(
@@ -170,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const SizedBox(height: 10),
             Text(
-              player.name,
+              user.name.isNotEmpty ? user.name : player.name,
               style: _fantasyTextStyle(
                 fontSize: 35,
                 color: Colors.orangeAccent,

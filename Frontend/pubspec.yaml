@@ -99,9 +99,8 @@ flutter:
     - assets/boss.png
     - assets/icons/attack.png
     - assets/icons/kick.png
-    - assets/effects/slash_effect.gif
+    # - assets/effects/slash_effect.gif  # Uncomment if the .gif file exists
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
