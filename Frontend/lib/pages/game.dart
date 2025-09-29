@@ -245,13 +245,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     flex: 15,
                     child: Row(
                       children: [
-<<<<<<< HEAD
                         Expanded(
                           flex: 5, // Give player more space
                           child: SlideTransition(
                             position: _playerShakeAnimation,
                             child: Player(state: _playerState),
-=======
+                          ),
+                        ),
                         // Player + Boss Health Bars
                         Flexible(
                           flex: 4,
@@ -267,9 +267,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                       user.name.isNotEmpty ? user.name : "Player",
-                                       style: const TextStyle(color: Colors.white),
-                                     ),
+                                      user.name.isNotEmpty
+                                          ? user.name
+                                          : "Player",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                     SizedBox(
                                       width:
                                           MediaQuery.of(context).size.width *
@@ -311,7 +315,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 ),
                               ],
                             ),
->>>>>>> f87a6510bd2c18caaf7bc77cd17c2fa2d70b77bd
                           ),
                         ),
                         const Spacer(flex: 1),
