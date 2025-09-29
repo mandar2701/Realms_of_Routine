@@ -75,6 +75,10 @@ flutter:
     - assets/Background/profile_bg.png
     - assets/Background/create_task.png
     - assets/Background/cal_bg.png
+    - assets/info_bg6.jpg
+    - assets/next_button.jpg
+    - assets/button22.jpg 
+    - assets/bg_signup.jpg
     - assets/icons/minus.png
     - assets/icons/plus.png
     - assets/icons/ai.png
@@ -101,10 +105,13 @@ flutter:
     - assets/boss.png
     - assets/icons/attack.png
     - assets/icons/kick.png
+<<<<<<< HEAD
     - assets/effects/slash_effect.gif
     - assets/Characters/player_attack.gif
+=======
+    # - assets/effects/slash_effect.gif  # Uncomment if the .gif file exists
+>>>>>>> f87a6510bd2c18caaf7bc77cd17c2fa2d70b77bd
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

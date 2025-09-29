@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 // Make sure these paths are correct for your project structure
 import '../pages/boss.dart';
@@ -202,6 +204,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
     return Scaffold(
       body: Stack(
         children: [
@@ -242,11 +245,73 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     flex: 15,
                     child: Row(
                       children: [
+<<<<<<< HEAD
                         Expanded(
                           flex: 5, // Give player more space
                           child: SlideTransition(
                             position: _playerShakeAnimation,
                             child: Player(state: _playerState),
+=======
+                        // Player + Boss Health Bars
+                        Flexible(
+                          flex: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                       user.name.isNotEmpty ? user.name : "Player",
+                                       style: const TextStyle(color: Colors.white),
+                                     ),
+                                    SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.4,
+                                      child: LinearProgressIndicator(
+                                        value: playerHealth / 100,
+                                        backgroundColor: Colors.grey[700],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                              Colors.green,
+                                            ),
+                                        minHeight: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Boss",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.4,
+                                      child: LinearProgressIndicator(
+                                        value: bossHealth / 100,
+                                        backgroundColor: Colors.grey[700],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                              Colors.red,
+                                            ),
+                                        minHeight: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+>>>>>>> f87a6510bd2c18caaf7bc77cd17c2fa2d70b77bd
                           ),
                         ),
                         const Spacer(flex: 1),
