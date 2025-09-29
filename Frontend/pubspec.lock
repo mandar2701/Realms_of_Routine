@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: async
-      sha256: "758e6d74e971c3e5aceb4110bfd6698efc7f501675bcfe0c775459a8140750eb"
+      sha256: d2872f9c19731c2e5f10444b14686eb7cc85c76274bd6c16e1816bff9a3bab63
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.12.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -134,14 +134,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_gif:
-    dependency: "direct main"
-    description:
-      name: flutter_gif
-      sha256: b13d7e484e40685e9236ffbaddf012c2448a2e2c1ac48bed345184dd7bc87f88
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -184,14 +176,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  gif_view:
-    dependency: "direct main"
-    description:
-      name: gif_view
-      sha256: "6e803e6ed892a6a0ff6671554550780a56d053cc1f06504086794001b3cd000e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.4"
   google_fonts:
     dependency: "direct main"
     description:
@@ -244,17 +228,10 @@ packages:
     dependency: transitive
     description:
       name: leak_tracker
-<<<<<<< HEAD
       sha256: c35baad643ba394b40aac41080300150a4f08fd0fd6a10378f8f7c6bc161acec
       url: "https://pub.dev"
     source: hosted
     version: "10.0.8"
-=======
-      sha256: "6bb818ecbdffe216e81182c2f0714a2e62b593f4a4f13098713ff1685dfb6ab0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.0.9"
->>>>>>> f87a6510bd2c18caaf7bc77cd17c2fa2d70b77bd
   leak_tracker_flutter_testing:
     dependency: transitive
     description:
@@ -552,10 +529,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: ddfa8d30d89985b96407efce8acbdd124701f96741f2d981ca860662f1c0dc02
+      sha256: "0968250880a6c5fe7edc067ed0a13d4bae1577fe2771dcf3010d52c4a9d3ca14"
       url: "https://pub.dev"
     source: hosted
-    version: "15.0.0"
+    version: "14.3.1"
   web:
     dependency: transitive
     description:

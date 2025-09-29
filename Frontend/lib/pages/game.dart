@@ -223,7 +223,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildHealthBar("Player", playerHealth, Colors.green),
+                      _buildHealthBar(
+                        user.name.isNotEmpty ? user.name : "Player",
+                        playerHealth,
+                        Colors.green,
+                      ),
                       _buildHealthBar("Boss", bossHealth, Colors.red),
                     ],
                   ),
@@ -253,70 +257,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         // Player + Boss Health Bars
-                        Flexible(
-                          flex: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      user.name.isNotEmpty
-                                          ? user.name
-                                          : "Player",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: LinearProgressIndicator(
-                                        value: playerHealth / 100,
-                                        backgroundColor: Colors.grey[700],
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                              Colors.green,
-                                            ),
-                                        minHeight: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      "Boss",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: LinearProgressIndicator(
-                                        value: bossHealth / 100,
-                                        backgroundColor: Colors.grey[700],
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                              Colors.red,
-                                            ),
-                                        minHeight: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                         const Spacer(flex: 1),
                         Expanded(
                           flex: 5,
