@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:life_xp_project/pages/hero_needs_parchment.dart';
 
 /// A screen that displays a parchment-style form for entering hero information.
 ///
@@ -30,7 +31,7 @@ class HeroInfoParchmentPage extends StatelessWidget {
             // Layer 3: The form itself, containing the input fields and button.
             // This is also a Stack with Positioned children, which will be placed
             // relative to the screen, aligning over the centered parchment.
-            _buildForm(),
+            _buildForm(context),
           ],
         ),
       ),
@@ -41,25 +42,33 @@ class HeroInfoParchmentPage extends StatelessWidget {
   ///
   /// This method uses `Positioned` widgets to precisely place each form
   /// element according to the design specifications in the background image.
-  Widget _buildForm() {
+  Widget _buildForm(BuildContext context) {
+    // To center the form elements, we get the screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+    // These values are estimates based on the image provided.
+    // You may need to tweak them for perfect alignment.
+    const double formWidth = 280;
+    const double buttonWidth = 157;
+    final double horizontalPadding = (screenWidth - formWidth) / 2;
+
     return Stack(
       children: [
         // Name input field - Positioned relative to the screen edges.
         Positioned(
-          left: 85,
+          left: horizontalPadding,
+          right: horizontalPadding,
           top: 320,
           child: SizedBox(
-            width: 280,
             height: 25,
             child: _buildTextField(hintText: 'Enter your name'),
           ),
         ),
         // Age input field - Positioned relative to the screen edges.
         Positioned(
-          left: 85,
+          left: horizontalPadding,
+          right: horizontalPadding,
           top: 395,
           child: SizedBox(
-            width: 280,
             height: 25,
             child: _buildTextField(
                 keyboardType: TextInputType.number, hintText: 'Enter your age'),
@@ -67,35 +76,39 @@ class HeroInfoParchmentPage extends StatelessWidget {
         ),
         // Birth Date input field - Positioned relative to the screen edges.
         Positioned(
-          left: 85,
+          left: horizontalPadding,
+          right: horizontalPadding,
           top: 470,
           child: SizedBox(
-            width: 280,
             height: 25,
             child: _buildTextField(hintText: 'MM/DD/YYYY'),
           ),
         ),
         // Gender input field - Positioned relative to the screen edges.
         Positioned(
-          left: 85,
+          left: horizontalPadding,
+          right: horizontalPadding,
           top: 545,
           child: SizedBox(
-            width: 280,
             height: 25,
             child: _buildTextField(hintText: 'Enter your gender'),
           ),
         ),
         // Defines a tappable area over the "NEXT" button in the background image.
         Positioned(
-          left: 148,
-          top: 647,
+          left: (screenWidth - buttonWidth) / 2,
+          top: 625, // Adjusted top position
           child: GestureDetector(
             onTap: () {
-              // TODO: Implement form validation and navigation to the next screen.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HeroNeedsParchmentPage()),
+              );
             },
             child: Container(
-              width: 157,
-              height: 38,
+              width: buttonWidth,
+              height: 50, // Adjusted height
               // The container is transparent, making the tappable area invisible.
               color: Colors.transparent,
             ),

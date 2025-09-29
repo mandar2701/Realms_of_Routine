@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:life_xp_project/pages/signup_page.dart';
 import 'package:life_xp_project/pages/hero_info_parchment_page.dart';
+import 'package:life_xp_project/pages/hero_needs_parchment.dart';
 import 'package:life_xp_project/providers/user_provider.dart';
 import 'package:life_xp_project/services/auth_services.dart';
 import 'pages/quest_calendar.dart';
@@ -43,13 +44,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Realms of Routine',
-
-       // Temporarily set to parchment page for testing
-       home: const HeroInfoParchmentPage(),
-       
-       // Original signup logic (commented for testing)
-       // home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
+      title: 'Realms of Routine',     
+       home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
 
       // Optionally, define routes here if you want navigation,
       //  routes: {
