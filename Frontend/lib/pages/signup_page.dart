@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:life_xp_project/pages/hero_info_parchment_page.dart';
 import 'package:life_xp_project/services/auth_services.dart';
-import 'home_screen.dart';
 import 'login_page.dart';
 
 class SignupPage extends StatefulWidget {
@@ -16,12 +16,16 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService authService = AuthService();
 
-  void signupUser() {
-    authService.signUpUser(
-      context: context,
-      email: _emailController.text,
-      password: _passwordController.text,
-      name: _usernameController.text,
+  void navigateToHeroInfo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HeroInfoParchmentPage(
+          email: _emailController.text,
+          password: _passwordController.text,
+          name: _usernameController.text,
+        ),
+      ),
     );
   }
 
@@ -87,8 +91,7 @@ class _SignupPageState extends State<SignupPage> {
                           Center(
                             child: GestureDetector(
                               onTap: () {
-                                // Later: call AuthService().signup(...)
-                                signupUser();
+                                navigateToHeroInfo();
                               },
                               child: Container(
                                 width: screenWidth * 0.4,

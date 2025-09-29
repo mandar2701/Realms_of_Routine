@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import '/models/user.dart';
 import '/providers/user_provider.dart';
 import '/pages/home_screen.dart';
-import '/pages/signup_page.dart';
-import '/pages/hero_info_parchment_page.dart';
+import '/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '/utils/constants.dart';
@@ -18,6 +17,12 @@ class AuthService {
     required String email,
     required String password,
     required String name,
+    required String age,
+    required String birthDate,
+    required String gender,
+    required String duty,
+    required String focus,
+    required String goal,
   }) async {
     try {
       User user = User(
@@ -26,6 +31,12 @@ class AuthService {
         password: password,
         email: email,
         token: '',
+        age: age,
+        birthDate: birthDate,
+        gender: gender,
+        duty: duty,
+        focus: focus,
+        goal: goal,
       );
 
       http.Response res = await http.post(
@@ -40,11 +51,27 @@ class AuthService {
         response: res,
         context: context,
         onSuccess: () {
-          // After successful signup, go to the parchment character info page
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => const HeroInfoParchmentPage(),
-            ),
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Signup Success'),
+                content: const Text('You have successfully signed up!'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           );
         },
       );

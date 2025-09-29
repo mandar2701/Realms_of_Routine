@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:life_xp_project/pages/home_screen.dart';
+import 'package:life_xp_project/services/auth_services.dart';
 
 class HeroNeedsParchmentPage extends StatefulWidget {
-  const HeroNeedsParchmentPage({super.key});
+  final String email;
+  final String password;
+  final String name;
+  final String age;
+  final String birthDate;
+  final String gender;
+
+  const HeroNeedsParchmentPage(
+      {super.key,
+      required this.email,
+      required this.password,
+      required this.name,
+      required this.age,
+      required this.birthDate,
+      required this.gender});
 
   @override
   _HeroNeedsParchmentPageState createState() => _HeroNeedsParchmentPageState();
@@ -12,6 +26,22 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
   final TextEditingController _dutyController = TextEditingController();
   final TextEditingController _focusController = TextEditingController();
   final TextEditingController _goalController = TextEditingController();
+  final AuthService authService = AuthService();
+
+  void signupUser() {
+    authService.signUpUser(
+      context: context,
+      email: widget.email,
+      password: widget.password,
+      name: widget.name,
+      age: widget.age,
+      birthDate: widget.birthDate,
+      gender: widget.gender,
+      duty: _dutyController.text,
+      focus: _focusController.text,
+      goal: _goalController.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +61,7 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
           // Parchment UI
           Center(
             child: Image.asset(
-              'assets/info_bg5.jpg',
+              'assets/info_bg6.jpg',
               width: MediaQuery.of(context).size.width * 1.25,
               height: MediaQuery.of(context).size.height * 2.5,
             ),
@@ -81,12 +111,7 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
           left: (screenWidth - buttonWidth) / 2,
           top: 620,
           child: GestureDetector(
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            },
+            onTap: signupUser,
             child: Container(
               width: buttonWidth,
               height: 60,
@@ -107,22 +132,29 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
     required TextEditingController controller,
     required String hintText,
   }) {
+    const textStyle = TextStyle(
+      fontFamily: 'Times New Roman',
+      color: Color(0xFF6F4E37),
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    );
+
     return TextField(
       controller: controller,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontFamily: 'Cinzel',
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
+      style: textStyle,
+      cursorColor: const Color(0xFF6F4E37),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(
-          fontFamily: 'Cinzel',
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+        hintStyle: textStyle.copyWith(
+          color: const Color(0xFF6F4E37).withOpacity(0.6),
         ),
-        border: const UnderlineInputBorder(),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF8B4513), width: 1),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF6F4E37), width: 1.5),
+        ),
       ),
     );
   }

@@ -5,9 +5,42 @@ import 'package:life_xp_project/pages/hero_needs_parchment.dart';
 ///
 /// This widget uses a Stack to layer a parchment form over a background image,
 /// with interactive text fields placed on top.
-class HeroInfoParchmentPage extends StatelessWidget {
+class HeroInfoParchmentPage extends StatefulWidget {
   /// Creates a [HeroInfoParchmentPage].
-  const HeroInfoParchmentPage({super.key});
+  const HeroInfoParchmentPage(
+      {super.key,
+      required this.email,
+      required this.password,
+      required this.name});
+
+  final String email;
+  final String password;
+  final String name;
+
+  @override
+  State<HeroInfoParchmentPage> createState() => _HeroInfoParchmentPageState();
+}
+
+class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = widget.name;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    _birthDateController.dispose();
+    _genderController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +59,7 @@ class HeroInfoParchmentPage extends StatelessWidget {
             // Layer 2: The parchment image, which serves as the form's background.
             // It's centered to align with the absolutely positioned form fields.
             Center(
-              child: Image.asset("assets/info_bg4.jpg"),
+              child: Image.asset("assets/info_bg6.jpg"),
             ),
             // Layer 3: The form itself, containing the input fields and button.
             // This is also a Stack with Positioned children, which will be placed
@@ -60,7 +93,8 @@ class HeroInfoParchmentPage extends StatelessWidget {
           top: 320,
           child: SizedBox(
             height: 25,
-            child: _buildTextField(hintText: 'Enter your name'),
+            child: _buildTextField(
+                hintText: 'Enter your name', controller: _nameController),
           ),
         ),
         // Age input field - Positioned relative to the screen edges.
@@ -71,7 +105,9 @@ class HeroInfoParchmentPage extends StatelessWidget {
           child: SizedBox(
             height: 25,
             child: _buildTextField(
-                keyboardType: TextInputType.number, hintText: 'Enter your age'),
+                keyboardType: TextInputType.number,
+                hintText: 'Enter your age',
+                controller: _ageController),
           ),
         ),
         // Birth Date input field - Positioned relative to the screen edges.
@@ -81,7 +117,8 @@ class HeroInfoParchmentPage extends StatelessWidget {
           top: 470,
           child: SizedBox(
             height: 25,
-            child: _buildTextField(hintText: 'MM/DD/YYYY'),
+            child: _buildTextField(
+                hintText: 'MM/DD/YYYY', controller: _birthDateController),
           ),
         ),
         // Gender input field - Positioned relative to the screen edges.
@@ -91,7 +128,8 @@ class HeroInfoParchmentPage extends StatelessWidget {
           top: 545,
           child: SizedBox(
             height: 25,
-            child: _buildTextField(hintText: 'Enter your gender'),
+            child: _buildTextField(
+                hintText: 'Enter your gender', controller: _genderController),
           ),
         ),
         // Defines a tappable area over the "NEXT" button in the background image.
@@ -103,14 +141,26 @@ class HeroInfoParchmentPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const HeroNeedsParchmentPage()),
+                  builder: (context) => HeroNeedsParchmentPage(
+                    email: widget.email,
+                    password: widget.password,
+                    name: _nameController.text,
+                    age: _ageController.text,
+                    birthDate: _birthDateController.text,
+                    gender: _genderController.text,
+                  ),
+                ),
               );
             },
             child: Container(
               width: buttonWidth,
               height: 50, // Adjusted height
-              // The container is transparent, making the tappable area invisible.
-              color: Colors.transparent,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/next_button.jpg'),
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
         ),
@@ -124,7 +174,9 @@ class HeroInfoParchmentPage extends StatelessWidget {
   /// Defaults to [TextInputType.text].
   /// [hintText] provides the placeholder text for the field.
   Widget _buildTextField(
-      {TextInputType keyboardType = TextInputType.text, String hintText = ''}) {
+      {TextInputType keyboardType = TextInputType.text,
+      String hintText = '',
+      required TextEditingController controller}) {
     // Defines the text style for user input.
     const textStyle = TextStyle(
       fontFamily: 'Times New Roman',
@@ -137,6 +189,7 @@ class HeroInfoParchmentPage extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: TextField(
+        controller: controller,
         keyboardType: keyboardType,
         style: textStyle,
         cursorColor: const Color(0xFF6F4E37),
