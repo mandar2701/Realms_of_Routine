@@ -73,6 +73,8 @@ flutter:
     - assets/Background/profile_bg.png
     - assets/Background/create_task.png
     - assets/Background/cal_bg.png
+    - assets/info_bg4.jpg
+    - assets/bg_signup.jpg
     - assets/icons/minus.png
     - assets/icons/plus.png
     - assets/icons/ai.png

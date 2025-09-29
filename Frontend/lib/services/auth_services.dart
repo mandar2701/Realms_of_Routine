@@ -5,6 +5,7 @@ import '/models/user.dart';
 import '/providers/user_provider.dart';
 import '/pages/home_screen.dart';
 import '/pages/signup_page.dart';
+import '/pages/hero_info_parchment_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '/utils/constants.dart';
@@ -39,9 +40,11 @@ class AuthService {
         response: res,
         context: context,
         onSuccess: () {
-          showSnackBar(
-            context,
-            'Account created! Login with the same credentials!',
+          // After successful signup, go to the parchment character info page
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => const HeroInfoParchmentPage(),
+            ),
           );
         },
       );
