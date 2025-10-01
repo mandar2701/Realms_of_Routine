@@ -1,19 +1,16 @@
-import 'dart:async'; // Import the Timer class
+import 'dart:async';
 import 'dart:convert';
-
-import '../models/player_manager.dart';
-import '../models/task_manager.dart';
-import '../pages/bottom_navbar.dart';
-import '../providers/user_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
-import '../models/player_manager.dart';
 import '../models/task_manager.dart';
+import '../models/tasks.dart';
+import '../models/player_manager.dart';
 import '../pages/bottom_navbar.dart';
+import '../providers/user_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,49 +21,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  List<String> tasks = [];
-  Timer? _dailyTimer; // Timer for daily task reset
+  Timer? _dailyTimer;
 
   @override
   void initState() {
     super.initState();
-    // Schedule the first task fetch at the next midnight
     _scheduleDailyTaskFetch();
-    // Initially fetch tasks when the screen is first loaded
-    // Only if there are no tasks yet
+
     final taskManager = Provider.of<TaskManager>(context, listen: false);
-    if (taskManager.tasks.isEmpty) {
+    if (taskManager.activeTasks.isEmpty) {
       fetchTasksFromAI();
-    } else {
-      tasks = List.from(taskManager.tasks);
     }
   }
 
   @override
   void dispose() {
-    // Cancel the timer to prevent memory leaks
     _dailyTimer?.cancel();
     super.dispose();
   }
 
   void _scheduleDailyTaskFetch() {
-    // Calculate the time until the next midnight
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1, 0, 0);
     final durationUntilMidnight = nextMidnight.difference(now);
 
-    // Schedule the timer to run at the next midnight
     _dailyTimer = Timer(durationUntilMidnight, () {
-      // Get the TaskManager instance
       final taskManager = Provider.of<TaskManager>(context, listen: false);
-
-      // Clear all existing tasks
       taskManager.clearTasks();
-
-      // Fetch new tasks from the AI
       fetchTasksFromAI();
 
-      // Schedule a recurring timer to run every 24 hours
       _dailyTimer = Timer.periodic(const Duration(hours: 24), (timer) {
         taskManager.clearTasks();
         fetchTasksFromAI();
@@ -81,20 +64,16 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> taskNames = data["tasks"];
+        final List<dynamic> taskDiffs = data["difficulties"];
 
-        // Clear local tasks list and add new tasks from the API
-        setState(() {
-          tasks.clear();
-        });
-
-        // Loop through the received tasks and add them with an animation
-        for (int i = 0; i < data.length && i < 7; i++) {
-          final task = data[i] as String;
+        for (int i = 0; i < taskNames.length && i < 7; i++) {
+          final task = Task(
+            name: taskNames[i] as String,
+            difficulty: taskDiffs[i] as String,
+          );
           taskManager.addTask(task);
-          setState(() {
-            tasks.insert(i, task);
-          });
           _listKey.currentState?.insertItem(
             i,
             duration: const Duration(milliseconds: 300),
@@ -138,8 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final player = Provider.of<PlayerManager>(context); // ✅ shared player state
-    final user = Provider.of<UserProvider>(context).user;
+    final player = Provider.of<PlayerManager>(context);
 
     return Scaffold(
       extendBody: true,
@@ -158,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(flex: 5, child: _topProfileBar(player)),
                   Flexible(flex: 2, child: _objectiveCard()),
                   Flexible(flex: 14, child: _taskList()),
-                  Flexible(flex: 2, child: BottomNavbar()),
+                  const Flexible(flex: 2, child: BottomNavbar()),
                 ],
               ),
             ),
@@ -168,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-   Widget _topProfileBar(PlayerManager player) {
+  Widget _topProfileBar(PlayerManager player) {
     final user = Provider.of<UserProvider>(context).user;
     return Row(
       children: [
@@ -264,18 +242,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return AnimatedList(
       key: _listKey,
-      initialItemCount: taskManager.tasks.length,
+      initialItemCount: taskManager.activeTasks.length,
       itemBuilder: (context, index, animation) {
-        return _taskCard(taskManager.tasks[index], index);
+        return _taskCard(taskManager.activeTasks[index], index);
       },
     );
   }
 
-  Widget _buildRemovedItem(
-    String task,
-    int index,
-    Animation<double> animation,
-  ) {
+  Widget _buildRemovedItem(Task task, int index, Animation<double> animation) {
     return Align(
       alignment: Alignment.center,
       child: SlideTransition(
@@ -291,54 +265,95 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _taskCard(String task, int index) {
+  Widget _taskCard(Task task, int index) {
     final taskManager = Provider.of<TaskManager>(context, listen: false);
+
+    Color getDifficultyColor(String difficulty) {
+      switch (difficulty.toLowerCase()) {
+        case 'low':
+        case '1':
+          return Colors.greenAccent;
+        case 'medium':
+        case '2':
+          return Colors.orangeAccent;
+        case 'high':
+        case '3':
+          return Colors.redAccent;
+        default:
+          return Colors.white;
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color:
+            task.status == TaskStatus.completed
+                ? Colors.green.withOpacity(0.2)
+                : task.status == TaskStatus.deleted
+                ? Colors.red.withOpacity(0.2)
+                : Colors.white10,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
+          // Delete button
           GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();
-              final removedTask = taskManager.tasks[index];
-              taskManager.removeTask(index);
+              taskManager.deleteTask(index);
 
-              _listKey.currentState!.removeItem(
-                index,
-                (context, animation) =>
-                    _buildRemovedItem(removedTask, index, animation),
-                duration: const Duration(milliseconds: 500),
-              );
-            },
-            child: Image.asset('assets/icons/minus.png', width: 60),
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(task, style: _fantasyTextStyle(fontSize: 16))),
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              final taskManager = Provider.of<TaskManager>(
-                context,
-                listen: false,
-              );
-              final task = taskManager.tasks[index];
-              taskManager.completeTask(index);
               _listKey.currentState!.removeItem(
                 index,
                 (context, animation) =>
                     _buildRemovedItem(task, index, animation),
                 duration: const Duration(milliseconds: 500),
               );
-
-              gainXP(500);
             },
-            child: Image.asset('assets/icons/plus.png', width: 60),
+            child: Image.asset('assets/icons/minus.png', width: 40),
+          ),
+          const SizedBox(width: 12),
+
+          // Task details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.name,
+                  style: _fantasyTextStyle(fontSize: 16, color: Colors.white),
+                ),
+                Text(
+                  "Difficulty: ${task.difficulty}",
+                  style: _fantasyTextStyle(
+                    fontSize: 14,
+                    color: getDifficultyColor(task.difficulty),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Complete button
+          GestureDetector(
+            onTap: () {
+              if (task.status == TaskStatus.pending) {
+                HapticFeedback.lightImpact();
+                taskManager.completeTask(index);
+
+                _listKey.currentState!.removeItem(
+                  index,
+                  (context, animation) =>
+                      _buildRemovedItem(task, index, animation),
+                  duration: const Duration(milliseconds: 500),
+                );
+
+                gainXP(500);
+              }
+            },
+            child: Image.asset('assets/icons/plus.png', width: 40),
           ),
         ],
       ),

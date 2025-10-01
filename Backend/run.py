@@ -3,6 +3,7 @@ from flask_cors import CORS
 # Import the Google Generative AI library
 import google.generativeai as genai
 import os
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -15,40 +16,73 @@ genai.configure(api_key="AIzaSyBnavFsTqiGZvAPzbaINsiUk9ZysNyXfIg")
 # Initialize the Gemini model
 # Note: You can choose a different Gemini model if needed
 model = genai.GenerativeModel('gemini-2.5-flash-lite')
-
+# Initialize Gemini model
 @app.route('/generate-task')
 def generate_task():
     try:
-        # Use the Gemini model to generate content
-        response = model.generate_content(
-            "You are a quest master for a fantasy RPG-style productivity app. "
-            "Generate exactly 7 short RPG-style daily quests that help users improve their real-life habits. "
-            "Each quest should be written in a fun, fantasy or gamified style, with a name that’s 2–5 words long. "
-            "After the quest name, include a short (2-3 words) explanation in parentheses describing exactly what the user should do "
-            "(e.g., 'Do 15 pushups' or 'Read 5 pages'). "
-            "Return only 7 quests with no intro, no numbering, and no extra text — only the quests, as plain bullet points."
-            "Remove the bullet points from the response."
+        prompt = (
+            "You are a quest master for a fantasy RPG productivity app. "
+            "Generate exactly 7 short RPG-style daily quests that help users improve real-life habits. "
+            "Each quest must include a 2-5 word name, a short action in parentheses (like 'Do 10 pushups'), "
+            "and a difficulty level (Low, Medium, High). "
+            "Return strictly JSON with keys 'tasks' and 'difficulties', each a list of 7 items. "
+            "Example output: "
+            '{"tasks": ["Morning Pushups", "Read Book"], "difficulties": ["Medium", "Low"]}'
         )
 
-        # Get the text from the response object
+        response = model.generate_content(prompt)
         content = response.text.strip()
 
-        # Extract each bullet point
-        tasks = [
-            line.strip("-• ").strip()
-            for line in content.split("\n")
-            if line.strip()
-        ]
+        # Attempt to parse AI response as JSON
+        try:
+            data = json.loads(content)
+            # Ensure both keys exist
+            if "tasks" not in data or "difficulties" not in data:
+                raise ValueError("Missing keys in AI response")
+            # Limit to 7 tasks/difficulties
+            data["tasks"] = data["tasks"][:7]
+            data["difficulties"] = data["difficulties"][:7]
 
-        return jsonify(tasks[:7])
+        except (json.JSONDecodeError, ValueError):
+            # Fallback parsing if AI did not return proper JSON
+            tasks = []
+            difficulties = []
+            for line in content.split("\n"):
+                line = line.strip("-• ").strip()
+                if not line:
+                    continue
+                # Extract difficulty if included
+                diff = "Medium"
+                if "Low" in line:
+                    diff = "Low"
+                elif "Medium" in line:
+                    diff = "Medium"
+                elif "High" in line:
+                    diff = "High"
+                # Extract task name before parentheses
+                if "(" in line:
+                    name = line.split("(")[0].strip()
+                else:
+                    name = line
+                tasks.append(name)
+                difficulties.append(diff)
+
+            data = {
+                "tasks": tasks[:7],
+                "difficulties": difficulties[:7]
+            }
+
+        return jsonify(data)
 
     except Exception as e:
         print("Error:", e)
-        return jsonify({"error": str(e)}), 500
-
+        # Always return valid JSON even on error
+        return jsonify({
+            "tasks": ["Sample Task 1", "Sample Task 2", "Sample Task 3", 
+                      "Sample Task 4", "Sample Task 5", "Sample Task 6", "Sample Task 7"],
+            "difficulties": ["Medium"]*7,
+            "error": str(e)
+        }), 500
 
 if __name__ == '__main__':
-    # Make sure to set your GEMINI_API_KEY environment variable before running
-    # On Linux/macOS: export GEMINI_API_KEY="YOUR_API_KEY"
-    # On Windows: set GEMINI_API_KEY="YOUR_API_KEY"
     app.run(host='0.0.0.0', port=5000)
