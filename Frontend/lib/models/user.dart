@@ -6,12 +6,10 @@ class User {
   final String email;
   final String token;
   final String password;
-  final String? age;
+  final int? age;
   final String? birthDate;
   final String? gender;
-  final String? duty;
-  final String? focus;
-  final String? goal;
+  final Map<String, String>? hero;
 
   User({
     required this.id,
@@ -19,12 +17,10 @@ class User {
     required this.email,
     required this.token,
     required this.password,
-    this.age,
+    this.age,    
     this.birthDate,
     this.gender,
-    this.duty,
-    this.focus,
-    this.goal,
+    this.hero,
   });
 
   Map<String, dynamic> toMap() {
@@ -36,27 +32,26 @@ class User {
       'age': age,
       'birthDate': birthDate,
       'gender': gender,
-      'duty': duty,
-      'focus': focus,
-      'goal': goal,
+      'hero': hero,
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      id: map['_id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      token: map['token'] ?? '',
-      password: map['password'] ?? '',
-      age: map['age'],
-      birthDate: map['birthDate'],
-      gender: map['gender'],
-      duty: map['duty'],
-      focus: map['focus'],
-      goal: map['goal'],
-    );
-  }
+// lib/models/user.dart
+
+factory User.fromMap(Map<String, dynamic> map) {
+  return User(
+    id: map['_id'] ?? '',
+    name: map['name'] ?? '',
+    email: map['email'] ?? '',
+    token: map['token'] ?? '',
+    password: map['password'] ?? '',
+    age: map['age'],
+    birthDate: map['birthDate'],
+    gender: map['gender'],
+    // Check if 'hero' exists before trying to convert it
+    hero: map['hero'] != null ? Map<String, String>.from(map['hero']) : null,
+  );
+}
 
   String toJson() => json.encode(toMap());
 

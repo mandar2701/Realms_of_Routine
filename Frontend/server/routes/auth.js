@@ -2,13 +2,11 @@ const express = require("express");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const UserInfo = require("../models/userInfo");
+const UserInfo = require("../models/userInfo"); // Make sure this is imported
 const authRouter = express.Router();
 const auth = require("../middleware/auth");
 
 // Sign Up
-
-
 authRouter.post("/api/signup", async (req, res) => {
   try {
     const { name, email, password, age, birthDate, gender, hero } = req.body;
@@ -42,7 +40,8 @@ authRouter.post("/api/signup", async (req, res) => {
     userInfo = await userInfo.save();
 
     const token = jwt.sign({ id: user._id }, "passwordKey");
-    res.json({ token, ...user._doc });
+    // Send back ALL user data
+    res.json({ token, ...user._doc, ...userInfo._doc });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -50,7 +49,6 @@ authRouter.post("/api/signup", async (req, res) => {
 });
 
 // Sign In
-
 authRouter.post("/api/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,12 +65,26 @@ authRouter.post("/api/signin", async (req, res) => {
       return res.status(400).json({ msg: "Incorrect password." });
     }
 
+    const userInfo = await UserInfo.findOne({ username: user.name });
     const token = jwt.sign({ id: user._id }, "passwordKey");
-    res.json({ token, ...user._doc });
+
+    // Safely combine user, userInfo, and token in the response
+    res.json({ token, ...user._doc, ...(userInfo ? userInfo._doc : {}) });
+
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
+// Get User Data (for app startup)
+authRouter.get("/", auth, async (req, res) => {
+  const user = await User.findById(req.user);
+  // Also fetch the userInfo to send back a complete user object
+  const userInfo = await UserInfo.findOne({ username: user.name });
+
+  res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), token: req.token });
+});
+
 
 authRouter.post("/tokenIsValid", async (req, res) => {
   try {
@@ -87,12 +99,6 @@ authRouter.post("/tokenIsValid", async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-});
-
-// get user data
-authRouter.get("/", auth, async (req, res) => {
-  const user = await User.findById(req.user);
-  res.json({ ...user._doc, token: req.token });
 });
 
 module.exports = authRouter;
