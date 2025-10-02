@@ -19,29 +19,31 @@ class AuthService {
     required String name,
     required String age,
     required String birthDate,
-    required String gender,
-    required String duty,
-    required String focus,
-    required String goal,
+    required String gender, required Map<String, String> hero,
   }) async {
     try {
       User user = User(
-        id: '',
-        name: name,
-        password: password,
-        email: email,
-        token: '',
-        age: age,
-        birthDate: birthDate,
-        gender: gender,
-        duty: duty,
-        focus: focus,
-        goal: goal,
-      );
-
+          id: '',
+          name: name,
+          email: email,
+          token: '',
+          password: password,
+          age: age,
+          birthDate: birthDate,
+          gender: gender,
+          hero: hero);  
+          
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signup'),
-        body: user.toJson(),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'name': name,
+          'age': age,
+          'birthDate': birthDate,
+          'gender': gender,
+          'hero': hero,
+        }),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
