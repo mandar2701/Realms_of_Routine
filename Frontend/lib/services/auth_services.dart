@@ -20,9 +20,7 @@ class AuthService {
     required String age,
     required String birthDate,
     required String gender,
-    required String duty,
-    required String focus,
-    required String goal,
+    required Map<String, String> hero,
   }) async {
     try {
       User user = User(
@@ -39,12 +37,17 @@ class AuthService {
         goal: goal,
       );
 
-      // Store the Navigator and other context-dependent objects BEFORE the await call.
-      final navigator = Navigator.of(context);
-
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signup'),
-        body: user.toJson(),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'name': name,
+          'age': age,
+          'birthDate': birthDate,
+          'gender': gender,
+          'hero': hero,
+        }),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -94,7 +97,6 @@ class AuthService {
     try {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       final navigator = Navigator.of(context);
-
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signin'),
         body: jsonEncode({'email': email, 'password': password}),
@@ -104,11 +106,20 @@ class AuthService {
       );
       httpErrorHandle(
         response: res,
-        // ✅ context is NO LONGER needed here
+        context: context,
         onSuccess: () async {
           SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          print('[2] ATTEMPTING to parse JSON and save token...');
+          final decodedBody = jsonDecode(res.body);
+          await prefs.setString('x-auth-token', decodedBody['token']);
+          print('[2] SUCCESS: Token saved.');
+
+          print('[3] ATTEMPTING to set user in UserProvider...');
           userProvider.setUser(res.body);
-          await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
+          print('[3] SUCCESS: User set in provider.');
+
+          print('[4] ATTEMPTING to navigate to HomeScreen...');
           navigator.pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false,
@@ -116,8 +127,7 @@ class AuthService {
         },
       );
     } catch (e) {
-      // ✅ Call the global showSnackBar without context
-      showSnackBar(e.toString());
+      showSnackBar(context, e.toString());
     }
   }
 
@@ -130,14 +140,13 @@ class AuthService {
 
       if (token == null) {
         prefs.setString('x-auth-token', '');
-        return; // Exit early if no token
       }
 
       var tokenRes = await http.post(
         Uri.parse('${Constants.uri}/tokenIsValid'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token,
+          'x-auth-token': token!,
         },
       );
 
@@ -155,9 +164,7 @@ class AuthService {
         userProvider.setUser(userRes.body);
       }
     } catch (e) {
-      // ✅ This was the original source of your crash.
-      // Now it calls the global showSnackBar without the invalid context from initState.
-      showSnackBar(e.toString());
+      showSnackBar(context, e.toString());
     }
   }
 }

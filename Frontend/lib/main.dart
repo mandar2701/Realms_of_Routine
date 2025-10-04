@@ -47,11 +47,6 @@ class _MyAppState extends State<MyApp> {
       title: 'Realms of Routine',     
        home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
 
-      // Optionally, define routes here if you want navigation,
-      //  routes: {
-      //  '/home': (context) => const HomeScreen(),
-      //'/todo': (context) => const TodoScreen(),
-      //},
     );
   }
 }

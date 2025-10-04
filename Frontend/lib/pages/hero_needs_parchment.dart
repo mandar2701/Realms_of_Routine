@@ -37,9 +37,11 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
       age: widget.age,
       birthDate: widget.birthDate,
       gender: widget.gender,
-      duty: _dutyController.text,
-      focus: _focusController.text,
-      goal: _goalController.text,
+      hero: {
+ 'duty': _dutyController.text,
+ 'focus': _focusController.text,
+ 'goal': _goalController.text,
+      },
     );
   }
 
