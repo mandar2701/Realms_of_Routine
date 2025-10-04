@@ -1,15 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '/models/user.dart';
-import '/providers/user_provider.dart';
-import '/pages/home_screen.dart';
-import '/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '/models/user.dart';
+import '/pages/home_screen.dart';
+import '/pages/login_page.dart';
+import '/providers/user_provider.dart';
 import '/utils/constants.dart';
 import '/utils/utils.dart'; // Your updated utils file is used here
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   void signUpUser({
@@ -29,12 +30,9 @@ class AuthService {
         password: password,
         email: email,
         token: '',
-        age: age,
+        age: int.parse(age),
         birthDate: birthDate,
         gender: gender,
-        duty: duty,
-        focus: focus,
-        goal: goal,
       );
 
       http.Response res = await http.post(
@@ -43,7 +41,7 @@ class AuthService {
           'email': email,
           'password': password,
           'name': name,
-          'age': age,
+          'age': int.parse(age), // Correctly parse age to int
           'birthDate': birthDate,
           'gender': gender,
           'hero': hero,
@@ -68,8 +66,7 @@ class AuthService {
                   TextButton(
                     child: const Text('OK'),
                     onPressed: () {
-                      // Use the stored navigator
-                      navigator.pushAndRemoveUntil(
+                      Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
                           builder: (context) => const LoginPage(),
                         ),
@@ -106,20 +103,14 @@ class AuthService {
       );
       httpErrorHandle(
         response: res,
-        context: context,
         onSuccess: () async {
           SharedPreferences prefs = await SharedPreferences.getInstance();
 
-          print('[2] ATTEMPTING to parse JSON and save token...');
           final decodedBody = jsonDecode(res.body);
           await prefs.setString('x-auth-token', decodedBody['token']);
-          print('[2] SUCCESS: Token saved.');
 
-          print('[3] ATTEMPTING to set user in UserProvider...');
           userProvider.setUser(res.body);
-          print('[3] SUCCESS: User set in provider.');
 
-          print('[4] ATTEMPTING to navigate to HomeScreen...');
           navigator.pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false,
@@ -127,7 +118,7 @@ class AuthService {
         },
       );
     } catch (e) {
-      showSnackBar(context, e.toString());
+      showSnackBar(e.toString());
     }
   }
 
@@ -139,14 +130,15 @@ class AuthService {
       String? token = prefs.getString('x-auth-token');
 
       if (token == null) {
-        prefs.setString('x-auth-token', '');
+        token = '';
+        prefs.setString('x-auth-token', token);
       }
 
       var tokenRes = await http.post(
         Uri.parse('${Constants.uri}/tokenIsValid'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token!,
+          'x-auth-token': token,
         },
       );
 
@@ -164,7 +156,7 @@ class AuthService {
         userProvider.setUser(userRes.body);
       }
     } catch (e) {
-      showSnackBar(context, e.toString());
+      showSnackBar(e.toString());
     }
   }
 }

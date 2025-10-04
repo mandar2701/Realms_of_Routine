@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:life_xp_project/pages/signup_page.dart';
-import 'package:life_xp_project/pages/hero_info_parchment_page.dart';
-import 'package:life_xp_project/pages/hero_needs_parchment.dart';
 import 'package:life_xp_project/providers/user_provider.dart';
 import 'package:life_xp_project/services/auth_services.dart';
-import 'pages/quest_calendar.dart';
-import 'pages/todo_screen.dart';
-import 'pages/home_screen.dart';
 import 'package:provider/provider.dart';
-import 'models/task_manager.dart';
+
 import 'models/player_manager.dart';
+import 'models/task_manager.dart';
+import 'pages/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,9 +40,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Realms of Routine',     
-       home: Provider.of<UserProvider>(context).user.token.isEmpty ?  const SignupPage() : const HomeScreen(),
-
+      title: 'Realms of Routine',
+      home:
+          Provider.of<UserProvider>(context).user.token.isEmpty
+              ? const HomeScreen()
+              : const HomeScreen(),
     );
   }
 }
