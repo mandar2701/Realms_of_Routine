@@ -41,7 +41,7 @@ dependencies:
   table_calendar: ^3.1.2
   fl_chart: ^0.63.0
   gif: ^2.3.0
-
+  glassmorphism: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

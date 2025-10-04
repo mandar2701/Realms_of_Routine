@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:life_xp_project/services/scaffold_messenger_service.dart'; // 👈 Step 1: IMPORT the service
 
-void showSnackBar(BuildContext context, String text) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(text),
-    ),
+// Step 2: REMOVE BuildContext from the function signature
+void showSnackBar(String text) {
+  // Use the GlobalKey to access the ScaffoldMessenger's state safely.
+  // The '?' is a null-aware operator in case the state is not available.
+  ScaffoldMessengerService.messengerKey.currentState?.showSnackBar(
+    SnackBar(content: Text(text)),
   );
 }
 
+// Step 3: REMOVE BuildContext from this function's signature as well
 void httpErrorHandle({
   required http.Response response,
-  required BuildContext context,
   required VoidCallback onSuccess,
 }) {
   switch (response.statusCode) {
@@ -20,12 +22,15 @@ void httpErrorHandle({
       onSuccess();
       break;
     case 400:
-      showSnackBar(context, jsonDecode(response.body)['msg']);
+      // Call the updated showSnackBar function (no context needed)
+      showSnackBar(jsonDecode(response.body)['msg']);
       break;
     case 500:
-      showSnackBar(context, jsonDecode(response.body)['error']);
+      // Call the updated showSnackBar function (no context needed)
+      showSnackBar(jsonDecode(response.body)['error']);
       break;
     default:
-      showSnackBar(context, response.body);
+      // Call the updated showSnackBar function (no context needed)
+      showSnackBar(response.body);
   }
 }

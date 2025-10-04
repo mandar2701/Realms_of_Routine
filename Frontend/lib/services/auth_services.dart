@@ -8,7 +8,7 @@ import '/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '/utils/constants.dart';
-import '/utils/utils.dart';
+import '/utils/utils.dart'; // Your updated utils file is used here
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -39,6 +39,9 @@ class AuthService {
         goal: goal,
       );
 
+      // Store the Navigator and other context-dependent objects BEFORE the await call.
+      final navigator = Navigator.of(context);
+
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signup'),
         body: user.toJson(),
@@ -49,8 +52,9 @@ class AuthService {
 
       httpErrorHandle(
         response: res,
-        context: context,
+        // ✅ context is NO LONGER needed here
         onSuccess: () {
+          // This context is still needed for the Dialog and Navigator
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -61,7 +65,8 @@ class AuthService {
                   TextButton(
                     child: const Text('OK'),
                     onPressed: () {
-                      Navigator.of(context).pushAndRemoveUntil(
+                      // Use the stored navigator
+                      navigator.pushAndRemoveUntil(
                         MaterialPageRoute(
                           builder: (context) => const LoginPage(),
                         ),
@@ -76,11 +81,12 @@ class AuthService {
         },
       );
     } catch (e) {
-      showSnackBar(context, e.toString());
+      // ✅ Call the global showSnackBar without context
+      showSnackBar(e.toString());
     }
   }
 
- void signInUser({
+  void signInUser({
     required BuildContext context,
     required String email,
     required String password,
@@ -88,41 +94,35 @@ class AuthService {
     try {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       final navigator = Navigator.of(context);
+
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signin'),
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
       httpErrorHandle(
         response: res,
-        context: context,
+        // ✅ context is NO LONGER needed here
         onSuccess: () async {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           userProvider.setUser(res.body);
           await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
           navigator.pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false,
           );
         },
       );
     } catch (e) {
-      showSnackBar(context, e.toString());
+      // ✅ Call the global showSnackBar without context
+      showSnackBar(e.toString());
     }
   }
 
-
-// get user data
-  void getUserData(
-    BuildContext context,
-  ) async {
+  // get user data
+  void getUserData(BuildContext context) async {
     try {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -130,13 +130,14 @@ class AuthService {
 
       if (token == null) {
         prefs.setString('x-auth-token', '');
+        return; // Exit early if no token
       }
 
       var tokenRes = await http.post(
         Uri.parse('${Constants.uri}/tokenIsValid'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token!,
+          'x-auth-token': token,
         },
       );
 
@@ -145,13 +146,18 @@ class AuthService {
       if (response == true) {
         http.Response userRes = await http.get(
           Uri.parse('${Constants.uri}/'),
-          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'x-auth-token': token},
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'x-auth-token': token,
+          },
         );
 
         userProvider.setUser(userRes.body);
       }
     } catch (e) {
-      showSnackBar(context, e.toString());
+      // ✅ This was the original source of your crash.
+      // Now it calls the global showSnackBar without the invalid context from initState.
+      showSnackBar(e.toString());
     }
   }
 }

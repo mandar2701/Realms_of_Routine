@@ -2,14 +2,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const authRouter = require("./routes/auth");
+const taskRouter = require("./routes/tasks");
 
-
-const PORT = process.env.PORT || 3000;
 const app = express();
+const PORT = 3000;
 
 app.use(cors());
+
 app.use(express.json());
 app.use(authRouter);
+app.use(taskRouter); // add this after your authRouter
 
 
 const DB =
@@ -24,6 +26,6 @@ mongoose
     console.log(e);
   });
 
-app.listen(PORT, () => {
-  console.log(`connected at port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server connected at port ${PORT}`);
 });

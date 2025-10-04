@@ -1,8 +1,7 @@
-import 'dart:ui'; // Import the dart:ui library for ImageFilter
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:glassmorphism/glassmorphism.dart';
 
 import 'bottom_navbar.dart';
 
@@ -61,188 +60,94 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                     flex: 11,
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
-                      // Wrap the Container with ClipRRect and BackdropFilter
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(
-                            sigmaX: 4,
-                            sigmaY: 4,
-                          ), // Adjust blur strength here
-                          child: Container(
-                            /* margin: const EdgeInsets.symmetric(
-                            horizontal: 25,
-                            vertical: 60,
-                          ),*/
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(
-                                255,
-                                255,
-                                255,
-                                255,
-                              ).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
+                      child: GlassmorphicContainer(
+                        width: double.infinity,
+                        height: double.infinity,
+                        borderRadius: 20,
+                        blur: 20,
+                        alignment: Alignment.center,
+                        border: 1,
+                        linearGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const Color.fromARGB(
+                              138,
+                              255,
+                              255,
+                              255,
+                            ).withOpacity(0.15),
+                            Colors.white.withOpacity(0.05),
+                          ],
+                        ),
+                        borderGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.4),
+                            Colors.white.withOpacity(0.1),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Calendar
+                            _buildCalendar(),
+
+                            const SizedBox(height: 10),
+
+                            // Divider + Title
+                            Row(
                               children: [
-                                //const SizedBox(height: 40),
-
-                                // Real Calendar
-                                _buildCalendar(),
-
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    const Expanded(
-                                      child: Divider(
-                                        color: Color.fromARGB(
-                                          255,
-                                          233,
-                                          214,
-                                          142,
-                                        ),
-                                        thickness: 1,
-                                        endIndent:
-                                            10, // space between line and text
-                                      ),
-                                    ),
-                                    Text(
-                                      "DAILY QUESTS",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color.fromARGB(
-                                          255,
-                                          233,
-                                          214,
-                                          142,
-                                        ),
-                                        letterSpacing: 2,
-                                      ),
-                                    ),
-                                    const Expanded(
-                                      child: Divider(
-                                        color: Color.fromARGB(
-                                          255,
-                                          233,
-                                          214,
-                                          142,
-                                        ),
-                                        thickness: 1,
-                                        indent:
-                                            10, // space between text and line
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: dailyQuests.length,
-                                    itemBuilder: (context, index) {
-                                      final quest = dailyQuests[index];
-                                      return ListTile(
-                                        leading: Icon(
-                                          quest["status"] == "completed"
-                                              ? Icons.shield
-                                              : quest["status"] == "failed"
-                                              ? Icons.close_rounded
-                                              : Icons.favorite,
-                                          color:
-                                              quest["status"] == "completed"
-                                                  ? Colors.amber
-                                                  : quest["status"] == "failed"
-                                                  ? Colors.red
-                                                  : Colors.greenAccent,
-                                        ),
-                                        title: Text(
-                                          quest["title"],
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color.fromARGB(
-                                              255,
-                                              238,
-                                              228,
-                                              190,
-                                            ),
-                                            textBaseline:
-                                                TextBaseline
-                                                    .alphabetic, // optional for alignment
-                                          ).copyWith(
-                                            letterSpacing: 1.2,
-                                            // This disables the forced caps
-                                            fontFeatures: [
-                                              const FontFeature.disable('smcp'),
-                                            ],
-                                          ),
-                                        ),
-                                        trailing: Text(
-                                          "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                quest["xp"] > 0
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                const Expanded(
+                                  child: Divider(
+                                    color: Color.fromARGB(255, 233, 214, 142),
+                                    thickness: 1,
+                                    endIndent: 10,
                                   ),
                                 ),
+                                Text(
+                                  "DAILY QUESTS",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 233, 214, 142),
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                                const Expanded(
+                                  child: Divider(
+                                    color: Color.fromARGB(255, 233, 214, 142),
+                                    thickness: 1,
+                                    indent: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
 
-                                // Set Quest Button
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                        255,
-                                        207,
-                                        203,
-                                        203,
-                                      ).withOpacity(0.2),
-                                      minimumSize: const Size(
-                                        double.infinity,
-                                        50,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        side: const BorderSide(
-                                          // 👈 Border added
-                                          color: const Color.fromARGB(
-                                            255,
-                                            238,
-                                            228,
-                                            190,
-                                          ),
-                                          width: 0.25,
-                                        ),
-                                      ),
+                            // Quest List
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: dailyQuests.length,
+                                itemBuilder: (context, index) {
+                                  final quest = dailyQuests[index];
+                                  return ListTile(
+                                    leading: Icon(
+                                      quest["status"] == "completed"
+                                          ? Icons.shield
+                                          : quest["status"] == "failed"
+                                          ? Icons.close_rounded
+                                          : Icons.favorite,
+                                      color:
+                                          quest["status"] == "completed"
+                                              ? Colors.amber
+                                              : quest["status"] == "failed"
+                                              ? Colors.red
+                                              : Colors.greenAccent,
                                     ),
-                                    onPressed: () {
-                                      addQuest(
-                                        "New Custom Quest",
-                                        25,
-                                        "completed",
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      Icons.add_box_outlined,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        238,
-                                        228,
-                                        190,
-                                      ),
-                                      size: 24,
-                                    ),
-                                    label: Text(
-                                      "Set Quest",
+                                    title: Text(
+                                      quest["title"],
                                       style: GoogleFonts.playfairDisplay(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: const Color.fromARGB(
                                           255,
@@ -250,14 +155,66 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                           228,
                                           190,
                                         ),
-                                        letterSpacing: 2,
                                       ),
+                                    ),
+                                    trailing: Text(
+                                      "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            quest["xp"] > 0
+                                                ? Colors.green
+                                                : Colors.red,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            // Set Quest Button
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white.withOpacity(
+                                    0.15,
+                                  ),
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    side: const BorderSide(
+                                      color: Color.fromARGB(255, 238, 228, 190),
+                                      width: 0.25,
                                     ),
                                   ),
                                 ),
-                              ],
+                                onPressed: () {
+                                  addQuest("New Custom Quest", 25, "completed");
+                                },
+                                icon: const Icon(
+                                  Icons.add_box_outlined,
+                                  color: Color.fromARGB(255, 238, 228, 190),
+                                  size: 24,
+                                ),
+                                label: Text(
+                                  "Set Quest",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      238,
+                                      228,
+                                      190,
+                                    ),
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -268,92 +225,84 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
               ),
             ),
           ),
-          // Bottom navigation
         ],
       ),
     );
   }
 
   Widget _buildCalendar() {
-    return Container(
-      child: TableCalendar(
-        firstDay: DateTime.utc(2020, 1, 1),
-        lastDay: DateTime.utc(2030, 12, 31),
-        focusedDay: _focusedDay,
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selectedDay, focusedDay) {
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          });
+    return TableCalendar(
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDay,
+      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+      },
+      calendarStyle: CalendarStyle(
+        todayDecoration: BoxDecoration(
+          color: Colors.amber.shade700,
+          shape: BoxShape.circle,
+        ),
+        selectedDecoration: const BoxDecoration(
+          color: Colors.blueAccent,
+          shape: BoxShape.circle,
+        ),
+        defaultTextStyle: GoogleFonts.cinzelDecorative(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        weekendTextStyle: GoogleFonts.cinzelDecorative(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.redAccent,
+        ),
+      ),
+      daysOfWeekStyle: DaysOfWeekStyle(
+        weekdayStyle: GoogleFonts.cinzel(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+          letterSpacing: 1,
+        ),
+        weekendStyle: GoogleFonts.cinzel(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+          letterSpacing: 1,
+        ),
+      ),
+      headerStyle: HeaderStyle(
+        titleTextStyle: GoogleFonts.cinzel(
+          fontSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        formatButtonVisible: false,
+        titleCentered: true,
+        leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.white),
+        rightChevronIcon: const Icon(Icons.chevron_right, color: Colors.white),
+      ),
+      calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, day, events) {
+          final status = _events[DateTime.utc(day.year, day.month, day.day)];
+          if (status == "completed") {
+            return const Icon(Icons.shield, color: Colors.amber, size: 18);
+          } else if (status == "failed") {
+            return const Icon(Icons.close, color: Colors.red, size: 18);
+          } else if (status == "bonus") {
+            return const Icon(
+              Icons.favorite,
+              color: Colors.greenAccent,
+              size: 18,
+            );
+          }
+          return null;
         },
-        calendarStyle: CalendarStyle(
-          todayDecoration: BoxDecoration(
-            color: Colors.amber.shade700,
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: BoxDecoration(
-            color: Colors.blueAccent,
-            shape: BoxShape.circle,
-          ),
-          defaultTextStyle: GoogleFonts.cinzelDecorative(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          weekendTextStyle: GoogleFonts.cinzelDecorative(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
-          ),
-        ),
-        daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: GoogleFonts.cinzel(
-            // applies to Mon–Fri
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            letterSpacing: 1, // spacing between letters
-          ),
-          weekendStyle: GoogleFonts.cinzel(
-            // applies to Sat & Sun
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            letterSpacing: 1,
-          ),
-        ),
-        headerStyle: HeaderStyle(
-          titleTextStyle: GoogleFonts.cinzel(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-          formatButtonVisible: false,
-          titleCentered: true,
-          leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.white),
-          rightChevronIcon: const Icon(
-            Icons.chevron_right,
-            color: Colors.white,
-          ),
-        ),
-        calendarBuilders: CalendarBuilders(
-          markerBuilder: (context, day, events) {
-            final status = _events[DateTime.utc(day.year, day.month, day.day)];
-            if (status == "completed") {
-              return const Icon(Icons.shield, color: Colors.amber, size: 18);
-            } else if (status == "failed") {
-              return const Icon(Icons.close, color: Colors.red, size: 18);
-            } else if (status == "bonus") {
-              return const Icon(
-                Icons.favorite,
-                color: Colors.greenAccent,
-                size: 18,
-              );
-            }
-            return null;
-          },
-        ),
       ),
     );
   }

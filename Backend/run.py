@@ -5,14 +5,16 @@ import google.generativeai as genai
 import os
 import json
 
+
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 # Use an environment variable for the API key
 # The genai.configure() function will automatically read from GEMINI_API_KEY
 #genai.configure(api_key="AIzaSyBnavFsTqiGZvAPzbaINsiUk9ZysNyXfIg")
 
-genai.configure(api_key="AIzaSyBnavFsTqiGZvAPzbaINsiUk9ZysNyXfIg")
+genai.configure(api_key="AIzaSyCLn0Cm0bPHY06W8vPpJwqTB4pXXs_GkTg")
 # Initialize the Gemini model
 # Note: You can choose a different Gemini model if needed
 model = genai.GenerativeModel('gemini-2.5-flash-lite')

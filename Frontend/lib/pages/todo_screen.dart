@@ -5,12 +5,14 @@ import '../models/task_manager.dart';
 import '../models/tasks.dart';
 import '../pages/create_task.dart';
 import 'bottom_navbar.dart';
+import '../providers/user_provider.dart';
 
 class TodoScreen extends StatelessWidget {
   const TodoScreen({super.key});
 
-  Color getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
+  Color getPriorityColor(String priority) {
+    // ✅ FIX: Renamed for clarity
+    switch (priority.toLowerCase()) {
       case '1':
       case 'low':
         return Colors.greenAccent;
@@ -28,20 +30,21 @@ class TodoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final taskManager = Provider.of<TaskManager>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final token = userProvider.user.token;
+
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Positioned.fill(
             child: Image.asset(
               'assets/Background/todo_bg.png',
               fit: BoxFit.fill,
             ),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
@@ -51,8 +54,6 @@ class TodoScreen extends StatelessWidget {
                     flex: 2,
                     child: SizedBox(height: screenHeight * 0.15),
                   ),
-
-                  // Center Container with task list
                   Flexible(
                     flex: 19,
                     child: Center(
@@ -68,12 +69,12 @@ class TodoScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            // Task list
                             Expanded(
                               child: ListView.builder(
                                 itemCount: taskManager.activeTasks.length,
                                 itemBuilder: (context, index) {
                                   final task = taskManager.activeTasks[index];
+
                                   return Container(
                                     margin: const EdgeInsets.symmetric(
                                       vertical: 2,
@@ -83,13 +84,7 @@ class TodoScreen extends StatelessWidget {
                                       vertical: 9,
                                     ),
                                     decoration: BoxDecoration(
-                                      color:
-                                          task.status == TaskStatus.completed
-                                              ? Colors.green.withOpacity(0.2)
-                                              : task.status ==
-                                                  TaskStatus.deleted
-                                              ? Colors.red.withOpacity(0.2)
-                                              : Colors.white10,
+                                      color: Colors.white10,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: Colors.amber.withOpacity(0.7),
@@ -99,18 +94,29 @@ class TodoScreen extends StatelessWidget {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        // Delete icon
                                         GestureDetector(
-                                          onTap: () {
-                                            taskManager.deleteTask(index);
+                                          onTap: () async {
+                                            if (token.isNotEmpty) {
+                                              await taskManager.deleteTask(
+                                                task,
+                                                token,
+                                              );
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    "Task deleted 🗑️",
+                                                  ),
+                                                ),
+                                              );
+                                            }
                                           },
                                           child: Image.asset(
                                             'assets/icons/delete.png',
                                             width: 40,
                                           ),
                                         ),
-
-                                        // Task text + difficulty
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -125,11 +131,11 @@ class TodoScreen extends StatelessWidget {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                "Difficulty: ${task.difficulty}",
+                                                "Priority: ${task.priority}", // ✅ FIX: Was 'Difficulty'
                                                 style: TextStyle(
                                                   fontSize: 14,
-                                                  color: getDifficultyColor(
-                                                    task.difficulty,
+                                                  color: getPriorityColor(
+                                                    task.priority, // ✅ FIX
                                                   ),
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -137,13 +143,15 @@ class TodoScreen extends StatelessWidget {
                                             ],
                                           ),
                                         ),
-
-                                        // Complete icon
                                         GestureDetector(
-                                          onTap: () {
+                                          onTap: () async {
                                             if (task.status ==
-                                                TaskStatus.pending) {
-                                              taskManager.completeTask(index);
+                                                    TaskStatus.pending &&
+                                                token.isNotEmpty) {
+                                              await taskManager.completeTask(
+                                                task,
+                                                token,
+                                              );
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
@@ -166,8 +174,6 @@ class TodoScreen extends StatelessWidget {
                                 },
                               ),
                             ),
-
-                            // Add more task button
                             GestureDetector(
                               onTap:
                                   () => Navigator.push(
@@ -194,8 +200,7 @@ class TodoScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  Flexible(flex: 2, child: BottomNavbar()),
+                  const Flexible(flex: 2, child: BottomNavbar()),
                 ],
               ),
             ),
