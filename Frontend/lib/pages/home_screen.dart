@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../models/player_manager.dart';
 import '../models/task_manager.dart';
 import '../models/tasks.dart';
-import '../models/player_manager.dart';
 import '../pages/bottom_navbar.dart';
 import '../providers/user_provider.dart';
 
@@ -36,6 +37,17 @@ class _HomeScreenState extends State<HomeScreen> {
     await taskManager.loadTasks(context);
 
     if (!mounted) return;
+
+    final loadedTasks = taskManager.activeTasks;
+    for (int i = 0; i < loadedTasks.length; i++) {
+      // We add a small delay to allow for a staggered animation effect
+      await Future.delayed(const Duration(milliseconds: 50));
+      _listKey.currentState?.insertItem(
+        i,
+        duration: const Duration(milliseconds: 300),
+      );
+    }
+
     if (taskManager.activeTasks.isEmpty) {
       await fetchTasksFromAI();
     }

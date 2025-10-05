@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 enum TaskStatus { pending, completed, deleted }
 
 extension TaskStatusExtension on TaskStatus {
@@ -76,13 +74,13 @@ class Task {
               : json['_id'], // Also handle BSON ObjectId
       // ✅ THE FIX: Changed json['title'] to json['name'] to match the database field.
       name: json['name'] ?? 'Untitled Task',
-      priority: json['priority'] ?? 'low',
+      priority: json['difficulty'] ?? 'low',
       status: _parseStatus(json['status']),
       description: json['description'],
       createdAt: _parseSafeDate(json['createdAt'], defaultDate: DateTime.now()),
       dueDate: _parseSafeDate(
         json['dueDate'],
-        defaultDate: DateTime.now().add(const Duration(days: 7)),
+        defaultDate: DateTime.now().add(const Duration(days: 1)),
       ),
     );
   }
