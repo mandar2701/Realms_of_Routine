@@ -6,7 +6,7 @@ const router = express.Router();
 // GET all tasks for user
 router.get("/api/tasks", authMiddleware, async (req, res) => {
   try {
-    const tasks = await Task.find({ userId: req.user.id });
+    const tasks = await Task.find({ userId: req.user });
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -18,7 +18,7 @@ router.post("/api/tasks", authMiddleware, async (req, res) => {
   try {
     const { name, difficulty, dueDate } = req.body;
     const newTask = new Task({
-      userId: req.user.id,
+      userId: req.user,
       name,
       difficulty,
       dueDate,

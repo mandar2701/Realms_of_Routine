@@ -24,14 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadInitialTasks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialTasks();
+    });
     _scheduleDailyTaskFetch();
   }
 
-  void _loadInitialTasks() async {
+  Future<void> _loadInitialTasks() async {
+    if (!mounted) return;
     final taskManager = Provider.of<TaskManager>(context, listen: false);
     await taskManager.loadTasks(context);
 
+    if (!mounted) return;
     if (taskManager.activeTasks.isEmpty) {
       await fetchTasksFromAI();
     }
@@ -49,74 +53,87 @@ class _HomeScreenState extends State<HomeScreen> {
     final durationUntilMidnight = nextMidnight.difference(now);
 
     _dailyTimer = Timer(durationUntilMidnight, () {
-      _handleDailyTasks();
+      if (mounted) {
+        _handleDailyTasks();
+      }
     });
   }
 
   Future<void> _handleDailyTasks() async {
+    if (!mounted) return;
     final taskManager = Provider.of<TaskManager>(context, listen: false);
     taskManager.clearTasks();
     await fetchTasksFromAI();
 
     _dailyTimer = Timer.periodic(const Duration(hours: 24), (timer) async {
-      taskManager.clearTasks();
-      await fetchTasksFromAI();
+      if (mounted) {
+        final taskManager = Provider.of<TaskManager>(context, listen: false);
+        taskManager.clearTasks();
+        await fetchTasksFromAI();
+      } else {
+        timer.cancel();
+      }
     });
   }
 
   Future<void> fetchTasksFromAI() async {
+    if (!mounted) return;
     final taskManager = Provider.of<TaskManager>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final token = userProvider.user.token;
+    final token = Provider.of<UserProvider>(context, listen: false).user.token;
 
     if (token.isEmpty) {
       print("Error: User token not available.");
       return;
     }
 
+    // ✅ FIX: Use 'localhost' for desktop/web, '10.0.2.2' for Android emulator
+    // When running as a desktop app, 'localhost' is correct.
     final uri = Uri.parse("http://localhost:5000/generate-task");
 
     try {
       final response = await http.get(uri);
+
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final List<dynamic> taskNames = data["tasks"];
         final List<dynamic> taskDiffs = data["difficulties"];
 
         final List<Task> tasksToInsert = [];
-        for (int i = 0; i < taskNames.length && i < 7; i++) {
+        for (int i = 0; i < taskNames.length; i++) {
           tasksToInsert.add(
             Task(
               name: taskNames[i] as String,
-              priority: taskDiffs[i] as String, // ✅ FIX: Was 'difficulty'
+              priority: taskDiffs[i] as String,
             ),
           );
         }
 
-        int initialIndex = taskManager.activeTasks.length;
+        if (tasksToInsert.isEmpty) return;
 
-        for (int i = 0; i < tasksToInsert.length; i++) {
-          final Task newTask = tasksToInsert[i];
-          await taskManager.addTask(newTask, token);
+        for (final task in tasksToInsert) {
+          if (!mounted) return;
+          int insertIndex = taskManager.activeTasks.length;
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _listKey.currentState?.insertItem(
-              initialIndex + i,
-              duration: const Duration(milliseconds: 300),
-            );
-          });
+          await taskManager.addTask(task, token);
 
+          _listKey.currentState?.insertItem(
+            insertIndex,
+            duration: const Duration(milliseconds: 300),
+          );
           await Future.delayed(const Duration(milliseconds: 100));
         }
       } else {
-        print("Failed to load tasks from AI service: ${response.statusCode}");
+        print("❌ AI Service Error: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error fetching tasks from AI service: $e");
+      print("❌ Exception fetching AI tasks: $e");
     }
   }
 
   void gainXP(int amount) {
+    if (!mounted) return;
     final player = Provider.of<PlayerManager>(context, listen: false);
     player.gainXP(amount);
 
@@ -281,6 +298,8 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _listKey,
       initialItemCount: taskManager.activeTasks.length,
       itemBuilder: (context, index, animation) {
+        if (index >= taskManager.activeTasks.length)
+          return const SizedBox.shrink();
         return _buildAnimatedTaskItem(
           taskManager.activeTasks[index],
           animation,
@@ -290,50 +309,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAnimatedTaskItem(Task task, Animation<double> animation) {
-    return Align(
-      alignment: Alignment.center,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(-1.0, 0.0),
-          end: const Offset(0.0, 0.0),
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-        child: FadeTransition(opacity: animation, child: _taskCard(task)),
-      ),
+    return SizeTransition(
+      sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: _taskCard(task),
     );
   }
 
   Widget _buildRemovedItem(Task task, Animation<double> animation) {
-    return SizeTransition(sizeFactor: animation, child: _taskCard(task));
+    return SizeTransition(
+      sizeFactor: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: _taskCard(task),
+    );
   }
 
   Widget _taskCard(Task task) {
     final taskManager = Provider.of<TaskManager>(context, listen: false);
+    final token = Provider.of<UserProvider>(context, listen: false).user.token;
 
     Color getPriorityColor(String priority) {
-      // ✅ FIX: Renamed for clarity
       switch (priority.toLowerCase()) {
         case 'low':
-        case '1':
           return Colors.greenAccent;
         case 'medium':
-        case '2':
           return Colors.orangeAccent;
         case 'high':
-        case '3':
           return Colors.redAccent;
         default:
           return Colors.white;
       }
     }
 
-    Color containerColor;
-    if (task.status == TaskStatus.completed) {
-      containerColor = Colors.green.withOpacity(0.2);
-    } else if (task.status == TaskStatus.deleted) {
-      containerColor = Colors.red.withOpacity(0.2);
-    } else {
-      containerColor = Colors.white10;
-    }
+    Color containerColor =
+        task.status == TaskStatus.completed
+            ? Colors.green.withOpacity(0.2)
+            : (task.status == TaskStatus.deleted
+                ? Colors.red.withOpacity(0.2)
+                : Colors.white10);
 
     int getTaskIndex(Task t) => taskManager.activeTasks.indexWhere(
       (activeTask) => activeTask.id == t.id,
@@ -349,18 +360,17 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () async {
+            onTap: () {
               final indexToRemove = getTaskIndex(task);
               if (indexToRemove != -1) {
+                final taskToRemove = taskManager.activeTasks[indexToRemove];
                 _listKey.currentState?.removeItem(
                   indexToRemove,
-                  (context, animation) => _buildRemovedItem(task, animation),
+                  (context, animation) =>
+                      _buildRemovedItem(taskToRemove, animation),
                   duration: const Duration(milliseconds: 500),
                 );
-                await taskManager.deleteTask(
-                  task,
-                  Provider.of<UserProvider>(context, listen: false).user.token,
-                );
+                taskManager.deleteTask(taskToRemove, token);
               }
             },
             child: Image.asset('assets/icons/minus.png', width: 40),
@@ -375,10 +385,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: _fantasyTextStyle(fontSize: 16, color: Colors.white),
                 ),
                 Text(
-                  "Priority: ${task.priority}", // ✅ FIX: Was 'Difficulty'
+                  "Priority: ${task.priority}",
                   style: _fantasyTextStyle(
                     fontSize: 14,
-                    color: getPriorityColor(task.priority), // ✅ FIX
+                    color: getPriorityColor(task.priority),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -386,22 +396,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () async {
+            onTap: () {
               if (task.status == TaskStatus.pending) {
                 final indexToRemove = getTaskIndex(task);
                 if (indexToRemove != -1) {
+                  final taskToComplete = taskManager.activeTasks[indexToRemove];
                   _listKey.currentState?.removeItem(
                     indexToRemove,
-                    (context, animation) => _buildRemovedItem(task, animation),
+                    (context, animation) =>
+                        _buildRemovedItem(taskToComplete, animation),
                     duration: const Duration(milliseconds: 500),
                   );
-                  await taskManager.completeTask(
-                    task,
-                    Provider.of<UserProvider>(
-                      context,
-                      listen: false,
-                    ).user.token,
-                  );
+                  taskManager.completeTask(taskToComplete, token);
                   gainXP(500);
                 }
               }

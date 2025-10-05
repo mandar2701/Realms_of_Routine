@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PlayerManager extends ChangeNotifier {
   String name = "Player";
-  int level = 25;
+  int level = 1;
   int xp = 700;
   int xpLimit = 1000;
 

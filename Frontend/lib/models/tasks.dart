@@ -30,7 +30,7 @@ class Task {
        this.dueDate = dueDate ?? DateTime.now().add(const Duration(days: 7));
 
   factory Task.fromJson(Map<String, dynamic> json) {
-    // ✅ FIX: A smarter date parser that handles both Strings and MongoDB's date format
+    // A smarter date parser that handles both Strings and MongoDB's date format
     DateTime _parseSafeDate(
       dynamic dateValue, {
       required DateTime defaultDate,
@@ -74,7 +74,8 @@ class Task {
           json['_id'] is Map
               ? json['_id']['\$oid']
               : json['_id'], // Also handle BSON ObjectId
-      name: json['title'] ?? 'Untitled Task',
+      // ✅ THE FIX: Changed json['title'] to json['name'] to match the database field.
+      name: json['name'] ?? 'Untitled Task',
       priority: json['priority'] ?? 'low',
       status: _parseStatus(json['status']),
       description: json['description'],

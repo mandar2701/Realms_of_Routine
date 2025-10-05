@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'models/player_manager.dart';
 import 'models/task_manager.dart';
 import 'pages/home_screen.dart';
+import 'pages/signup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Realms of Routine',
       home:
           Provider.of<UserProvider>(context).user.token.isEmpty
-              ? const HomeScreen()
+              ? const SignupPage()
               : const HomeScreen(),
     );
   }
