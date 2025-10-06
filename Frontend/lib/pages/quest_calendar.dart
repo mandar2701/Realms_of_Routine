@@ -151,23 +151,26 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                     ),
                                   ),
                                 ),
-                                onPressed: () async {
-                                  // Navigate to CreateTask screen and wait for result
-                                  await Navigator.push(
+                                // In your "Set Quest" button's onPressed in quest_calendar.dart
+                                onPressed: () {
+                                  // ✅ FIX: Use Navigator.push to navigate to a full screen
+                                  Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
-                                          (context) => const CreateTaskScreen(),
+                                          (context) => CreateTaskScreen(
+                                            selectedDate: _focusedDay,
+                                          ),
                                     ),
-                                  );
-                                  // Refresh the tasks list when returning
-                                  if (mounted) {
+                                  ).then((_) {
+                                    // Refresh the task list after returning from the create screen
                                     Provider.of<TaskManager>(
                                       context,
                                       listen: false,
                                     ).loadTasks(context);
-                                  }
+                                  });
                                 },
+
                                 icon: const Icon(
                                   Icons.add_box_outlined,
                                   color: Color.fromARGB(255, 238, 228, 190),
