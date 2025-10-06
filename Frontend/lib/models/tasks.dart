@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum TaskStatus { pending, completed, deleted }
 
 extension TaskStatusExtension on TaskStatus {
@@ -24,18 +26,16 @@ class Task {
     this.status = TaskStatus.pending,
     DateTime? createdAt,
     DateTime? dueDate,
-  }) : this.createdAt = createdAt ?? DateTime.now(),
-       this.dueDate = dueDate ?? DateTime.now().add(const Duration(days: 7));
+  }) : createdAt = createdAt ?? DateTime.now(),
+       dueDate = dueDate ?? DateTime.now().add(const Duration(days: 7));
 
   factory Task.fromJson(Map<String, dynamic> json) {
-    // A smarter date parser that handles both Strings and MongoDB's date format
     DateTime _parseSafeDate(
       dynamic dateValue, {
       required DateTime defaultDate,
     }) {
       if (dateValue == null) return defaultDate;
 
-      // Handle MongoDB's Extended JSON v2 format
       if (dateValue is Map && dateValue.containsKey('\$date')) {
         final dateMap = dateValue['\$date'];
         if (dateMap is Map && dateMap.containsKey('\$numberLong')) {
@@ -44,7 +44,6 @@ class Task {
         }
       }
 
-      // Handle standard ISO 8601 String format
       if (dateValue is String) {
         try {
           return DateTime.parse(dateValue);
@@ -53,7 +52,7 @@ class Task {
         }
       }
 
-      return defaultDate; // Fallback for unexpected formats
+      return defaultDate;
     }
 
     TaskStatus _parseStatus(String? statusString) {
@@ -68,11 +67,7 @@ class Task {
     }
 
     return Task(
-      id:
-          json['_id'] is Map
-              ? json['_id']['\$oid']
-              : json['_id'], // Also handle BSON ObjectId
-      // ✅ THE FIX: Changed json['title'] to json['name'] to match the database field.
+      id: json['_id'] is Map ? json['_id']['\$oid'] : json['_id'],
       name: json['name'] ?? 'Untitled Task',
       priority: json['difficulty'] ?? 'low',
       status: _parseStatus(json['status']),
@@ -85,11 +80,10 @@ class Task {
     );
   }
 
-  // Converts Dart Task object to a JSON map for sending to the API
   Map<String, dynamic> toJson() {
     return {
-      'name': name, // Server expects 'name'
-      'difficulty': priority, // Server expects 'difficulty'
+      'name': name,
+      'difficulty': priority,
       'status': status.toShortString(),
       'createdAt': createdAt.toIso8601String(),
       'dueDate': dueDate.toIso8601String(),

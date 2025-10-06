@@ -7,7 +7,9 @@ import '../models/tasks.dart';
 import '../providers/user_provider.dart';
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({super.key});
+  final DateTime? selectedDate;
+
+  const CreateTaskScreen({super.key, this.selectedDate});
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
@@ -25,7 +27,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     if (token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Authentication required to create task."),
+          content: Text("Authentication is required to create a task."),
         ),
       );
       return;
@@ -36,15 +38,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final notes = _notesController.text.trim();
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter a title")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a title for your quest.")),
+      );
       return;
     }
 
     final taskName = notes.isEmpty ? title : "$title ($notes)";
 
-    // ✅ FIX: Renamed variable from 'difficulty' to 'priority'
     String priority;
     if (_selectedDifficulty == 1) {
       priority = "Low";
@@ -54,30 +55,28 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       priority = "High";
     }
 
+    // ✅ FIX: This now correctly uses the date from the calendar.
+    final DateTime taskDate = widget.selectedDate ?? DateTime.now();
+
     final newTask = Task(
       name: taskName,
-      // ✅ FIX: Use the correct 'priority' parameter
       priority: priority,
       description: notes.isNotEmpty ? notes : null,
+      createdAt: taskDate,
+      dueDate: taskDate,
     );
 
     try {
       await taskManager.addTask(newTask, token);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Task created successfully!")),
-      );
-
-      _titleController.clear();
-      _notesController.clear();
-      setState(() {
-        _selectedDifficulty = 1;
-      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("A new quest has begun!")));
 
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving task: ${e.toString()}")),
+        SnackBar(content: Text("Failed to create quest: ${e.toString()}")),
       );
     }
   }
@@ -88,6 +87,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -99,7 +107,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: SingleChildScrollView(
-              // Added for small screens
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -148,7 +155,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Difficulty", // This is just a UI label, it can stay
+                      "Difficulty",
                       style: GoogleFonts.cinzel(
                         color: Colors.amber,
                         fontSize: 20,
