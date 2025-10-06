@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                user.name.isNotEmpty ? user.name : player.name,
+                user.name.isNotEmpty ? user.name : (player.name ?? "Player"),
                 style: _fantasyTextStyle(
                   fontSize: 35,
                   color: Colors.orangeAccent,
