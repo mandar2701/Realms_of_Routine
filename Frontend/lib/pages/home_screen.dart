@@ -10,6 +10,7 @@ import '../models/task_manager.dart';
 import '../models/tasks.dart';
 import '../pages/bottom_navbar.dart';
 import '../providers/user_provider.dart';
+import '../utils/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -100,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // ✅ FIX: Use 'localhost' for desktop/web, '10.0.2.2' for Android emulator
     // When running as a desktop app, 'localhost' is correct.
-    final uri = Uri.parse("http://localhost:5000/generate-task");
+    final uri = Uri.parse("${Constants.PYTHON_API_BASE_URL}/generate-task");
 
     try {
       final response = await http.get(uri);
