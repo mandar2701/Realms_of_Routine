@@ -1,15 +1,17 @@
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 import json
-import re # Import the regular expression module
+import re
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # It's better practice to load the API key from environment variables
 # For now, your existing method is fine for development.
-genai.configure(api_key="AIzaSyBaCX12uX9RqsEiWQVZaItAVavWdub30rw")
+# genai.configure(api_key="AIzaSyBaCX12uX9RqsEiWQVZaItAVavWdub30rw")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash-lite') # Use the latest flash model
 
 @app.route('/generate-task')
@@ -66,4 +68,5 @@ def generate_task():
         return jsonify(fallback_data), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
