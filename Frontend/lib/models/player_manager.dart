@@ -7,6 +7,7 @@ class PlayerManager extends ChangeNotifier {
   int level = 1;
   int xp = 0;
   int xpLimit = 100;
+  int unusedStatPoints = 0;
 
   // Actual stats data for the chart/display
   Map<String, double> statsAttributes = {
