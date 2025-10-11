@@ -124,6 +124,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                   SizedBox(height: screenHeight * 0.015),
 
+                                  if (player.statPoints > 0)
+                                    Column(
+                                      children: [
+                                        buildStatBar(
+                                          "Stat Points",
+                                          player.statPoints,
+                                          player
+                                              .statPoints, // Max is always current value
+                                          const Color.fromARGB(
+                                            255,
+                                            255,
+                                            102,
+                                            0,
+                                          ),
+                                          screenWidth,
+                                        ),
+                                        SizedBox(height: screenHeight * 0.015),
+                                      ],
+                                    ),
+
                                   buildStatBar(
                                     "Coins",
                                     700,

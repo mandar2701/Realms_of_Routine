@@ -7,22 +7,23 @@ class PlayerManager extends ChangeNotifier {
   int level = 50;
   int xp = 0;
   int xpLimit = 100;
-  int unusedStatPoints = 0;
+  int statPoints = 0;
 
   // Actual stats data for the chart/display
   Map<String, double> statsAttributes = {
-    'Strength': 5,
-    'Agility': 5,
-    'Vigor': 5,
-    'Stamina': 5,
-    'Defense': 5,
+    'Strength': 1,
+    'Agility': 1,
+    'Vigor': 1,
+    'Stamina': 1,
+    'Defense': 1,
   };
 
   void updateStats(PlayerStats stats) {
     level = stats.level;
     xp = stats.xp;
+    statPoints = stats.statPoints;
     // Dynamically set XP limit (e.g., next level is current level * 100)
-    xpLimit = (level + 1) * 100;
+    xpLimit = (level) * 100;
 
     // Update the map used by the StatsView widget
     statsAttributes['Strength'] = stats.attributes.strength.toDouble();
@@ -42,9 +43,11 @@ class PlayerManager extends ChangeNotifier {
   void gainXP(int amount) {
     xp += amount;
 
+    // Simulate progression until the next full data sync from the server
+    // The server will dictate the real level/xp.
     while (xp >= xpLimit) {
-      level++;
-      xpLimit += 1000;
+      // Just increase XP limit by 100 locally until the server syncs the new level
+      xpLimit += 100;
     }
 
     notifyListeners();
