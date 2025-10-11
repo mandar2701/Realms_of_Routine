@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../pages/boss.dart';
@@ -22,21 +23,37 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool isPlayerTurn = true;
   bool isGameRunning = true;
   bool _isSlashActive = false;
+  bool _isShieldActive = false;
   PlayerState _playerState = PlayerState.idle;
 
-  int bossIndex = 0; // 👈 Tracks which boss is currently active
+  int bossIndex = 0; // Tracks which boss is currently active
 
   late AnimationController _playerShakeController;
   late AnimationController _bossShakeController;
   late Animation<Offset> _playerShakeAnimation;
   late Animation<Offset> _bossShakeAnimation;
 
-  final List<String> bossImages = [
-    'boss.png',
-    'Characters/boss2.png',
-    'Characters/boss3.png',
-    //'Characters/boss4.png',
-  ]; // 👈 Add more bosses as needed
+  // Each boss has image, base health, and damage range
+  final List<Map<String, dynamic>> bosses = [
+    {
+      'image': 'boss.png',
+      'baseHealth': 100,
+      'damageRange': [5, 10],
+      'name': 'Goblin Lord',
+    },
+    {
+      'image': 'Characters/boss2.png',
+      'baseHealth': 130,
+      'damageRange': [8, 14],
+      'name': 'Orc Warlord',
+    },
+    {
+      'image': 'Characters/boss3.png',
+      'baseHealth': 160,
+      'damageRange': [10, 18],
+      'name': 'Dragon Emperor',
+    },
+  ];
 
   @override
   void initState() {
@@ -100,23 +117,28 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // === ATTACKS ===
+
   void swordAttack() {
     if (isPlayerTurn && isGameRunning) {
-      setState(() {
-        _playerState = PlayerState.swordAttack;
-      });
-      int damage = Random().nextInt(15) + 10;
-      performPlayerAttack(damage, 'You slashed the boss for $damage damage!');
+      setState(() => _playerState = PlayerState.swordAttack);
+
+      int damage = Random().nextInt(15 - 10 + 1) + 10; // 10–15 dmg
+      performPlayerAttack(
+        damage,
+        'You slashed ${bosses[bossIndex]['name']} for $damage damage!',
+      );
     }
   }
 
-  void kickAttack() {
+  void shieldDefend() {
     if (isPlayerTurn && isGameRunning) {
       setState(() {
-        _playerState = PlayerState.kickAttack;
+        _isShieldActive = true;
+        gameMessage = "You raised your shield! Defense increased.";
+        isPlayerTurn = false;
       });
-      int damage = Random().nextInt(8) + 5;
-      performPlayerAttack(damage, 'You kicked the boss for $damage damage!');
+      Timer(const Duration(seconds: 2), bossAttack);
     }
   }
 
@@ -141,7 +163,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     if (bossHealth <= 0) {
       bossHealth = 0;
       isGameRunning = false;
-      gameMessage = 'You defeated the boss!';
+      gameMessage = 'You defeated ${bosses[bossIndex]['name']}!';
       _showBossDefeatedDialog();
     } else {
       Timer(const Duration(seconds: 2), bossAttack);
@@ -150,10 +172,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   void bossAttack() {
     if (!isPlayerTurn && isGameRunning) {
-      int damage = Random().nextInt(8) + 3;
+      List<int> damageRange = bosses[bossIndex]['damageRange'];
+      int damage =
+          Random().nextInt(damageRange[1] - damageRange[0] + 1) +
+          damageRange[0];
+
+      // If player used shield, reduce damage
+      if (_isShieldActive) {
+        damage = (damage * 0.3).toInt(); // 70% damage reduction
+        _isShieldActive = false;
+        gameMessage = "Your shield absorbed most of the hit!";
+      } else {
+        gameMessage =
+            '${bosses[bossIndex]['name']} attacked you for $damage damage!';
+      }
+
       setState(() {
         playerHealth -= damage;
-        gameMessage = 'The boss attacked you for $damage damage!';
         isPlayerTurn = true;
       });
 
@@ -168,6 +203,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
+  // === DIALOGS ===
+
   void _showBossDefeatedDialog() {
     showDialog(
       context: context,
@@ -180,7 +217,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _nextBoss(); // 👈 Move to the next boss
+                _nextBoss();
               },
               child: const Text("NEXT BOSS"),
             ),
@@ -193,9 +230,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _nextBoss() {
     setState(() {
       bossIndex++;
-      if (bossIndex >= bossImages.length) bossIndex = 0; // Loop bosses
-      bossHealth = 100 + (bossIndex * 20); // 👈 Increase health per boss
-      playerHealth = min(playerHealth + 20, 100); // Small heal
+      if (bossIndex >= bosses.length) bossIndex = 0; // Loop bosses
+      bossHealth = bosses[bossIndex]['baseHealth'].toDouble();
+      playerHealth = min(playerHealth + 20, 100);
       gameMessage = 'A new boss appears!';
       isGameRunning = true;
       isPlayerTurn = true;
@@ -227,19 +264,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void resetGame() {
     setState(() {
       playerHealth = 100;
-      bossHealth = 100;
+      bossHealth = bosses[0]['baseHealth'].toDouble();
       bossIndex = 0;
       gameMessage = 'Your turn!';
       isPlayerTurn = true;
       isGameRunning = true;
       _isSlashActive = false;
+      _isShieldActive = false;
       _playerState = PlayerState.idle;
     });
   }
 
+  // === UI ===
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
+    final boss = bosses[bossIndex];
 
     return Scaffold(
       body: Stack(
@@ -264,18 +305,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         playerHealth,
                         Colors.green,
                       ),
-                      _buildHealthBar("Boss", bossHealth, Colors.red),
+                      _buildHealthBar(boss['name'], bossHealth, Colors.red),
                     ],
                   ),
                   const Spacer(flex: 1),
                   // Game Message
                   Text(
                     gameMessage,
-                    style: const TextStyle(
-                      fontSize: 22,
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [Shadow(blurRadius: 5.0, color: Colors.black)],
+                      color: Color.fromARGB(255, 238, 228, 190),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -301,7 +341,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               SlideTransition(
                                 position: _bossShakeAnimation,
                                 child: Image.asset(
-                                  bossImages[bossIndex],
+                                  boss['image'],
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -320,7 +360,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const Spacer(flex: 2),
-                  // Attack Buttons
+                  // Attack & Shield Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -329,7 +369,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         swordAttack,
                       ),
                       const SizedBox(width: 40),
-                      _buildAttackButton('assets/icons/kick.png', kickAttack),
+                      _buildAttackButton('assets/icons/kick.png', shieldDefend),
                     ],
                   ),
                   const Spacer(flex: 1),
@@ -370,7 +410,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 }
 
-// Slash animation stays the same
+// Slash animation (unchanged)
 class SlashAnimation extends StatefulWidget {
   const SlashAnimation({super.key});
 
