@@ -36,7 +36,7 @@ class AuthService {
       );
 
       http.Response res = await http.post(
-        Uri.parse('${Constants.uri}/api/signup'),
+        Uri.parse('${Constants.NODE_API_BASE_URL}/api/signup'),
         body: jsonEncode({
           'email': email,
           'password': password,
@@ -135,19 +135,21 @@ class AuthService {
       }
 
       try {
-        var tokenRes = await http.post(
-          Uri.parse('${Constants.uri}/tokenIsValid'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'x-auth-token': token,
-          },
-        ).timeout(Duration(seconds: 3));
+        var tokenRes = await http
+            .post(
+              Uri.parse('${Constants.NODE_API_BASE_URL}/tokenIsValid'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+                'x-auth-token': token,
+              },
+            )
+            .timeout(Duration(seconds: 3));
 
         var response = jsonDecode(tokenRes.body);
 
         if (response == true) {
           http.Response userRes = await http.get(
-            Uri.parse('${Constants.uri}/'),
+            Uri.parse('${Constants.NODE_API_BASE_URL}/'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'x-auth-token': token,

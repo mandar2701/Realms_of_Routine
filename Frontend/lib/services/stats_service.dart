@@ -12,7 +12,7 @@ import '../utils/constants.dart';
 import 'scaffold_messenger_service.dart'; // Import the service
 
 class StatsService {
-  final String baseUri = Constants.uri;
+  final String baseUri = Constants.NODE_API_BASE_URL;
 
   Future<PlayerStats?> fetchPlayerStats(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);

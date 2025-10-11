@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const AccountStats = require('../models/accountStats');
 const auth = require('../middleware/auth');
 const statsRouter = express.Router();
@@ -6,12 +7,14 @@ const statsRouter = express.Router();
 // Route to fetch a user's stats
 statsRouter.get('/api/stats', auth, async (req, res) => {
     try {
+        // Ensure ID is converted to a proper MongoDB ObjectId for lookup/creation
+        const userId = new mongoose.Types.ObjectId(req.user.id);
         // Use req.user.id provided by your auth middleware
-        const stats = await AccountStats.findOne({ userId: req.user.id });
+        const stats = await AccountStats.findOne({ userId: userId });
 
         if (!stats) {
              // If stats don't exist, create a default one (only happens on first login after adding this feature)
-             const newStats = new AccountStats({ userId: req.user.id });
+             const newStats = new AccountStats({ userId: userId });
              await newStats.save();
              return res.json(newStats);
         }
@@ -27,7 +30,9 @@ statsRouter.post('/api/stats/update-xp', auth, async (req, res) => {
     try {
         const { xpChange } = req.body; // e.g., { xpChange: 50 }
 
-        let stats = await AccountStats.findOne({ userId: req.user.id });
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+
+        let stats = await AccountStats.findOne({ userId: userId });
 
         if (!stats) {
             return res.status(404).json({ error: "Stats not found. User must login first." });
@@ -52,7 +57,7 @@ statsRouter.post('/api/stats/update-xp', auth, async (req, res) => {
         if (levelsGained > 0) {
             // Grant 5 stat points for every level gained
             stats.statPoints += levelsGained * 5;
-            console.log(`User ${req.user.id} leveled up to ${stats.level}! Gained ${levelsGained * 5} stat points.`);
+            console.log(`User ${userId} leveled up to ${stats.level}! Gained ${levelsGained * 5} stat points.`);
         }
 
         stats = await stats.save();
@@ -78,7 +83,8 @@ statsRouter.post('/api/stats/spend-points', auth, async (req, res) => {
             return res.status(400).json({ error: "Points spent must be a positive integer." });
         }
 
-        let stats = await AccountStats.findOne({ userId: req.user.id });
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        let stats = await AccountStats.findOne({ userId: userId });
 
         if (!stats) {
             return res.status(404).json({ error: "Stats not found. User must login first." });
