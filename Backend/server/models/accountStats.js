@@ -19,6 +19,11 @@ const accountStatsSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    statPoints: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     // Nested object for RPG-style attributes
     stats: {
         strength: { // Matches 'Strength' in Flutter
