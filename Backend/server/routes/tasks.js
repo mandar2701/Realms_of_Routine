@@ -95,7 +95,7 @@ router.patch("/api/tasks/:id", authMiddleware, async (req, res) => {
 
         if (levelsGained > 0) {
             // Grant 5 stat points for every level gained
-            stats.statPoints += levelsGained * 5;
+            stats.statPoints += levelsGained * 2;
         }
 
         await stats.save(); // Save the updated stats to the database!
