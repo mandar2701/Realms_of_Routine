@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -101,117 +102,187 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/Background/create_task.png"),
-            fit: BoxFit.fill,
+      body: Stack(
+        children: [
+          // Full-screen background
+          SizedBox.expand(
+            child: Image.asset(
+              "assets/Background/create_task.png",
+              fit: BoxFit.fill,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: screenHeight * 0.15),
-                  TextField(
-                    controller: _titleController,
-                    style: GoogleFonts.cinzel(
-                      color: Colors.white,
-                      fontSize: 18,
+          // Glassmorphic foreground
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: screenHeight * 0.1, // Shift down
+                left: screenWidth * 0.05,
+                right: screenWidth * 0.05,
+                bottom: screenHeight * 0.02,
+              ),
+              child: GlassmorphicContainer(
+                width: double.infinity,
+                height: screenHeight * 0.85, // leave some bottom space
+                borderRadius: 20,
+                blur: 5,
+                alignment: Alignment.topCenter,
+                border: 1,
+                linearGradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withOpacity(0.15),
+                    Colors.white.withOpacity(0.05),
+                  ],
+                ),
+                borderGradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withOpacity(0.4),
+                    Colors.white.withOpacity(0.1),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.03,
+                      vertical: screenHeight * 0.02,
                     ),
-                    decoration: InputDecoration(
-                      labelText: "Title",
-                      labelStyle: GoogleFonts.cinzel(color: Colors.amber),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFB66A2F)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.amber),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Title field
+                        TextField(
+                          controller: _titleController,
+                          style: GoogleFonts.cinzel(
+                            color: Color(0xFFB66A2F),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: "Title",
+                            labelStyle: GoogleFonts.cinzel(
+                              color: Color(0xFFB66A2F),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            filled: true, // enables background fill
+                            fillColor: Colors.white.withOpacity(0.15),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Color(0xFFB66A2F),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.amber),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Notes field
+                        TextField(
+                          controller: _notesController,
+                          maxLines: 4,
+                          style: GoogleFonts.cinzel(
+                            color: Color(0xFFB66A2F),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: "Notes",
+                            labelStyle: GoogleFonts.cinzel(
+                              color: Color(0xFFB66A2F),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            filled: true, // enables background fill
+                            fillColor: Colors.white.withOpacity(0.3),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Color(0xFFB66A2F),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.amber),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Difficulty
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Difficulty",
+                            style: GoogleFonts.cinzel(
+                              color: Colors.amber,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.01),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildDifficultyButton(stars: 1, ratio: 4),
+                            _buildDifficultyButton(stars: 2, ratio: 6),
+                            _buildDifficultyButton(stars: 3, ratio: 7),
+                          ],
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Create button
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFB66A2F),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.25,
+                              vertical: screenHeight * 0.02,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: _createTask,
+                          child: Text(
+                            "CREATE TASK",
+                            style: GoogleFonts.cinzel(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.03),
+                      ],
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.03),
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 4,
-                    style: GoogleFonts.cinzel(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: "Notes",
-                      labelStyle: GoogleFonts.cinzel(color: Colors.amber),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFB66A2F)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.amber),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Difficulty",
-                      style: GoogleFonts.cinzel(
-                        color: Colors.amber,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildDifficultyButton(1),
-                      _buildDifficultyButton(2),
-                      _buildDifficultyButton(3),
-                    ],
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB66A2F),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.2,
-                        vertical: screenHeight * 0.02,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: _createTask,
-                    child: Text(
-                      "CREATE TASK",
-                      style: GoogleFonts.cinzel(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildDifficultyButton(int stars) {
+  Widget _buildDifficultyButton({required int stars, required double ratio}) {
     bool isSelected = _selectedDifficulty == stars;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // Total ratio sum
+    final totalRatio = 3 + 6 + 9; // hardcoded for now
+
+    // Button width proportional to its ratio
+    final buttonWidth = (screenWidth * 0.8) * (ratio / totalRatio);
 
     return GestureDetector(
       onTap: () {
@@ -220,23 +291,28 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         });
       },
       child: Container(
-        width: screenWidth * 0.23,
-        height: screenHeight * 0.06,
+        width: buttonWidth,
+        height: screenHeight * 0.07,
         padding: const EdgeInsets.all(8),
-        margin: const EdgeInsets.symmetric(horizontal: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: const Color(0xFFB66A2F),
           borderRadius: BorderRadius.circular(8),
-          border:
-              isSelected
-                  ? Border.all(color: Colors.yellowAccent, width: 2)
-                  : null,
+          border: isSelected ? Border.all(color: Colors.amber, width: 2) : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             stars,
-            (index) => const Icon(Icons.star, color: Colors.lightBlueAccent),
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              child: Image.asset(
+                'assets/icons/star.png',
+                width: buttonWidth / (stars * 2),
+                height: screenHeight * 0.03,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
         ),
       ),
