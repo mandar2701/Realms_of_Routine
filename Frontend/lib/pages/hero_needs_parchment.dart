@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:life_xp_project/services/auth_services.dart';
+import 'package:life_xp_project/pages/login_page.dart';
 
 class HeroNeedsParchmentPage extends StatefulWidget {
   final String email;
@@ -28,26 +29,40 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
   final TextEditingController _goalController = TextEditingController();
   final AuthService authService = AuthService();
 
-  void signupUser() {
-    authService.signUpUser(
-      context: context,
-      email: widget.email,
-      password: widget.password,
-      name: widget.name,
-      age: widget.age,
-      birthDate: widget.birthDate,
-      gender: widget.gender,
-      hero: {
- 'duty': _dutyController.text,
- 'focus': _focusController.text,
- 'goal': _goalController.text,
-      },
-    );
+  void signupUser() async {
+    if (_dutyController.text.isEmpty || _focusController.text.isEmpty || _goalController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+    
+    try {
+      await authService.signUpUser(
+        context: context,
+        email: widget.email,
+        password: widget.password,
+        name: widget.name,
+        age: widget.age,
+        birthDate: widget.birthDate,
+        gender: widget.gender,
+        hero: {
+          'duty': _dutyController.text,
+          'focus': _focusController.text,
+          'goal': _goalController.text,
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -112,15 +127,18 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
         Positioned(
           left: (screenWidth - buttonWidth) / 2,
           top: 620,
-          child: GestureDetector(
-            onTap: signupUser,
-            child: Container(
-              width: buttonWidth,
-              height: 60,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/button22.jpg'),
-                  fit: BoxFit.contain,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: signupUser,
+              child: Container(
+                width: buttonWidth,
+                height: 80,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/button22.jpg'),
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),

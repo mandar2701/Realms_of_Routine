@@ -32,20 +32,39 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final AuthService authService = AuthService();
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    authService.getUserData(context);
+    _checkAuthStatus();
   }
 
+  Future<void> _checkAuthStatus() async {
+    await authService.getUserData(context);
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Realms of Routine',
-      home:
-          Provider.of<UserProvider>(context).user.token.isEmpty
-              ? const SignupPage()
-              : const HomeScreen(),
+      home: Provider.of<UserProvider>(context).user.token.isEmpty
+          ? const SignupPage()
+          : const HomeScreen(),
     );
   }
 }

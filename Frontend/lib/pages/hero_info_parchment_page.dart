@@ -45,6 +45,7 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         // The main layout is a Stack to layer the background, parchment, and form.
@@ -135,9 +136,16 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
         // Defines a tappable area over the "NEXT" button in the background image.
         Positioned(
           left: (screenWidth - buttonWidth) / 2,
-          top: 625, // Adjusted top position
+          top: 625,
           child: GestureDetector(
             onTap: () {
+              if (_nameController.text.isEmpty || _ageController.text.isEmpty || 
+                  _birthDateController.text.isEmpty || _genderController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Please fill all fields')),
+                );
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -154,11 +162,14 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
             },
             child: Container(
               width: buttonWidth,
-              height: 50, // Adjusted height
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/next_button.jpg'),
-                  fit: BoxFit.contain,
+              height: 80,
+              color: Colors.transparent,
+              child: Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/next_button.jpg'),
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),

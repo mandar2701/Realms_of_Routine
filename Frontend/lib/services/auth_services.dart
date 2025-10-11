@@ -13,7 +13,7 @@ import '/utils/constants.dart';
 import '/utils/utils.dart'; // Your updated utils file is used here
 
 class AuthService {
-  void signUpUser({
+  Future<void> signUpUser({
     required BuildContext context,
     required String email,
     required String password,
@@ -108,6 +108,7 @@ class AuthService {
 
           final decodedBody = jsonDecode(res.body);
           await prefs.setString('x-auth-token', decodedBody['token']);
+          await prefs.setString('cached-user', res.body);
 
           userProvider.setUser(res.body);
 
@@ -123,40 +124,47 @@ class AuthService {
   }
 
   // get user data
-  void getUserData(BuildContext context) async {
+  Future<void> getUserData(BuildContext context) async {
     try {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('x-auth-token');
 
-      if (token == null) {
-        token = '';
-        prefs.setString('x-auth-token', token);
+      if (token == null || token.isEmpty) {
+        return;
       }
 
-      var tokenRes = await http.post(
-        Uri.parse('${Constants.uri}/tokenIsValid'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token,
-        },
-      );
-
-      var response = jsonDecode(tokenRes.body);
-
-      if (response == true) {
-        http.Response userRes = await http.get(
-          Uri.parse('${Constants.uri}/'),
+      try {
+        var tokenRes = await http.post(
+          Uri.parse('${Constants.uri}/tokenIsValid'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'x-auth-token': token,
           },
-        );
+        ).timeout(Duration(seconds: 3));
 
-        userProvider.setUser(userRes.body);
+        var response = jsonDecode(tokenRes.body);
+
+        if (response == true) {
+          http.Response userRes = await http.get(
+            Uri.parse('${Constants.uri}/'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'x-auth-token': token,
+            },
+          );
+
+          userProvider.setUser(userRes.body);
+          await prefs.setString('cached-user', userRes.body);
+        }
+      } catch (e) {
+        String? cachedUser = prefs.getString('cached-user');
+        if (cachedUser != null && cachedUser.isNotEmpty) {
+          userProvider.setUser(cachedUser);
+        }
       }
     } catch (e) {
-      showSnackBar(e.toString());
+      // Ignore startup errors
     }
   }
 }
