@@ -55,8 +55,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       priority = "High";
     }
 
-    // ✅ FIX: This now correctly uses the date from the calendar.
-    final DateTime taskDate = widget.selectedDate ?? DateTime.now();
+    final now = DateTime.now();
+    final selected = widget.selectedDate ?? now;
+    final DateTime taskDate = DateTime(
+      selected.year,
+      selected.month,
+      selected.day,
+    );
 
     final newTask = Task(
       name: taskName,

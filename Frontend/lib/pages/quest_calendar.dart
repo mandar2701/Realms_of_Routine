@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:glassmorphism/glassmorphism.dart';
 
 import '../models/task_manager.dart';
 import '../models/tasks.dart';
@@ -134,7 +134,7 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                             // Quest List
                             _buildQuestList(),
 
-                            // ✅ FIX: Set Quest Button restored and functional
+                            // Set Quest Button
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: ElevatedButton.icon(
@@ -151,26 +151,22 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                     ),
                                   ),
                                 ),
-                                // In your "Set Quest" button's onPressed in quest_calendar.dart
                                 onPressed: () {
-                                  // ✅ FIX: Use Navigator.push to navigate to a full screen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
                                           (context) => CreateTaskScreen(
-                                            selectedDate: _focusedDay,
+                                            selectedDate: _selectedDay,
                                           ),
                                     ),
                                   ).then((_) {
-                                    // Refresh the task list after returning from the create screen
                                     Provider.of<TaskManager>(
                                       context,
                                       listen: false,
                                     ).loadTasks(context);
                                   });
                                 },
-
                                 icon: const Icon(
                                   Icons.add_box_outlined,
                                   color: Color.fromARGB(255, 238, 228, 190),
@@ -289,13 +285,10 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
     return Expanded(
       child: Consumer<TaskManager>(
         builder: (context, taskManager, child) {
-          // Filter tasks based on the selected day's createdAt date
           final dailyQuests =
               taskManager.tasks.where((task) {
-                if (task.createdAt == null || _selectedDay == null) {
-                  return false;
-                }
-                return isSameDay(task.createdAt, _selectedDay);
+                if (_selectedDay == null) return false;
+                return isSameDay(task.dueDate, _selectedDay);
               }).toList();
 
           if (dailyQuests.isEmpty) {
@@ -314,9 +307,9 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
               final status =
                   quest.status == TaskStatus.completed
                       ? "completed"
-                      : (quest.status == TaskStatus.deleted
-                          ? "failed"
-                          : "pending");
+                      : quest.status == TaskStatus.deleted
+                      ? "failed"
+                      : "pending";
 
               return ListTile(
                 leading: Icon(
