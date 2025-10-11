@@ -1,12 +1,15 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+import 'package:life_xp_project/utils/constants.dart';
+
 // Ensure you have a correct path to your Task model
 import '../models/tasks.dart';
 
 class TaskService {
   // 🚨 IMPORTANT: Replace with your actual backend server URL (e.g., http://10.0.2.2:3000/api/v1/tasks)
   // This URL targets the base endpoint for task operations.
-  final String _baseUrl = 'http://localhost:3000/api/tasks';
+  final String _baseUrl = '${Constants.NODE_API_BASE_URL}/api/tasks';
 
   // MODIFIED: Helper function to generate standardized, token-authenticated headers
   Map<String, String> _headers(String token) => {

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 
+import '../models/task_manager.dart';
+import '../models/tasks.dart';
 import 'bottom_navbar.dart';
+import 'create_task.dart'; // Import the CreateTask screen
 
 class QuestCalendarScreen extends StatefulWidget {
   const QuestCalendarScreen({super.key});
@@ -23,15 +27,13 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
     DateTime.utc(2025, 9, 19): "bonus",
   };
 
-  List<Map<String, dynamic>> dailyQuests = [
-    {"title": "Office presentation", "xp": 20, "status": "completed"},
-    {"title": "Skipped the gym !", "xp": -20, "status": "failed"},
-    {"title": "Spent whole day with family", "xp": 40, "status": "bonus"},
-  ];
-
-  void addQuest(String title, int xp, String status) {
-    setState(() {
-      dailyQuests.add({"title": title, "xp": xp, "status": status});
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focusedDay;
+    // Load all tasks when the screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskManager>(context, listen: false).loadTasks(context);
     });
   }
 
@@ -45,7 +47,7 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("Background/cal_bg.png"),
+                image: AssetImage("assets/Background/cal_bg.png"),
                 fit: BoxFit.fill,
               ),
             ),
@@ -110,7 +112,12 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                   style: GoogleFonts.playfairDisplay(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(255, 233, 214, 142),
+                                    color: const Color.fromARGB(
+                                      255,
+                                      233,
+                                      214,
+                                      142,
+                                    ),
                                     letterSpacing: 2,
                                   ),
                                 ),
@@ -125,55 +132,9 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                             ),
 
                             // Quest List
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: dailyQuests.length,
-                                itemBuilder: (context, index) {
-                                  final quest = dailyQuests[index];
-                                  return ListTile(
-                                    leading: Icon(
-                                      quest["status"] == "completed"
-                                          ? Icons.shield
-                                          : quest["status"] == "failed"
-                                          ? Icons.close_rounded
-                                          : Icons.favorite,
-                                      color:
-                                          quest["status"] == "completed"
-                                              ? Colors.amber
-                                              : quest["status"] == "failed"
-                                              ? Colors.red
-                                              : Colors.greenAccent,
-                                    ),
-                                    title: Text(
-                                      quest["title"],
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color.fromARGB(
-                                          255,
-                                          238,
-                                          228,
-                                          190,
-                                        ),
-                                      ),
-                                    ),
-                                    trailing: Text(
-                                      "${quest["xp"] > 0 ? "+" : ""}${quest["xp"]}XP",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            quest["xp"] > 0
-                                                ? Colors.green
-                                                : Colors.red,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                            _buildQuestList(),
 
-                            // Set Quest Button
+                            // ✅ FIX: Set Quest Button restored and functional
                             Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: ElevatedButton.icon(
@@ -190,9 +151,26 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                     ),
                                   ),
                                 ),
+                                // In your "Set Quest" button's onPressed in quest_calendar.dart
                                 onPressed: () {
-                                  addQuest("New Custom Quest", 25, "completed");
+                                  // ✅ FIX: Use Navigator.push to navigate to a full screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => CreateTaskScreen(
+                                            selectedDate: _focusedDay,
+                                          ),
+                                    ),
+                                  ).then((_) {
+                                    // Refresh the task list after returning from the create screen
+                                    Provider.of<TaskManager>(
+                                      context,
+                                      listen: false,
+                                    ).loadTasks(context);
+                                  });
                                 },
+
                                 icon: const Icon(
                                   Icons.add_box_outlined,
                                   color: Color.fromARGB(255, 238, 228, 190),
@@ -220,7 +198,7 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Flexible(flex: 1, child: BottomNavbar()),
+                  const Flexible(flex: 1, child: BottomNavbar()),
                 ],
               ),
             ),
@@ -302,6 +280,69 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
             );
           }
           return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildQuestList() {
+    return Expanded(
+      child: Consumer<TaskManager>(
+        builder: (context, taskManager, child) {
+          // Filter tasks based on the selected day's createdAt date
+          final dailyQuests =
+              taskManager.tasks.where((task) {
+                if (task.createdAt == null || _selectedDay == null) {
+                  return false;
+                }
+                return isSameDay(task.createdAt, _selectedDay);
+              }).toList();
+
+          if (dailyQuests.isEmpty) {
+            return const Center(
+              child: Text(
+                'No quests for this day.',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: dailyQuests.length,
+            itemBuilder: (context, index) {
+              final quest = dailyQuests[index];
+              final status =
+                  quest.status == TaskStatus.completed
+                      ? "completed"
+                      : (quest.status == TaskStatus.deleted
+                          ? "failed"
+                          : "pending");
+
+              return ListTile(
+                leading: Icon(
+                  status == "completed"
+                      ? Icons.shield
+                      : status == "failed"
+                      ? Icons.close_rounded
+                      : Icons.hourglass_empty,
+                  color:
+                      status == "completed"
+                          ? Colors.amber
+                          : status == "failed"
+                          ? Colors.red
+                          : Colors.grey,
+                ),
+                title: Text(
+                  quest.name,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 238, 228, 190),
+                  ),
+                ),
+              );
+            },
+          );
         },
       ),
     );

@@ -175,14 +175,23 @@ class TodoScreen extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap:
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => const CreateTaskScreen(),
-                                    ),
+                              // In your floating action button's onPressed in todo_screen.dart
+                              onTap: () {
+                                // ✅ FIX: Use Navigator.push to navigate to a full screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => const CreateTaskScreen(),
                                   ),
+                                ).then((_) {
+                                  // Refresh tasks after dialog is closed
+                                  Provider.of<TaskManager>(
+                                    context,
+                                    listen: false,
+                                  ).loadTasks(context);
+                                });
+                              },
                               child: const Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Text(

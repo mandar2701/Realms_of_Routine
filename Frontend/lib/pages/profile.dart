@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/player_manager.dart';
 import '../providers/user_provider.dart';
+import '../services/stats_service.dart';
 import 'bottom_navbar.dart';
 
 // Enum to manage the selected tab
@@ -19,6 +20,30 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   ProfileTab _selectedTab = ProfileTab.achievements;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, _fetchStats);
+  }
+
+  Future<void> _fetchStats() async {
+    if (!mounted) return;
+
+    final statsService = StatsService();
+    final playerManager = Provider.of<PlayerManager>(context, listen: false);
+
+    final stats = await statsService.fetchPlayerStats(context);
+
+    if (stats != null) {
+      playerManager.updateStats(stats);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   void _onTabTapped(ProfileTab tab) {
     setState(() {
@@ -26,7 +51,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-   @override
+  // 🆕 Helper getter to safely resolve the name for the UI
+  String get playerNameDisplay {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final player = Provider.of<PlayerManager>(context, listen: false);
+
+    // Use the stronger user name, falling back to player name, or 'Player'
+    return user.name.isNotEmpty ? user.name : (player.name ?? "Player");
+  }
+
+  @override
   Widget build(BuildContext context) {
     final player = Provider.of<PlayerManager>(context);
     final user = Provider.of<UserProvider>(context).user;
@@ -49,79 +83,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Flexible(
                     flex: 21,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Column(
-                            children: [
-                              Text(
-                                user.name.isNotEmpty ? user.name : (player.name ?? "Player"),
-                                 style: GoogleFonts.imFellEnglish(
-                                   fontSize: screenWidth * 0.08,
-                                   fontWeight: FontWeight.bold,
-                                   color: Colors.orange,
-                                   letterSpacing: 2,
-                                 ),
+                    child:
+                        _isLoading
+                            ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.orange,
                               ),
-                              Text(
-                                "Level ${player.level}",
-                                style: GoogleFonts.imFellEnglish(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.white70,
-                                ),
+                            )
+                            : SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        playerNameDisplay,
+                                        style: GoogleFonts.imFellEnglish(
+                                          fontSize: screenWidth * 0.08,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orange,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Level ${player.level}",
+                                        style: GoogleFonts.imFellEnglish(
+                                          fontSize: screenWidth * 0.045,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: screenHeight * 0.02),
+
+                                  buildStatBar(
+                                    "XP",
+                                    player.xp,
+                                    player.xpLimit,
+                                    Colors.blue,
+                                    screenWidth,
+                                  ),
+                                  SizedBox(height: screenHeight * 0.015),
+
+                                  buildStatBar(
+                                    "Coins",
+                                    700,
+                                    1000,
+                                    Colors.orange,
+                                    screenWidth,
+                                  ),
+                                  SizedBox(height: screenHeight * 0.02),
+
+                                  Image.asset(
+                                    "assets/Characters/profile.png",
+                                    height: screenHeight * 0.3,
+                                  ),
+                                  SizedBox(height: screenHeight * 0.015),
+
+                                  Container(
+                                    padding: EdgeInsets.all(screenWidth * 0.04),
+                                    constraints: BoxConstraints(
+                                      minHeight: screenHeight * 0.34,
+                                    ),
+                                    width: screenWidth * 0.9,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: const Color.fromARGB(
+                                          161,
+                                          208,
+                                          127,
+                                          6,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        _buildTabs(screenWidth),
+                                        SizedBox(height: screenHeight * 0.015),
+                                        _buildTabContent(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: screenHeight * 0.02),
-
-                          buildStatBar(
-                            "XP",
-                            player.xp,
-                            player.xpLimit,
-                            Colors.blue,
-                            screenWidth,
-                          ),
-                          SizedBox(height: screenHeight * 0.015),
-
-                          buildStatBar(
-                            "Coins",
-                            700,
-                            1000,
-                            Colors.orange,
-                            screenWidth,
-                          ),
-                          SizedBox(height: screenHeight * 0.02),
-
-                          Image.asset(
-                            "assets/Characters/profile.png",
-                            height: screenHeight * 0.3,
-                          ),
-                          SizedBox(height: screenHeight * 0.015),
-
-                          Container(
-                            padding: EdgeInsets.all(screenWidth * 0.04),
-                            constraints: BoxConstraints(
-                              minHeight: screenHeight * 0.34,
                             ),
-                            width: screenWidth * 0.9,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: const Color.fromARGB(161, 208, 127, 6),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                _buildTabs(screenWidth),
-                                SizedBox(height: screenHeight * 0.015),
-                                _buildTabContent(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   const Flexible(flex: 2, child: BottomNavbar()),
@@ -183,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case ProfileTab.about:
         return Center(
           child: Text(
-            "About ${user.name.isNotEmpty ? user.name : (player.name ?? "Player")}",
+            "About $playerNameDisplay",
             style: GoogleFonts.imFellEnglish(color: Colors.white, fontSize: 18),
           ),
         );
@@ -194,25 +240,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 // 🔥 Stats View with Editable Radar Chart
-class StatsView extends StatefulWidget {
+// 🔀 CHANGED TO STATELESS WIDGET TO READ DATA FROM PROVIDER
+class StatsView extends StatelessWidget {
   const StatsView({super.key});
 
-  @override
-  _StatsViewState createState() => _StatsViewState();
-}
-
-class _StatsViewState extends State<StatsView> {
-  Map<String, double> statsData = {
-    'Strength': 8,
-    'Agility': 5,
-    'Vigor': 9,
-    'Stamina': 6,
-    'Defense': 4,
-  };
+  // Helper widget to build the stat slider item (moved out of the old state class)
+  Widget _buildStatSlider(
+    String statName,
+    double statValue,
+    double screenWidth,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+          child: Text(
+            '$statName: ${statValue.toInt()}',
+            style: GoogleFonts.imFellEnglish(
+              color: Colors.white,
+              fontSize: screenWidth * 0.04,
+            ),
+          ),
+        ),
+        Slider(
+          value: statValue,
+          min: 0,
+          max: 10,
+          divisions: 10,
+          activeColor: Colors.orange,
+          inactiveColor: Colors.orange.withOpacity(0.3),
+          onChanged: (newValue) {
+            // NOTE: Updating the slider here would require calling an API
+            // to save the changes, but for now, we leave it without local update.
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    // ✅ GET THE LIVE DATA FROM PLAYER MANAGER
+    final player = Provider.of<PlayerManager>(context);
+    final Map<String, double> statsData = player.statsAttributes;
 
     return Column(
       children: [
@@ -234,6 +306,7 @@ class _StatsViewState extends State<StatsView> {
                   borderColor: Colors.orange,
                   entryRadius: 2.5,
                   borderWidth: 2,
+                  // ✅ USE LIVE DATA
                   dataEntries:
                       statsData.values
                           .map((v) => RadarEntry(value: v))
@@ -255,39 +328,10 @@ class _StatsViewState extends State<StatsView> {
         ),
         const SizedBox(height: 16),
 
-        ...statsData.keys.map((key) => _buildStatSlider(key)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildStatSlider(String statName) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-          child: Text(
-            '$statName: ${statsData[statName]!.toInt()}',
-            style: GoogleFonts.imFellEnglish(
-              color: Colors.white,
-              fontSize: screenWidth * 0.04,
-            ),
-          ),
-        ),
-        Slider(
-          value: statsData[statName]!,
-          min: 0,
-          max: 10,
-          divisions: 10,
-          activeColor: Colors.orange,
-          inactiveColor: Colors.orange.withOpacity(0.3),
-          onChanged: (newValue) {
-            setState(() {
-              statsData[statName] = newValue;
-            });
-          },
-        ),
+        // ✅ USE LIVE DATA FOR SLIDERS
+        ...statsData.keys
+            .map((key) => _buildStatSlider(key, statsData[key]!, screenWidth))
+            .toList(),
       ],
     );
   }
