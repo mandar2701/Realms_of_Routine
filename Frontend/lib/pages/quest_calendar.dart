@@ -66,7 +66,7 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                         width: double.infinity,
                         height: double.infinity,
                         borderRadius: 20,
-                        blur: 20,
+                        blur: 5,
                         alignment: Alignment.center,
                         border: 1,
                         linearGradient: LinearGradient(
