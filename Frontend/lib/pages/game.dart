@@ -1,17 +1,12 @@
-// lib/screens/game_screen.dart
-
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
-
-// Make sure these paths are correct for your project structure
 import '../pages/boss.dart';
 import '../pages/player.dart';
 import '../pages/player_state.dart';
-import 'bottom_navbar.dart'; // Assuming you have this widget
+import 'bottom_navbar.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -21,7 +16,6 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  // Game variables
   double playerHealth = 100;
   double bossHealth = 100;
   String gameMessage = 'Your turn!';
@@ -30,10 +24,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool _isSlashActive = false;
   PlayerState _playerState = PlayerState.idle;
 
+  int bossIndex = 0; // 👈 Tracks which boss is currently active
+
   late AnimationController _playerShakeController;
   late AnimationController _bossShakeController;
   late Animation<Offset> _playerShakeAnimation;
   late Animation<Offset> _bossShakeAnimation;
+
+  final List<String> bossImages = [
+    'boss.png',
+    'Characters/boss2.png',
+    'Characters/boss3.png',
+    //'Characters/boss4.png',
+  ]; // 👈 Add more bosses as needed
 
   @override
   void initState() {
@@ -127,7 +130,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     _bossShakeController.forward(from: 0.0);
 
-    // This duration should match the length of your attack GIF
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
       setState(() {
@@ -140,7 +142,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       bossHealth = 0;
       isGameRunning = false;
       gameMessage = 'You defeated the boss!';
-      _showGameOverDialog(true);
+      _showBossDefeatedDialog();
     } else {
       Timer(const Duration(seconds: 2), bossAttack);
     }
@@ -161,21 +163,53 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         playerHealth = 0;
         isGameRunning = false;
         gameMessage = 'You have been defeated!';
-        _showGameOverDialog(false);
+        _showGameOverDialog();
       }
     }
   }
 
-  void _showGameOverDialog(bool playerWon) {
+  void _showBossDefeatedDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(playerWon ? "CONGRATULATIONS" : "GAME OVER"),
-          content: Text(
-            playerWon ? "You have won!" : "Would you like to play again?",
-          ),
+          title: const Text("Boss Defeated!"),
+          content: const Text("A new, stronger boss appears..."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _nextBoss(); // 👈 Move to the next boss
+              },
+              child: const Text("NEXT BOSS"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _nextBoss() {
+    setState(() {
+      bossIndex++;
+      if (bossIndex >= bossImages.length) bossIndex = 0; // Loop bosses
+      bossHealth = 100 + (bossIndex * 20); // 👈 Increase health per boss
+      playerHealth = min(playerHealth + 20, 100); // Small heal
+      gameMessage = 'A new boss appears!';
+      isGameRunning = true;
+      isPlayerTurn = true;
+    });
+  }
+
+  void _showGameOverDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("GAME OVER"),
+          content: const Text("Would you like to play again?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -194,6 +228,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     setState(() {
       playerHealth = 100;
       bossHealth = 100;
+      bossIndex = 0;
       gameMessage = 'Your turn!';
       isPlayerTurn = true;
       isGameRunning = true;
@@ -205,6 +240,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -250,13 +286,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 5, // Give player more space
+                          flex: 5,
                           child: SlideTransition(
                             position: _playerShakeAnimation,
                             child: Player(state: _playerState),
                           ),
                         ),
-                        // Player + Boss Health Bars
                         const Spacer(flex: 1),
                         Expanded(
                           flex: 5,
@@ -265,8 +300,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             children: [
                               SlideTransition(
                                 position: _bossShakeAnimation,
-                                child:
-                                    const Boss(), // Assuming you have a Boss widget
+                                child: Image.asset(
+                                  bossImages[bossIndex],
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                               if (_isSlashActive)
                                 SizedBox(
@@ -296,7 +333,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ],
                   ),
                   const Spacer(flex: 1),
-                  const BottomNavbar(), // Assuming you have a BottomNavbar widget
+                  const BottomNavbar(),
                 ],
               ),
             ),
@@ -333,7 +370,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 }
 
-// You still need the SlashAnimation widget from your original code
+// Slash animation stays the same
 class SlashAnimation extends StatefulWidget {
   const SlashAnimation({super.key});
 

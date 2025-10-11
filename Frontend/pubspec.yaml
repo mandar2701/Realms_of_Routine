@@ -101,6 +101,8 @@ flutter:
     - assets/icons/ror_logo.jpg
     - assets/player.png
     - assets/boss.png
+    - assets/Characters/boss2.png
+    - assets/Characters/boss3.png
     - assets/icons/attack.png
     - assets/icons/kick.png
     # - assets/effects/slash_effect.gif  

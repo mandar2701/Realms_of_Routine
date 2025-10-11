@@ -4,7 +4,7 @@ import 'player_stats.dart';
 
 class PlayerManager extends ChangeNotifier {
   String? name = "Player";
-  int level = 1;
+  int level = 50;
   int xp = 0;
   int xpLimit = 100;
   int unusedStatPoints = 0;
