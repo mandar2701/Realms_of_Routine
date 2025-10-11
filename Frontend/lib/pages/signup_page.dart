@@ -20,11 +20,12 @@ class _SignupPageState extends State<SignupPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HeroInfoParchmentPage(
-          email: _emailController.text,
-          password: _passwordController.text,
-          name: _usernameController.text,
-        ),
+        builder:
+            (context) => HeroInfoParchmentPage(
+              email: _emailController.text,
+              password: _passwordController.text,
+              name: _usernameController.text,
+            ),
       ),
     );
   }

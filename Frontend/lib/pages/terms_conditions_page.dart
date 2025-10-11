@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:life_xp_project/pages/login_page.dart';
 
 class TermsConditionsPage extends StatefulWidget {
@@ -35,7 +36,9 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF2D1810),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           title: const Text(
             'Registration Successful!',
             style: TextStyle(
@@ -78,59 +81,52 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/bg_signup.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
+          // Background image
+          Image.asset(
+            'assets/bg_signup.jpg',
+            fit: BoxFit.cover,
+            width: screenWidth,
+            height: screenHeight,
           ),
+          // Parchment overlay
           Center(
             child: Image.asset(
-              'assets/info_bg6.jpg',
-              width: MediaQuery.of(context).size.width * 1.25,
-              height: MediaQuery.of(context).size.height * 2.5,
+              'assets/parchment.png',
+              width: screenWidth * 1.25,
+              height: screenHeight * 2.5,
+              fit: BoxFit.contain,
             ),
           ),
-          _buildTermsContent(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTermsContent(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    const double contentWidth = 300;
-    const double buttonWidth = 200;
-    final double horizontalPadding = (screenWidth - contentWidth) / 2;
-
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(horizontalPadding, 250, horizontalPadding, 20),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const Text(
-                    'TERMS & CONDITIONS',
-                    style: TextStyle(
-                      fontFamily: 'Times New Roman',
-                      color: Color(0xFF6F4E37),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '''By joining this realm, you agree to:
+          // Scrollable Terms content with button inside
+          Center(
+            child: SizedBox(
+              height: screenHeight * 0.45, // Scrollable area height
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.25),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'TERMS & CONDITIONS',
+                        style: TextStyle(
+                          fontFamily: 'Times New Roman',
+                          color: Color(0xFF6F4E37),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      const Text(
+                        '''By joining this realm, you agree to:
 
 • Complete quests with honor
 • Battle procrastination monsters
@@ -141,68 +137,73 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
 Your data is protected by ancient magic (encryption) and will never be shared with dark forces.
 
 May your journey be legendary!''',
-                    style: TextStyle(
-                      fontFamily: 'Times New Roman',
-                      color: Color(0xFF6F4E37),
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isAgreed,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAgreed = value ?? false;
-                          });
-                        },
-                        activeColor: const Color(0xFF6F4E37),
+                        style: TextStyle(
+                          fontFamily: 'Times New Roman',
+                          color: Color(0xFF6F4E37),
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
                       ),
-                      const Expanded(
-                        child: Text(
-                          'I agree to the Terms & Conditions',
-                          style: TextStyle(
-                            fontFamily: 'Times New Roman',
-                            color: Color(0xFF6F4E37),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      SizedBox(height: screenHeight * 0.03),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isAgreed,
+                            onChanged: (value) {
+                              setState(() {
+                                _isAgreed = value ?? false;
+                              });
+                            },
+                            activeColor: const Color(0xFF6F4E37),
+                          ),
+                          const Expanded(
+                            child: Text(
+                              'I agree to the Terms & Conditions',
+                              style: TextStyle(
+                                fontFamily: 'Times New Roman',
+                                color: Color(0xFF6F4E37),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight * 0.03),
+                      // Transparent parchment-style button inside a Container
+                      Container(
+                        width: screenWidth * 1.25 * 0.36,
+                        height: screenHeight * 0.06,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 116, 54, 2),
+                            width: 1,
+                          ),
+                          color: Colors.transparent,
+                        ),
+                        child: TextButton(
+                          onPressed:
+                              _isAgreed ? _showRegistrationSuccess : null,
+                          child: Text(
+                            "Next",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              color: const Color.fromARGB(255, 116, 54, 2),
+                            ),
                           ),
                         ),
                       ),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 100),
-          child: Center(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _isAgreed ? _showRegistrationSuccess : null,
-                child: Opacity(
-                  opacity: _isAgreed ? 1.0 : 0.5,
-                  child: Container(
-                    width: buttonWidth,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/button22.jpg'),
-                        fit: BoxFit.contain,
-                      ),
-                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

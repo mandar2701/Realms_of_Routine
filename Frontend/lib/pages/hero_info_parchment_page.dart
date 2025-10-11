@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:life_xp_project/pages/hero_needs_parchment.dart';
 
-/// A screen that displays a parchment-style form for entering hero information.
-///
-/// This widget uses a Stack to layer a parchment form over a background image,
-/// with interactive text fields placed on top.
 class HeroInfoParchmentPage extends StatefulWidget {
-  /// Creates a [HeroInfoParchmentPage].
-  const HeroInfoParchmentPage(
-      {super.key,
-      required this.email,
-      required this.password,
-      required this.name});
+  const HeroInfoParchmentPage({
+    super.key,
+    required this.email,
+    required this.password,
+    required this.name,
+  });
 
   final String email;
   final String password;
@@ -44,132 +41,161 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screen = MediaQuery.of(context).size;
+    final height = screen.height;
+    final width = screen.width;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
-        // The main layout is a Stack to layer the background, parchment, and form.
         child: Stack(
-          fit: StackFit.expand,
           children: [
-            // Layer 1: The main background image (forest).
-            Image.asset(
-              "assets/bg_signup.jpg",
-              fit: BoxFit.cover,
+            // Background
+            SizedBox(
+              height: height,
+              width: width,
+              child: Image.asset("assets/bg_signup.jpg", fit: BoxFit.cover),
             ),
-            // Layer 2: The parchment image, which serves as the form's background.
-            // It's centered to align with the absolutely positioned form fields.
+
+            // Parchment background (same height as screen)
             Center(
-              child: Image.asset("assets/info_bg6.jpg"),
+              child: Image.asset(
+                "assets/parchment.png",
+                height: height * 1.25, // keep parchment within screen
+                width: width * 2.5, // wide enough for form
+                fit: BoxFit.contain,
+              ),
             ),
-            // Layer 3: The form itself, containing the input fields and button.
-            // This is also a Stack with Positioned children, which will be placed
-            // relative to the screen, aligning over the centered parchment.
-            _buildForm(context),
+
+            // Form overlay
+            _buildForm(context, height, width),
           ],
         ),
       ),
     );
   }
 
-  /// Builds the form by arranging input fields and buttons in a Stack.
-  ///
-  /// This method uses `Positioned` widgets to precisely place each form
-  /// element according to the design specifications in the background image.
-  Widget _buildForm(BuildContext context) {
-    // To center the form elements, we get the screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-    // These values are estimates based on the image provided.
-    // You may need to tweak them for perfect alignment.
-    const double formWidth = 280;
-    const double buttonWidth = 157;
-    final double horizontalPadding = (screenWidth - formWidth) / 2;
+  Widget _buildForm(BuildContext context, double height, double width) {
+    final double formWidth = width * 0.75;
+    final double buttonWidth = width * 0.45;
+    final double fieldHeight = height * 0.03;
+    final double horizontalPadding = (width - formWidth) / 1;
 
     return Stack(
       children: [
-        // Name input field - Positioned relative to the screen edges.
+        // Name field
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 320,
+          top: height * 0.35,
           child: SizedBox(
-            height: 25,
+            height: fieldHeight,
             child: _buildTextField(
-                hintText: 'Enter your name', controller: _nameController),
+              hintText: 'Enter your name',
+              controller: _nameController,
+            ),
           ),
         ),
-        // Age input field - Positioned relative to the screen edges.
+
+        // Age field
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 395,
+          top: height * 0.42,
           child: SizedBox(
-            height: 25,
+            height: fieldHeight,
             child: _buildTextField(
-                keyboardType: TextInputType.number,
-                hintText: 'Enter your age',
-                controller: _ageController),
+              keyboardType: TextInputType.number,
+              hintText: 'Enter your age',
+              controller: _ageController,
+            ),
           ),
         ),
-        // Birth Date input field - Positioned relative to the screen edges.
+
+        // Birth date
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 470,
+          top: height * 0.49,
           child: SizedBox(
-            height: 25,
+            height: fieldHeight,
             child: _buildTextField(
-                hintText: 'MM/DD/YYYY', controller: _birthDateController),
+              hintText: 'MM/DD/YYYY',
+              controller: _birthDateController,
+            ),
           ),
         ),
-        // Gender input field - Positioned relative to the screen edges.
+
+        // Gender
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 545,
+          top: height * 0.56,
           child: SizedBox(
-            height: 25,
+            height: fieldHeight,
             child: _buildTextField(
-                hintText: 'Enter your gender', controller: _genderController),
+              hintText: 'Enter your gender',
+              controller: _genderController,
+            ),
           ),
         ),
-        // Defines a tappable area over the "NEXT" button in the background image.
+
+        // NEXT button (clickable)
         Positioned(
-          left: (screenWidth - buttonWidth) / 2,
-          top: 625,
-          child: GestureDetector(
-            onTap: () {
-              if (_nameController.text.isEmpty || _ageController.text.isEmpty || 
-                  _birthDateController.text.isEmpty || _genderController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please fill all fields')),
-                );
-                return;
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HeroNeedsParchmentPage(
-                    email: widget.email,
-                    password: widget.password,
-                    name: _nameController.text,
-                    age: _ageController.text,
-                    birthDate: _birthDateController.text,
-                    gender: _genderController.text,
+          left: width * 0.3,
+          right: width * 0.3,
+          top: height * 0.63,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.transparent, // 👈 Fully transparent background
+                elevation: 0, // 👈 Remove shadow
+
+                minimumSize: Size(double.infinity, height * 0.06),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: const BorderSide(
+                    color: Color.fromARGB(255, 114, 63, 4),
+                    width: 1,
                   ),
                 ),
-              );
-            },
-            child: Container(
-              width: buttonWidth,
-              height: 80,
-              color: Colors.transparent,
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/next_button.jpg'),
-                    fit: BoxFit.contain,
+              ),
+              onPressed: () {
+                if (_nameController.text.isEmpty ||
+                    _ageController.text.isEmpty ||
+                    _birthDateController.text.isEmpty ||
+                    _genderController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all fields')),
+                  );
+                  return;
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => HeroNeedsParchmentPage(
+                          email: widget.email,
+                          password: widget.password,
+                          name: _nameController.text,
+                          age: _ageController.text,
+                          birthDate: _birthDateController.text,
+                          gender: _genderController.text,
+                        ),
                   ),
+                );
+              },
+
+              label: Text(
+                "Next",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 116, 54, 2),
                 ),
               ),
             ),
@@ -179,24 +205,17 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
     );
   }
 
-  /// Creates a styled [TextField] for the form.
-  ///
-  /// [keyboardType] specifies the type of keyboard to display for the input.
-  /// Defaults to [TextInputType.text].
-  /// [hintText] provides the placeholder text for the field.
-  Widget _buildTextField(
-      {TextInputType keyboardType = TextInputType.text,
-      String hintText = '',
-      required TextEditingController controller}) {
-    // Defines the text style for user input.
+  Widget _buildTextField({
+    TextInputType keyboardType = TextInputType.text,
+    String hintText = '',
+    required TextEditingController controller,
+  }) {
     const textStyle = TextStyle(
       fontFamily: 'Times New Roman',
-      color: Color(0xFF6F4E37), // A deep brown, parchment-ink color
-      fontSize: 16, // Slightly increased font size for better readability
+      color: Color(0xFF6F4E37),
+      fontSize: 16,
     );
 
-    // This Align widget ensures that the TextField and its underline are
-    // positioned at the bottom of the parent SizedBox.
     return Align(
       alignment: Alignment.bottomCenter,
       child: TextField(
@@ -206,13 +225,11 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
         cursorColor: const Color(0xFF6F4E37),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle:
-              textStyle.copyWith(color: const Color(0xFF6F4E37).withOpacity(0.6)),
-          // isDense and zero contentPadding help in removing extra vertical
-          // space, allowing for more precise alignment.
+          hintStyle: textStyle.copyWith(
+            color: Color(0xFF6F4E37).withOpacity(0.6),
+          ),
           isDense: true,
           contentPadding: EdgeInsets.zero,
-          // Defines the appearance of the underline border.
           enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Color(0xFF8B4513), width: 1),
           ),
@@ -224,4 +241,3 @@ class _HeroInfoParchmentPageState extends State<HeroInfoParchmentPage> {
     );
   }
 }
-

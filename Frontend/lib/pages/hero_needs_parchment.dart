@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:life_xp_project/pages/terms_conditions_page.dart';
 
 class HeroNeedsParchmentPage extends StatefulWidget {
@@ -29,75 +30,87 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
   final TextEditingController _goalController = TextEditingController();
 
   void _continueToTerms() {
-    if (_dutyController.text.isEmpty || _focusController.text.isEmpty || _goalController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+    if (_dutyController.text.isEmpty ||
+        _focusController.text.isEmpty ||
+        _goalController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TermsConditionsPage(
-          email: widget.email,
-          password: widget.password,
-          name: widget.name,
-          age: widget.age,
-          birthDate: widget.birthDate,
-          gender: widget.gender,
-          hero: {
-            'duty': _dutyController.text,
-            'focus': _focusController.text,
-            'goal': _goalController.text,
-          },
-        ),
+        builder:
+            (context) => TermsConditionsPage(
+              email: widget.email,
+              password: widget.password,
+              name: widget.name,
+              age: widget.age,
+              birthDate: widget.birthDate,
+              gender: widget.gender,
+              hero: {
+                'duty': _dutyController.text,
+                'focus': _focusController.text,
+                'goal': _goalController.text,
+              },
+            ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/bg_signup.jpg'),
-                fit: BoxFit.cover,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Layer 1: Background image
+            Image.asset(
+              'assets/bg_signup.jpg',
+              fit: BoxFit.cover,
+              width: screenWidth,
+              height: screenHeight,
+            ),
+            // Layer 2: Parchment overlay
+            Center(
+              child: Image.asset(
+                'assets/parchment.png',
+                width: screenWidth * 1.25,
+                height: screenHeight * 2.5,
+                fit: BoxFit.contain,
               ),
             ),
-          ),
-          // Parchment UI
-          Center(
-            child: Image.asset(
-              'assets/info_bg6.jpg',
-              width: MediaQuery.of(context).size.width * 1.25,
-              height: MediaQuery.of(context).size.height * 2.5,
-            ),
-          ),
-          _buildForm(context),
-        ],
+            // Layer 3: Form
+            _buildForm(context, screenWidth, screenHeight),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildForm(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    const double formWidth = 280;
-    const double buttonWidth = 200;
-    final double horizontalPadding = (screenWidth - formWidth) / 2;
-
+  Widget _buildForm(
+    BuildContext context,
+    double screenWidth,
+    double screenHeight,
+  ) {
+    final double formWidth = screenWidth * 0.75;
+    final double buttonWidth = screenWidth * 0.45;
+    final double fieldHeight = screenWidth * 0.03;
+    final double horizontalPadding = (screenWidth - formWidth) / 1;
     return Stack(
       children: [
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 320,
+          top: screenHeight * 0.32,
           child: _buildTextField(
             controller: _dutyController,
             hintText: "HERO'S DUTY",
@@ -106,7 +119,7 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 420,
+          top: screenHeight * 0.42,
           child: _buildTextField(
             controller: _focusController,
             hintText: "HERO'S FOCUS",
@@ -115,27 +128,40 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          top: 520,
+          top: screenHeight * 0.52,
           child: _buildTextField(
             controller: _goalController,
             hintText: "HERO'S GOAL",
           ),
         ),
         Positioned(
-          left: (screenWidth - buttonWidth) / 2,
-          top: 620,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _continueToTerms,
-              child: Container(
-                width: buttonWidth,
-                height: 80,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/button22.jpg'),
-                    fit: BoxFit.contain,
+          left: screenWidth * 0.3,
+          right: screenWidth * 0.3,
+          top: screenHeight * 0.63,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.transparent, // Transparent parchment look
+                elevation: 0,
+                minimumSize: Size(double.infinity, screenHeight * 0.06),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: const BorderSide(
+                    color: Color.fromARGB(255, 114, 63, 4),
+                    width: 1,
                   ),
+                ),
+              ),
+              onPressed: _continueToTerms,
+
+              label: Text(
+                "Next",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 116, 54, 2),
                 ),
               ),
             ),
