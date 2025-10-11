@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_xp_project/services/auth_services.dart';
-import 'package:life_xp_project/pages/login_page.dart';
+import 'package:life_xp_project/pages/terms_conditions_page.dart';
 
 class HeroNeedsParchmentPage extends StatefulWidget {
   final String email;
@@ -10,14 +9,15 @@ class HeroNeedsParchmentPage extends StatefulWidget {
   final String birthDate;
   final String gender;
 
-  const HeroNeedsParchmentPage(
-      {super.key,
-      required this.email,
-      required this.password,
-      required this.name,
-      required this.age,
-      required this.birthDate,
-      required this.gender});
+  const HeroNeedsParchmentPage({
+    super.key,
+    required this.email,
+    required this.password,
+    required this.name,
+    required this.age,
+    required this.birthDate,
+    required this.gender,
+  });
 
   @override
   _HeroNeedsParchmentPageState createState() => _HeroNeedsParchmentPageState();
@@ -27,36 +27,33 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
   final TextEditingController _dutyController = TextEditingController();
   final TextEditingController _focusController = TextEditingController();
   final TextEditingController _goalController = TextEditingController();
-  final AuthService authService = AuthService();
 
-  void signupUser() async {
+  void _continueToTerms() {
     if (_dutyController.text.isEmpty || _focusController.text.isEmpty || _goalController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
-    
-    try {
-      await authService.signUpUser(
-        context: context,
-        email: widget.email,
-        password: widget.password,
-        name: widget.name,
-        age: widget.age,
-        birthDate: widget.birthDate,
-        gender: widget.gender,
-        hero: {
-          'duty': _dutyController.text,
-          'focus': _focusController.text,
-          'goal': _goalController.text,
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
-    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TermsConditionsPage(
+          email: widget.email,
+          password: widget.password,
+          name: widget.name,
+          age: widget.age,
+          birthDate: widget.birthDate,
+          gender: widget.gender,
+          hero: {
+            'duty': _dutyController.text,
+            'focus': _focusController.text,
+            'goal': _goalController.text,
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -130,7 +127,7 @@ class _HeroNeedsParchmentPageState extends State<HeroNeedsParchmentPage> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: signupUser,
+              onTap: _continueToTerms,
               child: Container(
                 width: buttonWidth,
                 height: 80,
