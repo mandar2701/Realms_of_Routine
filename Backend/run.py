@@ -5,7 +5,7 @@ import google.generativeai as genai
 import json
 import re # Import the regular expression module
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app, resources={r"/": {"origins": ""}})
 
 # It's better practice to load the API key from environment variables
@@ -67,5 +67,5 @@ def generate_task():
         }
         return jsonify(fallback_data), 500
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
