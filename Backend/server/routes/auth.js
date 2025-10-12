@@ -9,6 +9,7 @@ const auth = require("../middleware/auth");
 
 // Sign Up
 authRouter.post("/api/signup", async (req, res) => {
+console.log("Received signup data:", req.body);
   try {
     const { name, email, password, age, birthDate, gender, hero } = req.body;
 
@@ -56,7 +57,16 @@ authRouter.post("/api/signup", async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, "passwordKey");
     // Send back ALL user data
-    res.json({ token, ...user._doc, ...userInfo._doc, ...accountStats._doc });
+    res.json({
+      token,
+      email: user.email,
+      name: user.name,
+      age: userInfo.age,
+      birthDate: userInfo.birthDate,
+      gender: userInfo.gender,
+      hero: userInfo.hero, // <-- hero is now explicit
+      accountStats: accountStats, // optional: nest the entire accountStats
+    });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -80,7 +90,7 @@ authRouter.post("/api/signin", async (req, res) => {
       return res.status(400).json({ msg: "Incorrect password." });
     }
 
-    const userInfo = await UserInfo.findOne({ username: user._id });
+    const userInfo = await UserInfo.findOne({ username: user.name });
     const accountStats = await AccountStats.findOne({ userId: user._id });
     const token = jwt.sign({ id: user._id }, "passwordKey");
 
