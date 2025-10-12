@@ -102,6 +102,25 @@ authRouter.get("/", auth, async (req, res) => {
   res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}), token: req.token });
 });
 
+// GET hero info by username
+authRouter.get("/api/hero/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Find the first UserInfo document with this username
+    const userInfo = await UserInfo.findOne({ username });
+
+    if (!userInfo) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // Return only the hero object
+    res.json(userInfo.hero);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 authRouter.post("/tokenIsValid", async (req, res) => {
   try {
