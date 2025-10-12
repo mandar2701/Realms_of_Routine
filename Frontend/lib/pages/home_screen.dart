@@ -101,7 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // ✅ FIX: Use 'localhost' for desktop/web, '10.0.2.2' for Android emulator
     // When running as a desktop app, 'localhost' is correct.
-    final uri = Uri.parse("${Constants.PYTHON_API_BASE_URL}/generate-task");
+    final username =
+        Provider.of<UserProvider>(context, listen: false).user.name;
+    final uri = Uri.parse(
+      "${Constants.PYTHON_API_BASE_URL}/generate-task?username=$username",
+    );
 
     try {
       final response = await http.get(uri);
