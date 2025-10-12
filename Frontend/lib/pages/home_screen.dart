@@ -101,24 +101,31 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final username = userProvider.user.name;
-    // Make sure this points to your running Python API
-    final uri = Uri.parse(
-      "${Constants.PYTHON_API_BASE_URL}/generate-task?username=$username",
-    );
+    // Get hero details from userProvider
+    final hero =
+        userProvider
+            .user
+            .hero; // hero is a Map<String, dynamic> or your custom object
+    final duty = hero?['duty'] ?? 'Physical Well-being';
+    final focus = hero?['focus'] ?? 'Daily Habits';
+    final goal = hero?['goal'] ?? 'Achieve small victories';
 
     try {
-      final response = await http.get(uri);
+      // Only the base endpoint, no query parameters
+      final uri = Uri.parse("${Constants.PYTHON_API_BASE_URL}/generate-task");
+
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"duty": duty, "focus": focus, "goal": goal}),
+      );
 
       if (!mounted) return;
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-
-        final List<dynamic> taskNames = data["tasks"] ?? [];
-        final List<dynamic> taskDiffs = data["difficulties"] ?? [];
-
-        if (taskNames.isEmpty || taskDiffs.isEmpty) return;
+        final List<dynamic> taskNames = data["tasks"];
+        final List<dynamic> taskDiffs = data["difficulties"];
 
         final List<Task> tasksToInsert = [];
         for (int i = 0; i < taskNames.length; i++) {
@@ -130,20 +137,24 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
+        if (tasksToInsert.isEmpty) return;
+
         for (final task in tasksToInsert) {
           if (!mounted) return;
+          final insertIndex = taskManager.activeTasks.length;
 
-          int insertIndex = taskManager.activeTasks.length;
           await taskManager.addTask(task, token);
 
           _listKey.currentState?.insertItem(
             insertIndex,
             duration: const Duration(milliseconds: 300),
           );
+
           await Future.delayed(const Duration(milliseconds: 100));
         }
       } else {
         print("❌ AI Service Error: ${response.statusCode}");
+        print("Response body: ${response.body}");
       }
     } catch (e) {
       print("❌ Exception fetching AI tasks: $e");
@@ -346,11 +357,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Color getPriorityColor(String priority) {
       switch (priority.toLowerCase()) {
-        case 'low':
+        case 'Easy':
           return Colors.greenAccent;
         case 'medium':
           return Colors.orangeAccent;
-        case 'high':
+        case 'hard':
           return Colors.redAccent;
         default:
           return Colors.white;
