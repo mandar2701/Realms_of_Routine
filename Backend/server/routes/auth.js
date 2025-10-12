@@ -23,6 +23,10 @@ authRouter.post("/api/signup", async (req, res) => {
   try {
     const { name, email, password, age, birthDate, gender, hero } = req.body;
 
+    if (!name || !email || !password || !age || !birthDate || !gender || !hero) {
+      return res.status(400).json({ msg: "All fields are required!" });
+    }
+
     // Check if email exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -48,16 +52,25 @@ authRouter.post("/api/signup", async (req, res) => {
       return res.status(400).json({ msg: "Invalid birthDate format. Use DD/MM/YYYY" });
     }
 
+    // Ensure age is a number
+    const parsedAge = Number(age);
+    if (isNaN(parsedAge) || parsedAge <= 0) {
+      return res.status(400).json({ msg: "Age must be a positive number" });
+    }
+
+    // Ensure hero object exists
+    const heroData = hero || { duty: "", focus: "", goal: "" };
+
     // Create UserInfo
     let userInfo = new UserInfo({
       username: name,
-      age,
+      age: parsedAge,
       birthDate: parsedBirthDate,
       gender,
       hero: {
-        duty: hero.duty,
-        focus: hero.focus,
-        goal: hero.goal,
+        duty: heroData.duty || "",
+        focus: heroData.focus || "",
+        goal: heroData.goal || "",
       },
     });
     userInfo = await userInfo.save();
@@ -81,7 +94,7 @@ authRouter.post("/api/signup", async (req, res) => {
       accountStats: accountStats,
     });
   } catch (e) {
-    console.error(e);
+    console.error("Signup error:", e);
     res.status(500).json({ error: e.message });
   }
 });
