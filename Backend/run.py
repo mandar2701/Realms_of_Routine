@@ -4,39 +4,27 @@ from flask_cors import CORS
 import google.generativeai as genai
 import json
 import re
-import requests # Make sure to install this library: pip install requests
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# It's better practice to load the API key from environment variables
+# Load Gemini API key from environment variable
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-pro')
-
-# Define the base URL of your Node.js API
-NODE_API_URL = "https://realms-of-routine-node-js.onrender.com" # Adjust if your backend runs on a different port
 
 @app.route('/generate-task', methods=['GET'])
 def generate_task():
     try:
-        username = request.args.get('username')
-        print(f"📥 Received request for username: {username}")
-        if not username:
-            raise ValueError("Username is required")
+        # Read hero details from query parameters
+        duty = request.args.get('duty', 'Physical Well-being')
+        focus = request.args.get('focus', 'Daily Habits')
+        goal = request.args.get('goal', 'Achieve small victories')
 
-        response = requests.get(f"{NODE_API_URL}/api/hero/{username}")
-        print(f"🌐 Fetched hero data status: {response.status_code}")
-        response.raise_for_status()
-        hero_data = response.json()
-        print(f"🦸 Hero data: {hero_data}")
-
-        hero_duty = hero_data.get('duty', 'Physical Well-being')
-        hero_focus = hero_data.get('focus', 'Daily Habits')
-        hero_goal = hero_data.get('goal', 'Achieve small victories')
+        print(f"📥 Received Hero details - Duty: {duty}, Focus: {focus}, Goal: {goal}")
 
         personalization_details = (
             f"The user's Hero details are: "
-            f"Duty: '{hero_duty}', Focus: '{hero_focus}', Goal: '{hero_goal}'."
+            f"Duty: '{duty}', Focus: '{focus}', Goal: '{goal}'."
         )
 
         prompt = (
@@ -52,6 +40,7 @@ def generate_task():
         content = response.text.strip()
         print(f"🤖 Gemini raw response: {content}")
 
+        # Extract JSON from AI response
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if not json_match:
             raise ValueError("No valid JSON object found in the AI response.")

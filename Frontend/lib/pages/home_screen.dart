@@ -91,18 +91,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchTasksFromAI() async {
     if (!mounted) return;
+
     final taskManager = Provider.of<TaskManager>(context, listen: false);
-    final token = Provider.of<UserProvider>(context, listen: false).user.token;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final token = userProvider.user.token;
 
     if (token.isEmpty) {
       print("Error: User token not available.");
       return;
     }
 
-    // ✅ FIX: Use 'localhost' for desktop/web, '10.0.2.2' for Android emulator
-    // When running as a desktop app, 'localhost' is correct.
-    final username =
-        Provider.of<UserProvider>(context, listen: false).user.name;
+    final username = userProvider.user.name;
+    // Make sure this points to your running Python API
     final uri = Uri.parse(
       "${Constants.PYTHON_API_BASE_URL}/generate-task?username=$username",
     );
@@ -114,8 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final List<dynamic> taskNames = data["tasks"];
-        final List<dynamic> taskDiffs = data["difficulties"];
+
+        final List<dynamic> taskNames = data["tasks"] ?? [];
+        final List<dynamic> taskDiffs = data["difficulties"] ?? [];
+
+        if (taskNames.isEmpty || taskDiffs.isEmpty) return;
 
         final List<Task> tasksToInsert = [];
         for (int i = 0; i < taskNames.length; i++) {
@@ -127,12 +130,10 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        if (tasksToInsert.isEmpty) return;
-
         for (final task in tasksToInsert) {
           if (!mounted) return;
-          int insertIndex = taskManager.activeTasks.length;
 
+          int insertIndex = taskManager.activeTasks.length;
           await taskManager.addTask(task, token);
 
           _listKey.currentState?.insertItem(
