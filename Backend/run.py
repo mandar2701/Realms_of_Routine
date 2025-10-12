@@ -12,15 +12,15 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-pro')
 
-@app.route('/generate-task', methods=['GET'])
+@app.route('/generate-task', methods=['POST'])
 def generate_task():
     try:
-        # Read hero details from query parameters
-        duty = request.args.get('duty', 'Physical Well-being')
-        focus = request.args.get('focus', 'Daily Habits')
-        goal = request.args.get('goal', 'Achieve small victories')
+        data = request.get_json() or {}
+        duty = data.get('duty', 'Physical Well-being')
+        focus = data.get('focus', 'Daily Habits')
+        goal = data.get('goal', 'Achieve small victories')
 
-        print(f"📥 Received Hero details - Duty: {duty}, Focus: {focus}, Goal: {goal}")
+        print(f"📥 Hero details - Duty: {duty}, Focus: {focus}, Goal: {goal}")
 
         personalization_details = (
             f"The user's Hero details are: "
@@ -35,24 +35,19 @@ def generate_task():
             "Return only a valid JSON object with two keys: 'tasks' and 'difficulties'."
         )
 
-        print("🧠 Sending prompt to Gemini...")
         response = model.generate_content(prompt)
         content = response.text.strip()
-        print(f"🤖 Gemini raw response: {content}")
 
-        # Extract JSON from AI response
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if not json_match:
             raise ValueError("No valid JSON object found in the AI response.")
 
-        data = json.loads(json_match.group(0))
-        print(f"✅ Parsed JSON: {data}")
-
-        return jsonify(data)
+        return jsonify(json.loads(json_match.group(0)))
 
     except Exception as e:
-        print(f"❌ ERROR in /generate-task: {type(e).__name__}: {e}")
+        print(f"❌ ERROR: {type(e).__name__}: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
