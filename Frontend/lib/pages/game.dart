@@ -367,12 +367,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       _buildAttackButton(
                         'assets/icons/attack.png',
                         swordAttack,
+                        height: 120,
+                        width: 120,
                       ),
                       const SizedBox(width: 40),
-                      _buildAttackButton('assets/icons/kick.png', shieldDefend),
+                      _buildAttackButton(
+                        'assets/icons/kick.png',
+                        shieldDefend,
+                        height: 80,
+                        width: 80,
+                      ),
                     ],
                   ),
-                  const Spacer(flex: 1),
+                  const Spacer(flex: 2),
                   const BottomNavbar(),
                 ],
               ),
@@ -402,10 +409,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAttackButton(String iconPath, VoidCallback onPressed) {
+  Widget _buildAttackButton(
+    String iconPath,
+    VoidCallback onPressed, {
+    required int height,
+    required int width,
+  }) {
     return GestureDetector(
       onTap: onPressed,
-      child: Image.asset(iconPath, width: 100, height: 100),
+      child: Image.asset(
+        iconPath,
+        width: width.toDouble(),
+        height: height.toDouble(),
+      ),
     );
   }
 }
