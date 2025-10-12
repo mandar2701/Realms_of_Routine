@@ -74,8 +74,8 @@ statsRouter.post('/api/stats/update-xp', auth, async (req, res) => {
 
         if (levelsGained > 0) {
             // Grant 5 stat points for every level gained
-            stats.statPoints += levelsGained * 5;
-            console.log(`User ${userId} leveled up to ${stats.level}! Gained ${levelsGained * 5} stat points.`);
+            stats.statPoints += levelsGained * 2;
+            console.log(`User ${userId} leveled up to ${stats.level}! Gained ${levelsGained * 2} stat points.`);
         }
 
         stats = await stats.save();
