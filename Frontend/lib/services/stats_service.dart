@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../models/player_stats.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import 'scaffold_messenger_service.dart'; // Import the service
+import 'scaffold_messenger_service.dart';
 
 class StatsService {
   final String baseUri = Constants.NODE_API_BASE_URL;
@@ -28,12 +28,8 @@ class StatsService {
       );
 
       if (res.statusCode == 200) {
-        // ... return data ...
-        // Placeholder for missing PlayerStats definition/import:
-        // You would return PlayerStats.fromJson(jsonDecode(res.body)) here.
-        return null;
+        return PlayerStats.fromJson(jsonDecode(res.body));
       } else {
-        // ✅ FIXED: Calling the static method directly on the class
         ScaffoldMessengerService.showSnackBar(
           context,
           'Failed to load player stats: ${jsonDecode(res.body)['error']}',
@@ -41,7 +37,6 @@ class StatsService {
         return null;
       }
     } catch (e) {
-      // ✅ FIXED: Calling the static method directly on the class
       ScaffoldMessengerService.showSnackBar(
         context,
         'Error fetching stats: ${e.toString()}',

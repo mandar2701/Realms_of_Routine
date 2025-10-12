@@ -7,18 +7,36 @@ const statsRouter = express.Router();
 // Route to fetch a user's stats
 statsRouter.get('/api/stats', auth, async (req, res) => {
     try {
-        // Ensure ID is converted to a proper MongoDB ObjectId for lookup/creation
+        // This converts the ID string from the JWT to a stable ObjectId object.
         const userId = new mongoose.Types.ObjectId(req.user.id);
-        // Use req.user.id provided by your auth middleware
-        const stats = await AccountStats.findOne({ userId: userId });
 
-        if (!stats) {
-             // If stats don't exist, create a default one (only happens on first login after adding this feature)
-             const newStats = new AccountStats({ userId: userId });
-             await newStats.save();
-             return res.json(newStats);
-        }
+        // FIX: Use findOneAndUpdate with upsert: true for atomic get-or-create
+        const stats = await AccountStats.findOneAndUpdate(
+            { userId: userId }, // 1. Filter: Find doc by userId
+            { $setOnInsert: { // 2. Values to set ONLY if inserting a NEW document
+                userId: userId,
+                level: 1,
+                xp: 0,
+                statPoints: 0, // Ensure default is set for the new field
+                tasksCompleted: 0,
+                questsFailed: 0,
+                stats: { // Explicitly set all nested defaults
+                    strength: 1,
+                    agility: 1,
+                    vigor: 1,
+                    stamina: 1,
+                    defense: 1
+                }
+            }},
+            {
+                new: true, // Return the updated (or newly created) document
+                upsert: true, // Create the document if it doesn't exist
+                runValidators: true,
+                setDefaultsOnInsert: true
+            }
+        );
 
+        // If you had 5 documents, deleting them and running this will fix it.
         res.json(stats);
     } catch (e) {
         res.status(500).json({ error: e.message });

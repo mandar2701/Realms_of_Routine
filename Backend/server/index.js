@@ -8,14 +8,13 @@ const statsRouter = require("./routes/stats");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
+app.use(express.json());
+
 app.get('/', (req, res) => {
     // This immediately responds with a successful status, stabilizing the container.
     res.status(200).send('API is running.');
 });
-
-app.use(cors());
-
-app.use(express.json());
 
 app.use(authRouter);
 app.use(taskRouter);

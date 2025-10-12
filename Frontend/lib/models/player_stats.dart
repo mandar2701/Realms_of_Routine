@@ -30,6 +30,7 @@ class PlayerStats {
   final String userId;
   final int level;
   final int xp;
+  final int statPoints;
   final int tasksCompleted;
   final int questsFailed;
   final StatsAttributes attributes;
@@ -38,6 +39,7 @@ class PlayerStats {
     required this.userId,
     required this.level,
     required this.xp,
+    required this.statPoints,
     required this.tasksCompleted,
     required this.questsFailed,
     required this.attributes,
@@ -48,6 +50,7 @@ class PlayerStats {
       userId: json['userId'] as String,
       level: (json['level'] as num?)?.toInt() ?? 1,
       xp: (json['xp'] as num?)?.toInt() ?? 0,
+      statPoints: json['statPoints'] ?? 0,
       tasksCompleted: (json['tasksCompleted'] as num?)?.toInt() ?? 0,
       questsFailed: (json['questsFailed'] as num?)?.toInt() ?? 0,
       attributes: StatsAttributes.fromJson(json['stats']),
