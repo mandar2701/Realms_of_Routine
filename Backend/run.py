@@ -4,25 +4,36 @@ from flask_cors import CORS
 import google.generativeai as genai
 import json
 import re
+import requests # Make sure to install this library: pip install requests
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # It's better practice to load the API key from environment variables
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-2.5-flash-lite')
+model = genai.GenerativeModel('gemini-pro')
+
+# Define the base URL of your Node.js API
+NODE_API_URL = "https://realms-of-routine-node-js.onrender.com" # Adjust if your backend runs on a different port
 
 @app.route('/generate-task', methods=['GET'])
 def generate_task():
     try:
-        # --- 1. Extract Hero Parameters from Request Query ---
-        # The frontend should call this route with query parameters like:
-        # /generate-task?duty=Fitness&focus=Strength&goal=Lift+100kg
-        hero_duty = request.args.get('duty', 'Physical Well-being')
-        hero_focus = request.args.get('focus', 'Daily Habits')
-        hero_goal = request.args.get('goal', 'Achieve small victories')
+        # --- 1. Get username from the request query ---
+        username = request.args.get('username')
+        if not username:
+            raise ValueError("Username is required")
+
+        # --- 2. Fetch Hero data from your Node.js API ---
+        response = requests.get(f"{NODE_API_URL}/api/hero/{username}")
+        response.raise_for_status()  # This will raise an error for bad responses
+        hero_data = response.json()
+
+        hero_duty = hero_data.get('duty', 'Physical Well-being')
+        hero_focus = hero_data.get('focus', 'Daily Habits')
+        hero_goal = hero_data.get('goal', 'Achieve small victories')
         
-        # --- 2. Build the Personalised Prompt ---
+        # --- 3. Build the Personalised Prompt ---
         personalization_details = (
             f"The user's Hero details are: "
             f"Duty: '{hero_duty}', "
@@ -31,9 +42,9 @@ def generate_task():
             "The quests must be directly inspired by and relevant to these details."
         )
 
-        # Use Zintoria instead of Clerk in the prompt as requested by the user.
+        
         prompt = (
-            "You are Zintoria, a quest master for a fantasy RPG productivity app. "
+            "You are a quest master for a fantasy RPG productivity app. "
             f"{personalization_details} "
             "Generate a list of exactly 7 short, RPG-themed daily quests. "
             "Each quest needs a name (2-4 words) along with a description in parentheses: short but meaningful instruction (e.g., 'drink 1 liter water', 'read 20 pages') and a difficulty (Low, Medium, or High). "
@@ -47,7 +58,7 @@ def generate_task():
         response = model.generate_content(prompt)
         content = response.text.strip()
 
-        # --- 3. Robust JSON Parsing ---
+        # --- 4. Robust JSON Parsing ---
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
 
         if not json_match:
@@ -65,7 +76,6 @@ def generate_task():
 
     except Exception as e:
         print(f"--- ERROR in /generate-task: {e} ---")
-        print(f"--- Raw AI Response was: ---\n{content}\n--------------------------")
         
         # Fallback tailored to the parameters if available, or generic if not.
         fallback_data = {
