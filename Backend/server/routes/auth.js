@@ -19,6 +19,13 @@ authRouter.post("/api/signup", async (req, res) => {
         .json({ msg: "User with same email already exists!" });
     }
 
+    const existingUserInfo = await UserInfo.findOne({ username: name });
+    if (existingUserInfo) {
+        return res
+            .status(400)
+            .json({ msg: "Username is already taken." });
+    }
+
     const hashedPassword = await bcryptjs.hash(password, 8);
     let user = new User({
       email,
@@ -73,7 +80,7 @@ authRouter.post("/api/signin", async (req, res) => {
       return res.status(400).json({ msg: "Incorrect password." });
     }
 
-    const userInfo = await UserInfo.findOne({ username: user.name });
+    const userInfo = await UserInfo.findOne({ username: user._id });
     const accountStats = await AccountStats.findOne({ userId: user._id });
     const token = jwt.sign({ id: user._id }, "passwordKey");
 
@@ -89,7 +96,7 @@ authRouter.post("/api/signin", async (req, res) => {
 authRouter.get("/", auth, async (req, res) => {
   const user = await User.findById(req.user);
   // Also fetch the userInfo to send back a complete user object
-  const userInfo = await UserInfo.findOne({ username: user.name });
+  const userInfo = await UserInfo.findOne({ username: user._id });
   const accountStats = await AccountStats.findOne({ userId: user._id });
 
   res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}), token: req.token });

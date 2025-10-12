@@ -1,7 +1,15 @@
 const mongoose = require('mongoose');
 
 const userInfoSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
+    // CHANGE: Use userId for the unique link to the primary account
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        unique: true // Ensures each user only has one UserInfo document
+    },
+    // CHANGE: Keep username as a data field, but remove the unique constraint.
+    username: { type: String, required: true },
     age: { type: Number, required: true },
     birthDate: { type: Date, required: true },
     gender: { type: String, required: true },
