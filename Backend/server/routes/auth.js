@@ -9,6 +9,7 @@ const auth = require("../middleware/auth");
 
 // Sign Up
 authRouter.post("/api/signup", async (req, res) => {
+console.log("Received signup data:", req.body);
   try {
     const { name, email, password, age, birthDate, gender, hero } = req.body;
 
