@@ -5,58 +5,71 @@ const User = require("../models/user");
 const UserInfo = require("../models/userInfo");
 const AccountStats = require("../models/accountStats");
 const authRouter = express.Router();
-const auth = require("../middleware/auth");
+
+// Helper function to parse date strings like "DD/MM/YYYY"
+function parseBirthDate(dateStr) {
+  try {
+    const [day, month, year] = dateStr.split("/").map(Number);
+    if (!day || !month || !year) return null;
+    return new Date(year, month - 1, day); // JS months are 0-indexed
+  } catch (err) {
+    return null;
+  }
+}
 
 // Sign Up
 authRouter.post("/api/signup", async (req, res) => {
-console.log("Received signup data:", req.body);
+  console.log("Received signup data:", req.body);
   try {
     const { name, email, password, age, birthDate, gender, hero } = req.body;
 
+    // Check if email exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ msg: "User with same email already exists!" });
+      return res.status(400).json({ msg: "User with same email already exists!" });
     }
 
+    // Check if username exists
     const existingUserInfo = await UserInfo.findOne({ username: name });
     if (existingUserInfo) {
-        return res
-            .status(400)
-            .json({ msg: "Username is already taken." });
+      return res.status(400).json({ msg: "Username is already taken." });
     }
 
+    // Hash password
     const hashedPassword = await bcryptjs.hash(password, 8);
-    let user = new User({
-      email,
-      password: hashedPassword,
-      name,
-    });
+
+    // Create User
+    let user = new User({ email, password: hashedPassword, name });
     user = await user.save();
 
+    // Safely parse birthDate
+    const parsedBirthDate = parseBirthDate(birthDate);
+    if (!parsedBirthDate) {
+      return res.status(400).json({ msg: "Invalid birthDate format. Use DD/MM/YYYY" });
+    }
+
+    // Create UserInfo
     let userInfo = new UserInfo({
-        username: name,
-        age,
-        birthDate,
-        gender,
-        hero: {
-            duty: hero.duty,
-            focus: hero.focus,
-            goal: hero.goal,
-        }
+      username: name,
+      age,
+      birthDate: parsedBirthDate,
+      gender,
+      hero: {
+        duty: hero.duty,
+        focus: hero.focus,
+        goal: hero.goal,
+      },
     });
     userInfo = await userInfo.save();
 
-    // Create initial AccountStats
-    let accountStats = new AccountStats({
-        userId: user._id,
-        // The remaining fields will automatically use defaults from schema
-    });
+    // Create AccountStats
+    let accountStats = new AccountStats({ userId: user._id });
     accountStats = await accountStats.save();
 
+    // Create token
     const token = jwt.sign({ id: user._id }, "passwordKey");
-    // Send back ALL user data
+
+    // Send combined data
     res.json({
       token,
       email: user.email,
@@ -64,65 +77,11 @@ console.log("Received signup data:", req.body);
       age: userInfo.age,
       birthDate: userInfo.birthDate,
       gender: userInfo.gender,
-      hero: userInfo.hero, // <-- hero is now explicit
-      accountStats: accountStats, // optional: nest the entire accountStats
+      hero: userInfo.hero,
+      accountStats: accountStats,
     });
-
   } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// Sign In
-authRouter.post("/api/signin", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ msg: "User with this email does not exist!" });
-    }
-
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: "Incorrect password." });
-    }
-
-    const userInfo = await UserInfo.findOne({ username: user.name });
-    const accountStats = await AccountStats.findOne({ userId: user._id });
-    const token = jwt.sign({ id: user._id }, "passwordKey");
-
-    // Safely combine user, userInfo, and token in the response
-    res.json({ token, ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}) });
-
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// Get User Data (for app startup)
-authRouter.get("/", auth, async (req, res) => {
-  const user = await User.findById(req.user);
-  // Also fetch the userInfo to send back a complete user object
-  const userInfo = await UserInfo.findOne({ username: user._id });
-  const accountStats = await AccountStats.findOne({ userId: user._id });
-
-  res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}), token: req.token });
-});
-
-authRouter.post("/tokenIsValid", async (req, res) => {
-  try {
-    const token = req.header("x-auth-token");
-    if (!token) return res.json(false);
-    const verified = jwt.verify(token, "passwordKey");
-    if (!verified) return res.json(false);
-
-    const user = await User.findById(verified.id);
-    if (!user) return res.json(false);
-    res.json(true);
-  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
