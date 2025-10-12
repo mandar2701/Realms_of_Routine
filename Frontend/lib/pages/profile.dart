@@ -201,14 +201,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildTabs(double screenWidth) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildTabItem("Achievement", ProfileTab.achievements, screenWidth),
-        _buildTabItem("Attachment", ProfileTab.attachment, screenWidth),
-        _buildTabItem("Stats", ProfileTab.stats, screenWidth),
-        _buildTabItem("About", ProfileTab.about, screenWidth),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildTabItem("Stats", ProfileTab.stats, screenWidth),
+          _buildTabItem("Milestones", ProfileTab.achievements, screenWidth),
+          _buildTabItem("About", ProfileTab.about, screenWidth),
+        ],
+      ),
     );
   }
 
@@ -239,20 +241,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return const StatsView();
       case ProfileTab.achievements:
         return const AchievementsGrid();
-      case ProfileTab.attachment:
-        return Center(
-          child: Text(
-            "Attachments",
-            style: GoogleFonts.imFellEnglish(color: Colors.white, fontSize: 18),
-          ),
-        );
       case ProfileTab.about:
-        return Center(
-          child: Text(
-            "About $playerNameDisplay",
-            style: GoogleFonts.imFellEnglish(color: Colors.white, fontSize: 18),
+        // Access data (assuming userProvider and user object are accessible in this scope)
+        final userProvider = Provider.of<UserProvider>(context);
+        final user = userProvider.user;
+        final hero = user.hero ?? {};
+
+        // Safely extract values
+        final String playerNameDisplay =
+            user.name.isNotEmpty ? user.name : "Adventurer";
+        final String duty = hero['duty'] ?? 'Upholding the balance';
+        final String focus = hero['focus'] ?? 'Unwavering concentration';
+        final String goal = hero['goal'] ?? 'Undetermined destiny';
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- Decorative Heading ---
+              Text(
+                "📜 A Hero's Oath:",
+                style: GoogleFonts.cormorantInfant(
+                  color: Colors.yellowAccent,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // --- The Gamified Quote Sentence using Text.rich ---
+              Text.rich(
+                TextSpan(
+                  style: GoogleFonts.cormorantInfant(
+                    color: Colors.white,
+                    fontSize: 20,
+                    //fontStyle: FontStyle.italic,
+                  ),
+                  children: <TextSpan>[
+                    const TextSpan(text: 'The destiny of '),
+                    TextSpan(
+                      text: '$playerNameDisplay ',
+                      style: const TextStyle(
+                        color: Colors.orangeAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const TextSpan(text: 'is bound by the sacred Duty of '),
+                    TextSpan(
+                      text: '$duty,',
+                      style: const TextStyle(
+                        color: Colors.lightBlueAccent,
+                        fontWeight: FontWeight.bold,
+                        fontStyle:
+                            FontStyle.normal, // Emphasize text, not italic
+                      ),
+                    ),
+                    const TextSpan(text: ' demanding a formidable Focus on '),
+                    TextSpan(
+                      text: '$focus,',
+                      style: const TextStyle(
+                        color: Colors.greenAccent,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: ' all to achieve the glorious Goal of ',
+                    ),
+                    TextSpan(
+                      text: '$goal.',
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(color: Colors.white30, height: 32),
+
+              // --- Other User Information ---
+              Text(
+                "👤 Personal Sigils",
+                style: GoogleFonts.playfairDisplay(
+                  color: Colors.white70,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Email Rune: ${user.email.isNotEmpty ? user.email : 'Sealed'}",
+                style: GoogleFonts.playfairDisplay(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Current Status: Ready for the next great venture!",
+                style: GoogleFonts.playfairDisplay(
+                  color: Colors.lightGreenAccent,
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
         );
+
+      // The 'default' case should follow this block.
       default:
         return const AchievementsGrid();
     }
@@ -277,7 +377,7 @@ class StatsView extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
           child: Text(
             '$statName: ${statValue.toInt()}',
-            style: GoogleFonts.imFellEnglish(
+            style: GoogleFonts.playfairDisplay(
               color: Colors.white,
               fontSize: screenWidth * 0.04,
             ),
