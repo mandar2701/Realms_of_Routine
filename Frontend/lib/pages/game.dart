@@ -3,11 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/user_provider.dart';
-import '../pages/boss.dart';
-import '../pages/player.dart';
-import '../pages/player_state.dart';
+import '../models/player_manager.dart';
+import 'player_state.dart';
 import 'bottom_navbar.dart';
+
+// ====================================================================
+// 🎮 MAIN GAME SCREEN
+// ====================================================================
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -36,19 +40,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Each boss has image, base health, and damage range
   final List<Map<String, dynamic>> bosses = [
     {
-      'image': 'boss.png',
+      'image': 'assets/boss.png',
       'baseHealth': 100,
       'damageRange': [5, 10],
       'name': 'Goblin Lord',
     },
     {
-      'image': 'Characters/boss2.png',
+      'image': 'assets/Characters/boss2.png',
       'baseHealth': 130,
       'damageRange': [8, 14],
       'name': 'Orc Warlord',
     },
     {
-      'image': 'Characters/boss3.png',
+      'image': 'assets/Characters/boss3.png',
       'baseHealth': 160,
       'damageRange': [10, 18],
       'name': 'Dragon Emperor',
@@ -63,51 +67,44 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _playerShakeAnimation = TweenSequence<Offset>([
-      TweenSequenceItem(
-        tween: Tween(begin: const Offset(0, 0), end: const Offset(-0.02, 0)),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0.02, 0)),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(-0.02, 0)),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0, 0)),
-        weight: 1,
-      ),
-    ]).animate(
-      CurvedAnimation(parent: _playerShakeController, curve: Curves.easeInOut),
-    );
+    _playerShakeAnimation = _createShakeAnimation(_playerShakeController, true);
 
     _bossShakeController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _bossShakeAnimation = TweenSequence<Offset>([
+    _bossShakeAnimation = _createShakeAnimation(_bossShakeController, false);
+  }
+
+  TweenSequence<Offset> _createShakeSequence(bool isPlayer) {
+    final double dir = isPlayer ? -1 : 1;
+    return TweenSequence<Offset>([
       TweenSequenceItem(
-        tween: Tween(begin: const Offset(0, 0), end: const Offset(0.02, 0)),
+        tween: Tween(begin: const Offset(0, 0), end: Offset(dir * 0.02, 0)),
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(-0.02, 0)),
+        tween: Tween(begin: Offset(dir * 0.02, 0), end: Offset(-dir * 0.02, 0)),
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: const Offset(-0.02, 0), end: const Offset(0.02, 0)),
+        tween: Tween(begin: Offset(-dir * 0.02, 0), end: Offset(dir * 0.02, 0)),
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: const Offset(0.02, 0), end: const Offset(0, 0)),
+        tween: Tween(begin: Offset(dir * 0.02, 0), end: const Offset(0, 0)),
         weight: 1,
       ),
-    ]).animate(
-      CurvedAnimation(parent: _bossShakeController, curve: Curves.easeInOut),
-    );
+    ]);
+  }
+
+  Animation<Offset> _createShakeAnimation(
+    AnimationController controller,
+    bool isPlayer,
+  ) {
+    return _createShakeSequence(
+      isPlayer,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -117,7 +114,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // === ATTACKS ===
+  // ================= ATTACKS =================
 
   void swordAttack() {
     if (isPlayerTurn && isGameRunning) {
@@ -177,7 +174,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           Random().nextInt(damageRange[1] - damageRange[0] + 1) +
           damageRange[0];
 
-      // If player used shield, reduce damage
       if (_isShieldActive) {
         damage = (damage * 0.3).toInt(); // 70% damage reduction
         _isShieldActive = false;
@@ -203,7 +199,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
-  // === DIALOGS ===
+  // ================= DIALOGS =================
 
   void _showBossDefeatedDialog() {
     showDialog(
@@ -275,7 +271,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
-  // === UI ===
+  // ================= UI =================
 
   @override
   Widget build(BuildContext context) {
@@ -309,18 +305,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ],
                   ),
                   const Spacer(flex: 1),
+
                   // Game Message
                   Text(
                     gameMessage,
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 238, 228, 190),
+                      color: const Color.fromARGB(255, 238, 228, 190),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const Spacer(flex: 4),
-                  // Characters (Player + Boss)
+
+                  // Characters
                   Expanded(
                     flex: 15,
                     child: Row(
@@ -360,7 +358,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const Spacer(flex: 2),
-                  // Attack & Shield Buttons
+
+                  // Attack Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -426,7 +425,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 }
 
-// Slash animation (unchanged)
+// ====================================================================
+// 🗡️ SLASH ANIMATION
+// ====================================================================
+
 class SlashAnimation extends StatefulWidget {
   const SlashAnimation({super.key});
 
@@ -465,8 +467,63 @@ class _SlashAnimationState extends State<SlashAnimation>
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'effects/slash/slash_${currentFrame + 1}.png',
+      'assets/effects/slash/slash_${currentFrame + 1}.png',
       fit: BoxFit.contain,
     );
+  }
+}
+
+// ====================================================================
+// 🧙 PLAYER + BOSS COMPONENTS
+// ====================================================================
+
+class Player extends StatelessWidget {
+  final PlayerState state;
+  const Player({super.key, this.state = PlayerState.idle});
+
+  String _getImagePath() {
+    switch (state) {
+      case PlayerState.swordAttack:
+      case PlayerState.kickAttack:
+        return 'assets/Characters/player_attack.gif';
+      case PlayerState.idle:
+      default:
+        return 'assets/Characters/player.png';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget imageWidget = Image.asset(
+      _getImagePath(),
+      key: UniqueKey(),
+      fit: BoxFit.contain,
+    );
+
+    if (state == PlayerState.swordAttack || state == PlayerState.kickAttack) {
+      return Transform.scale(scale: 2.7, child: imageWidget);
+    }
+    return imageWidget;
+  }
+}
+
+class Boss extends StatelessWidget {
+  const Boss({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final playerManager = Provider.of<PlayerManager>(context);
+    final int level = playerManager.level;
+
+    String bossImage;
+    if (level >= 1 && level <= 14) {
+      bossImage = 'boss.png';
+    } else if (level >= 15 && level <= 24) {
+      bossImage = 'assets/Characters/boss2.png';
+    } else {
+      bossImage = 'assets/Characters/boss3.png';
+    }
+
+    return FittedBox(fit: BoxFit.contain, child: Image.asset(bossImage));
   }
 }
