@@ -4,34 +4,51 @@ from flask_cors import CORS
 import google.generativeai as genai
 import json
 import re
-import requests # Make sure to install this library: pip install requests
+import requests
 
 app = Flask(__name__)
+# Allow CORS from all origins for all endpoints, which is appropriate for development/Render deployment
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # It's better practice to load the API key from environment variables
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.5-flash-lite')
 
 # Define the base URL of your Node.js API
 NODE_API_URL = "https://realms-of-routine-node-js.onrender.com" # Adjust if your backend runs on a different port
 
-@app.route('/generate-task', methods=['GET'])
+# FIX: Change the route to match the client's request path (/generate_task - with underscore)
+# FIX: Change methods to accept POST requests.
+@app.route('/generate_task', methods=['POST'])
 def generate_task():
+    # Initialize variables for safe use in fallback block
+    username = None
+    hero_duty = 'Physical Well-being'
+    hero_focus = 'Daily Habits'
+    hero_goal = 'Achieve small victories'
+
     try:
-        # --- 1. Get username from the request query ---
-        username = request.args.get('username')
+        # FIX: For POST requests, read data from the JSON body
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON payload received.")
+
+        # --- 1. Get username from the request body ---
+        # Assuming the client is sending { "username": "..." }
+        username = data.get('username')
+
         if not username:
-            raise ValueError("Username is required")
+            raise ValueError("Username is required in the request body")
 
         # --- 2. Fetch Hero data from your Node.js API ---
+        # The Node.js route needs to exist: /api/hero/{username}
         response = requests.get(f"{NODE_API_URL}/api/hero/{username}")
         response.raise_for_status()  # This will raise an error for bad responses
         hero_data = response.json()
 
-        hero_duty = hero_data.get('duty', 'Physical Well-being')
-        hero_focus = hero_data.get('focus', 'Daily Habits')
-        hero_goal = hero_data.get('goal', 'Achieve small victories')
+        hero_duty = hero_data.get('duty', hero_duty)
+        hero_focus = hero_data.get('focus', hero_focus)
+        hero_goal = hero_data.get('goal', hero_goal)
 
         # --- 3. Build the Personalised Prompt ---
         personalization_details = (
@@ -69,14 +86,34 @@ def generate_task():
         data = json.loads(json_string)
 
         if ("tasks" not in data or "difficulties" not in data or
-            not isinstance(data["tasks"], list) or not isinstance(data["difficulties"], list) or
-            len(data["tasks"]) != 7 or len(data["difficulties"]) != 7):
+                not isinstance(data["tasks"], list) or not isinstance(data["difficulties"], list) or
+                len(data["tasks"]) != 7 or len(data["difficulties"]) != 7):
             raise ValueError(f"JSON format error or lists do not contain exactly 7 items. Found {len(data.get('tasks', []))} tasks.")
 
         return jsonify(data)
 
+    except requests.exceptions.RequestException as e:
+        # Handle Node API errors (e.g., Hero data not found, 404/500 from Node)
+        print(f"--- ERROR in /generate_task (Node API Request Failed): {e} ---")
+        # Use fallback data with a custom message.
+        fallback_data = {
+            "tasks": [
+                f"Minor Training (Stretch for 10 minutes, supporting Duty: {hero_duty})",
+                f"Focus Scroll (Read a book related to Goal: {hero_goal})",
+                "Cleanse the Artifact (Tidy up your desk)",
+                "Hydration Ritual (Drink 3 glasses of water)",
+                f"Review Strategy (Outline the top 3 steps for Focus: {hero_focus})",
+                "Seek Silence (Meditate for 5 minutes)",
+                "Evening Log (Review and plan next day's tasks)"
+            ],
+            "difficulties": ["Low", "Medium", "Low", "Low", "Medium", "Low", "High"],
+            "warning": "Personalized quests could not be generated as Hero data fetch failed. Using generic quests."
+        }
+        return jsonify(fallback_data), 200 # Return 200/OK so app doesn't crash, but warn user.
+
     except Exception as e:
-        print(f"--- ERROR in /generate-task: {e} ---")
+        # Handle all other errors (e.g., JSON parsing failure, missing username)
+        print(f"--- ERROR in /generate_task: {e} ---")
 
         # Fallback tailored to the parameters if available, or generic if not.
         fallback_data = {
@@ -91,7 +128,7 @@ def generate_task():
             ],
             "difficulties": ["Low", "Medium", "Low", "Low", "Medium", "Low", "High"]
         }
-
+        # Use a generic error message for other failures.
         return jsonify(fallback_data), 500
 
 if __name__ == '__main__':
