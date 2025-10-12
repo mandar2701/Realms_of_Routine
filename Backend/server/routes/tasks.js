@@ -85,7 +85,7 @@ router.patch("/api/tasks/:id", authMiddleware, async (req, res) => {
                 $setOnInsert: {
                     level: 1,
                     statPoints: 0,
-                    stats: { strength: 5, agility: 5, vigor: 5, stamina: 5, defense: 5 }
+                    stats: { strength: 1, agility: 1, vigor: 1, stamina: 1, defense: 1 }
                 }
             },
             {

@@ -19,7 +19,7 @@ NODE_API_URL = "https://realms-of-routine-node-js.onrender.com" # Adjust if your
 
 # FIX: Change the route to match the client's request path (/generate_task - with underscore)
 # FIX: Change methods to accept POST requests.
-@app.route('/generate_task', methods=['POST'])
+@app.route('/generate-task', methods=['POST'])
 def generate_task():
     # Initialize variables for safe use in fallback block
     username = None

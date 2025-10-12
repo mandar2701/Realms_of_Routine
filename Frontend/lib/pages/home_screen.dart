@@ -96,8 +96,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final token = userProvider.user.token;
 
+    final username = userProvider.user.name;
+
     if (token.isEmpty) {
       print("Error: User token not available.");
+      return;
+    }
+
+    // Safety check for username
+    if (username.isEmpty) {
+      print("Error: Username not available for AI task fetch.");
       return;
     }
 
@@ -117,7 +125,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"duty": duty, "focus": focus, "goal": goal}),
+        body: jsonEncode({
+          "username": username,
+          "duty": duty,
+          "focus": focus,
+          "goal": goal,
+        }),
       );
 
       if (!mounted) return;
@@ -357,11 +370,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Color getPriorityColor(String priority) {
       switch (priority.toLowerCase()) {
-        case 'Easy':
+        case 'low':
           return Colors.greenAccent;
         case 'medium':
           return Colors.orangeAccent;
-        case 'hard':
+        case 'high':
           return Colors.redAccent;
         default:
           return Colors.white;

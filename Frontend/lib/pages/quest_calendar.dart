@@ -30,10 +30,24 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 1. Normalize the initial date to midnight (00:00:00)
+    _focusedDay = DateTime(
+      _focusedDay.year,
+      _focusedDay.month,
+      _focusedDay.day,
+    );
     _selectedDay = _focusedDay;
-    // Load all tasks when the screen initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TaskManager>(context, listen: false).loadTasks(context);
+
+    // 2. 🌟 THE FIX: Load all tasks asynchronously and explicitly trigger setState 🌟
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Use listen: false as we are outside the build method
+      await Provider.of<TaskManager>(context, listen: false).loadTasks(context);
+
+      // Once tasks are loaded, force a UI rebuild (Crucial for first paint)
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -161,10 +175,14 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
                                           ),
                                     ),
                                   ).then((_) {
+                                    // It's good practice to call loadTasks here AND trigger a rebuild
                                     Provider.of<TaskManager>(
                                       context,
                                       listen: false,
                                     ).loadTasks(context);
+                                    setState(
+                                      () {},
+                                    ); // Force rebuild immediately after returning
                                   });
                                 },
                                 icon: const Icon(
@@ -212,7 +230,12 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
-          _selectedDay = selectedDay;
+          // Normalize the selected day to midnight on selection as well
+          _selectedDay = DateTime(
+            selectedDay.year,
+            selectedDay.month,
+            selectedDay.day,
+          );
           _focusedDay = focusedDay;
         });
       },
@@ -287,8 +310,17 @@ class _QuestCalendarScreenState extends State<QuestCalendarScreen> {
         builder: (context, taskManager, child) {
           final dailyQuests =
               taskManager.tasks.where((task) {
-                if (_selectedDay == null) return false;
-                return isSameDay(task.dueDate, _selectedDay);
+                if (_selectedDay == null || task.dueDate == null) return false;
+
+                // 🌟 FIX IN FILTER: Normalize the task's date for guaranteed comparison 🌟
+                // This ensures an exact match regardless of time component stored on the server.
+                final normalizedDueDate = DateTime(
+                  task.dueDate!.year,
+                  task.dueDate!.month,
+                  task.dueDate!.day,
+                );
+
+                return isSameDay(normalizedDueDate, _selectedDay);
               }).toList();
 
           if (dailyQuests.isEmpty) {

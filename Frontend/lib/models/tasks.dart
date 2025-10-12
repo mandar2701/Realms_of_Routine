@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 enum TaskStatus { pending, completed, deleted }
 
 extension TaskStatusExtension on TaskStatus {
@@ -27,7 +25,7 @@ class Task {
     DateTime? createdAt,
     DateTime? dueDate,
   }) : createdAt = createdAt ?? DateTime.now(),
-       dueDate = dueDate ?? DateTime.now().add(const Duration(days: 7));
+       dueDate = dueDate ?? DateTime.now().add(const Duration(days: 1));
 
   factory Task.fromJson(Map<String, dynamic> json) {
     DateTime _parseSafeDate(

@@ -8,7 +8,21 @@ const statsRouter = require("./routes/stats");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// --- START: CORS Configuration (CORRECTED) ---
+const corsOptions = {
+    // Specify the exact origin of your Flutter web app
+    origin: '*',
+    // Allow the necessary methods (including POST, and OPTIONS for preflight)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    // This ensures the crucial OPTIONS preflight request is handled correctly
+    optionsSuccessStatus: 204
+};
+
+// 🌟 THE FIX: Pass the configuration object to the middleware 🌟
+app.use(cors(corsOptions));
+// --- END: CORS Configuration (CORRECTED) ---
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
