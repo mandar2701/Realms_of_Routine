@@ -29,27 +29,27 @@ const accountStatsSchema = new mongoose.Schema({
         strength: { // Matches 'Strength' in Flutter
             type: Number,
             required: true,
-            default: 5
+            default: 1
         },
         agility: { // Matches 'Agility' in Flutter
             type: Number,
             required: true,
-            default: 5
+            default: 1
         },
         vigor: { // Matches 'Vigor' in Flutter
             type: Number,
             required: true,
-            default: 5
+            default: 1
         },
         stamina: { // Matches 'Stamina' in Flutter
             type: Number,
             required: true,
-            default: 5
+            default: 1
         },
         defense: { // Matches 'Defense' in Flutter
             type: Number,
             required: true,
-            default: 5
+            default: 1
         }
     },
     // Other tracking fields for the profile page

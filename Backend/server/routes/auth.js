@@ -2,7 +2,8 @@ const express = require("express");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const UserInfo = require("../models/userInfo"); // Make sure this is imported
+const UserInfo = require("../models/userInfo");
+const AccountStats = require("../models/accountStats");
 const authRouter = express.Router();
 const auth = require("../middleware/auth");
 
@@ -39,9 +40,16 @@ authRouter.post("/api/signup", async (req, res) => {
     });
     userInfo = await userInfo.save();
 
+    // Create initial AccountStats
+    let accountStats = new AccountStats({
+        userId: user._id,
+        // The remaining fields will automatically use defaults from schema
+    });
+    accountStats = await accountStats.save();
+
     const token = jwt.sign({ id: user._id }, "passwordKey");
     // Send back ALL user data
-    res.json({ token, ...user._doc, ...userInfo._doc });
+    res.json({ token, ...user._doc, ...userInfo._doc, ...accountStats._doc });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -66,10 +74,11 @@ authRouter.post("/api/signin", async (req, res) => {
     }
 
     const userInfo = await UserInfo.findOne({ username: user.name });
+    const accountStats = await AccountStats.findOne({ userId: user._id });
     const token = jwt.sign({ id: user._id }, "passwordKey");
 
     // Safely combine user, userInfo, and token in the response
-    res.json({ token, ...user._doc, ...(userInfo ? userInfo._doc : {}) });
+    res.json({ token, ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}) });
 
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -81,8 +90,9 @@ authRouter.get("/", auth, async (req, res) => {
   const user = await User.findById(req.user);
   // Also fetch the userInfo to send back a complete user object
   const userInfo = await UserInfo.findOne({ username: user.name });
+  const accountStats = await AccountStats.findOne({ userId: user._id });
 
-  res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), token: req.token });
+  res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}), token: req.token });
 });
 
 
