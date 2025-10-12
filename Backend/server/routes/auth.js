@@ -7,6 +7,24 @@ const AccountStats = require("../models/accountStats");
 const authRouter = express.Router();
 const auth = require("../middleware/auth");
 
+// 🌟 Define the missing helper function here 🌟
+function parseBirthDate(dateString) {
+  if (!dateString) return null;
+  // Assumes input format DD/MM/YYYY, converts to standard Date object, and returns ISO string
+  const parts = dateString.split('/');
+  if (parts.length === 3) {
+    const d = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const y = parseInt(parts[2], 10);
+    const date = new Date(Date.UTC(y, m - 1, d)); // Note: Month is 0-indexed
+    // Simple check to ensure date components are valid (e.g., prevents 32/01/2000)
+    if (date && date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d) {
+      return date.toISOString();
+    }
+  }
+  return null;
+}
+
 // Sign Up
 authRouter.post("/api/signup", async (req, res) => {
   console.log("Received signup data:", req.body);

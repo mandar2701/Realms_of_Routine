@@ -23,6 +23,32 @@ class AuthService {
     required Map<String, String> hero,
   }) async {
     try {
+      // 🌟 THE FIX: Client-Side Input Validation 🌟
+      if (email.isEmpty ||
+          password.isEmpty ||
+          name.isEmpty ||
+          age.isEmpty ||
+          birthDate.isEmpty ||
+          gender.isEmpty ||
+          hero.isEmpty) {
+        // Use a utility function to show the snackbar (assuming one exists)
+        // Or implement it directly:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All fields must be filled out to proceed.'),
+          ),
+        );
+        return;
+      }
+
+      // Additional check to prevent int.parse from throwing if 'age' is not numeric
+      if (int.tryParse(age) == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Age must be a valid number.')),
+        );
+        return;
+      }
+
       final res = await http.post(
         Uri.parse('${Constants.NODE_API_BASE_URL}/api/signup'),
         body: jsonEncode({
