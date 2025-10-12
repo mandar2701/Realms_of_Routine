@@ -146,4 +146,34 @@ authRouter.post("/tokenIsValid", async (req, res) => {
   }
 });
 
+// Get Hero Data by Username (Used by Python AI service)
+authRouter.get("/api/hero/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    if (!username) {
+      return res.status(400).json({ msg: "Username parameter is required." });
+    }
+
+    // 1. Find UserInfo by username
+    const userInfo = await UserInfo.findOne({ username });
+
+    if (!userInfo) {
+      return res.status(404).json({ msg: "User hero data not found." });
+    }
+
+    // 2. Return the hero details for the Python script
+    // We only return the `hero` object fields which are needed for the AI prompt
+    res.json({
+      duty: userInfo.hero.duty,
+      focus: userInfo.hero.focus,
+      goal: userInfo.hero.goal,
+    });
+
+  } catch (e) {
+    console.error("Get Hero Data error:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = authRouter;
