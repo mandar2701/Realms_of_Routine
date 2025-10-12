@@ -63,6 +63,7 @@ authRouter.post("/api/signup", async (req, res) => {
 
     // Create UserInfo
     let userInfo = new UserInfo({
+      userId: user._id,
       username: name,
       age: parsedAge,
       birthDate: parsedBirthDate,
@@ -95,6 +96,11 @@ authRouter.post("/api/signup", async (req, res) => {
     });
   } catch (e) {
     console.error("Signup error:", e);
+    // Check if the error is a Mongoose Validation Error (like the missing userId)
+    if (e.name === 'ValidationError') {
+      return res.status(400).json({ msg: e.message });
+    }
+
     res.status(500).json({ error: e.message });
   }
 });

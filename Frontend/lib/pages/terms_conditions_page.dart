@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:life_xp_project/pages/login_page.dart';
 import 'package:life_xp_project/services/auth_services.dart';
+
+import '../utils/constants.dart';
+import '../utils/utils.dart';
 
 class TermsConditionsPage extends StatefulWidget {
   final String email;
@@ -32,70 +38,67 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
   // FIX: Instantiate AuthService
   final AuthService authService = AuthService();
 
-  void signupUser() async {
+  void signUpUser({
+    required BuildContext context,
+    required String email,
+    required String password,
+    required String name,
+    required String age,
+    required String birthDate, // Ensure DD/MM/YYYY format
+    required String gender,
+    required Map<String, String> hero,
+  }) async {
     try {
-      // FIX: Use the AuthService instance and pass the correct hero data
-      await authService.signUpUser(
-        context: context,
-        email: widget.email,
-        password: widget.password,
-        name: widget.name,
-        age: widget.age,
-        birthDate: widget.birthDate,
-        gender: widget.gender,
-        hero: widget.hero, // FIX: Use widget.hero
+      // Ensure hero object has all keys
+      final heroData = {
+        'duty': hero['duty'] ?? '',
+        'focus': hero['focus'] ?? '',
+        'goal': hero['goal'] ?? '',
+      };
+
+      final body = jsonEncode({
+        'email': email.trim(),
+        'password': password.trim(),
+        'name': name.trim(),
+        'age': age.trim(), // keep as string, backend will parse
+        'birthDate': birthDate.trim(), // must be DD/MM/YYYY
+        'gender': gender.trim(),
+        'hero': heroData,
+      });
+
+      final res = await http.post(
+        Uri.parse('${Constants.NODE_API_BASE_URL}/api/signup'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: body,
       );
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFF2D1810),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            title: const Text(
-              'Registration Successful!',
-              style: TextStyle(
-                color: Color(0xFFFFE57F),
-                fontFamily: 'Times New Roman',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: const Text(
-              'Your hero has been created successfully. Welcome to the realm!',
-              style: TextStyle(
-                color: Color(0xFFEFDCC3),
-                fontFamily: 'Times New Roman',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                    (route) => false,
-                  );
-                },
-                child: const Text(
-                  'Continue to Login',
-                  style: TextStyle(
-                    color: Color(0xFFFFE57F),
-                    fontFamily: 'Times New Roman',
-                    fontWeight: FontWeight.bold,
+
+      // Handle response
+      if (res.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Signup Success'),
+                content: const Text('You have successfully signed up!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('OK'),
                   ),
-                ),
+                ],
               ),
-            ],
-          );
-        },
-      );
+        );
+      } else {
+        final decoded = jsonDecode(res.body);
+        showSnackBar(decoded['msg'] ?? 'Signup failed');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      showSnackBar(e.toString());
     }
   }
 
@@ -206,8 +209,21 @@ May your journey be legendary!''',
                           color: Colors.transparent,
                         ),
                         child: TextButton(
-                          // FIX: Removed onTap and corrected onPressed
-                          onPressed: _isAgreed ? signupUser : null,
+                          onPressed:
+                              _isAgreed
+                                  ? () {
+                                    signUpUser(
+                                      context: context,
+                                      email: widget.email,
+                                      password: widget.password,
+                                      name: widget.name,
+                                      age: widget.age,
+                                      birthDate: widget.birthDate,
+                                      gender: widget.gender,
+                                      hero: widget.hero,
+                                    );
+                                  }
+                                  : null,
                           child: Text(
                             "Next",
                             style: GoogleFonts.playfairDisplay(
