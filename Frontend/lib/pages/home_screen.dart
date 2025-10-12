@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       // Only the base endpoint, no query parameters
-      final uri = Uri.parse("${Constants.PYTHON_API_BASE_URL}/generate_task");
+      final uri = Uri.parse("${Constants.PYTHON_API_BASE_URL}/generate-task");
 
       final response = await http.post(
         uri,
