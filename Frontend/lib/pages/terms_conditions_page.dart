@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:life_xp_project/pages/login_page.dart';
+import 'package:life_xp_project/services/auth_services.dart';
 
 class TermsConditionsPage extends StatefulWidget {
   final String email;
@@ -28,56 +29,78 @@ class TermsConditionsPage extends StatefulWidget {
 
 class _TermsConditionsPageState extends State<TermsConditionsPage> {
   bool _isAgreed = false;
+  // FIX: Instantiate AuthService
+  final AuthService authService = AuthService();
 
-  void _showRegistrationSuccess() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF2D1810),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text(
-            'Registration Successful!',
-            style: TextStyle(
-              color: Color(0xFFFFE57F),
-              fontFamily: 'Times New Roman',
-              fontWeight: FontWeight.bold,
+  void signupUser() async {
+    try {
+      // FIX: Use the AuthService instance and pass the correct hero data
+      await authService.signUpUser(
+        context: context,
+        email: widget.email,
+        password: widget.password,
+        name: widget.name,
+        age: widget.age,
+        birthDate: widget.birthDate,
+        gender: widget.gender,
+        hero: widget.hero, // FIX: Use widget.hero
+      );
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF2D1810),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-          ),
-          content: const Text(
-            'Your hero has been created successfully. Welcome to the realm!',
-            style: TextStyle(
-              color: Color(0xFFEFDCC3),
-              fontFamily: 'Times New Roman',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
-              },
-              child: const Text(
-                'Continue to Login',
-                style: TextStyle(
-                  color: Color(0xFFFFE57F),
-                  fontFamily: 'Times New Roman',
-                  fontWeight: FontWeight.bold,
-                ),
+            title: const Text(
+              'Registration Successful!',
+              style: TextStyle(
+                color: Color(0xFFFFE57F),
+                fontFamily: 'Times New Roman',
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ],
-        );
-      },
-    );
+            content: const Text(
+              'Your hero has been created successfully. Welcome to the realm!',
+              style: TextStyle(
+                color: Color(0xFFEFDCC3),
+                fontFamily: 'Times New Roman',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                    (route) => false,
+                  );
+                },
+                child: const Text(
+                  'Continue to Login',
+                  style: TextStyle(
+                    color: Color(0xFFFFE57F),
+                    fontFamily: 'Times New Roman',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+    }
   }
+
+  // This function is redundant because authService.signUpUser already shows a success dialog.
+  // You can remove it if you want to.
 
   @override
   Widget build(BuildContext context) {
@@ -183,8 +206,8 @@ May your journey be legendary!''',
                           color: Colors.transparent,
                         ),
                         child: TextButton(
-                          onPressed:
-                              _isAgreed ? _showRegistrationSuccess : null,
+                          // FIX: Removed onTap and corrected onPressed
+                          onPressed: _isAgreed ? signupUser : null,
                           child: Text(
                             "Next",
                             style: GoogleFonts.playfairDisplay(
