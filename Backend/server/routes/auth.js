@@ -7,17 +7,6 @@ const AccountStats = require("../models/accountStats");
 const authRouter = express.Router();
 const auth = require("../middleware/auth");
 
-// Helper function to parse date strings like "DD/MM/YYYY"
-function parseBirthDate(dateStr) {
-  try {
-    const [day, month, year] = dateStr.split("/").map(Number);
-    if (!day || !month || !year) return null;
-    return new Date(year, month - 1, day); // JS months are 0-indexed
-  } catch (err) {
-    return null;
-  }
-}
-
 // Sign Up
 authRouter.post("/api/signup", async (req, res) => {
   console.log("Received signup data:", req.body);
@@ -103,16 +92,10 @@ authRouter.post("/api/signup", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
 // Sign In
 authRouter.post("/api/signin", async (req, res) => {
-  console.log("Received signin data:", req.body);
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ msg: "Email and password are required!" });
-    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -126,64 +109,26 @@ authRouter.post("/api/signin", async (req, res) => {
       return res.status(400).json({ msg: "Incorrect password." });
     }
 
-    // FIX: Query UserInfo by userId (ObjectId), not the string username field
-    const userInfo = await UserInfo.findOne({ userId: user._id });
-    const accountStats = await AccountStats.findOne({ userId: user._id });
+    const userInfo = await UserInfo.findOne({ username: user.name });
+    const accountStats = await AccountStats.findOne({ userId: user._id }) || {};
     const token = jwt.sign({ id: user._id }, "passwordKey");
 
     // Safely combine user, userInfo, and token in the response
-    res.json({
-        token,
-        email: user.email,
-        name: user.name,
-        age: userInfo.age,
-        birthDate: userInfo.birthDate,
-        gender: userInfo.gender,
-        hero: userInfo.hero,
-        accountStats: accountStats,
-    });
+    res.json({ token, ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}) });
 
   } catch (e) {
-    console.error("Signin error:", e);
     res.status(500).json({ error: e.message });
   }
 });
 
 // Get User Data (for app startup)
 authRouter.get("/", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user);
-    if (!user) {
-        return res.status(404).json({ msg: "User not found." });
-    }
+  const user = await User.findById(req.user);
+  // Also fetch the userInfo to send back a complete user object
+  const userInfo = await UserInfo.findOne({ username: user._id });
+  const accountStats = await AccountStats.findOne({ userId: user._id });
 
-    // FIX: Query UserInfo by userId (ObjectId), not the string username field
-    const userInfo = await UserInfo.findOne({ userId: user._id });
-    const accountStats = await AccountStats.findOne({ userId: user._id });
-
-    // Ensure all necessary documents exist before merging/sending
-    if (!userInfo || !accountStats) {
-        // This is a data inconsistency error, better than a crash
-        console.error(`Inconsistent data for user ${user._id}: Missing userInfo or accountStats`);
-        // If a new user, maybe send a setup prompt later, but for now, throw error.
-        return res.status(500).json({ msg: "Incomplete user profile data. Please try re-logging."});
-    }
-
-    // Use explicit field names for consistency and clarity in client apps
-    res.json({
-        token: req.token,
-        email: user.email,
-        name: user.name,
-        age: userInfo.age,
-        birthDate: userInfo.birthDate,
-        gender: userInfo.gender,
-        hero: userInfo.hero,
-        accountStats: accountStats,
-    });
-  } catch (e) {
-    console.error("Get User Data error:", e);
-    res.status(500).json({ error: e.message });
-  }
+  res.json({ ...user._doc, ...(userInfo ? userInfo._doc : {}), ...(accountStats ? accountStats._doc : {}), token: req.token });
 });
 
 authRouter.post("/tokenIsValid", async (req, res) => {
