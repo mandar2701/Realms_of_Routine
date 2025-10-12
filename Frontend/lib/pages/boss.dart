@@ -14,11 +14,11 @@ class Boss extends StatelessWidget {
     String bossImage;
 
     if (level >= 1 && level <= 14) {
-      bossImage = 'boss.png';
+      bossImage = 'assets/boss.png';
     } else if (level >= 15 && level <= 24) {
-      bossImage = 'Characters/boss2.png';
+      bossImage = 'assets/Characters/boss2.png';
     } else {
-      bossImage = 'Characters/boss3.png';
+      bossImage = 'assets/Characters/boss3.png';
     }
 
     return FittedBox(fit: BoxFit.contain, child: Image.asset(bossImage));
