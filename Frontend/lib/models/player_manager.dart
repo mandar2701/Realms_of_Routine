@@ -1,11 +1,13 @@
+// Frontend/lib/models/player_manager.dart
+
 import 'package:flutter/material.dart';
 
 import 'player_stats.dart';
 
 class PlayerManager extends ChangeNotifier {
   String? name = "Player";
-  int level = 50;
-  int xp = 0;
+  int level = 1; // Set to 1 for the demo start state
+  int xp = 0; // Set to 0 for the demo start state
   int xpLimit = 100;
   int statPoints = 0;
 
@@ -19,13 +21,12 @@ class PlayerManager extends ChangeNotifier {
   };
 
   void updateStats(PlayerStats stats) {
+    // Keep this part as it reads the initial mocked data
     level = stats.level;
     xp = stats.xp;
     statPoints = stats.statPoints;
-    // Dynamically set XP limit (e.g., next level is current level * 100)
-    xpLimit = (level) * 100;
+    xpLimit = level * 100;
 
-    // Update the map used by the StatsView widget
     statsAttributes['Strength'] = stats.attributes.strength.toDouble();
     statsAttributes['Agility'] = stats.attributes.agility.toDouble();
     statsAttributes['Vigor'] = stats.attributes.vigor.toDouble();
@@ -40,16 +41,32 @@ class PlayerManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // *** CRITICAL MOCK LOGIC: Use this for the presentation ***
   void gainXP(int amount) {
+    // Use the existing public class fields: 'xp' and 'level'
     xp += amount;
 
-    // Simulate progression until the next full data sync from the server
-    // The server will dictate the real level/xp.
-    while (xp >= xpLimit) {
-      // Just increase XP limit by 100 locally until the server syncs the new level
-      xpLimit += 100;
+    int levelsGained = 0;
+
+    // Loop to handle potential multiple level-ups in one step
+    while (xp >= level * 100) {
+      xp -= level * 100;
+      level += 1;
+      levelsGained++;
     }
 
-    notifyListeners();
+    if (levelsGained > 0) {
+      // Grant 2 stat points for every level gained
+      statPoints += levelsGained * 2;
+      print(
+        'User leveled up to $level! Gained ${levelsGained * 2} stat points.',
+      );
+    }
+
+    // Update the XP Limit to the new threshold for the UI display
+    xpLimit = level * 100;
+
+    notifyListeners(); // Notify UI to redraw with new values
+    print('Gained $amount XP. Current Level: $level, Current XP: $xp/$xpLimit');
   }
 }
